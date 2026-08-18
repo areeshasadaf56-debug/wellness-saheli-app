@@ -33,7 +33,10 @@ class AboutScreen extends StatelessWidget {
               const SizedBox(height: 4),
               Text(
                 'Version 1.0.0',
-                style: AppTextStyles.sans(size: 12, color: AppColors.textSecondary),
+                style: AppTextStyles.sans(
+                  size: 12,
+                  color: AppColors.textSecondary,
+                ),
               ),
               const SizedBox(height: 24),
               _section(
@@ -42,7 +45,7 @@ class AboutScreen extends StatelessWidget {
               ),
               _section(
                 'What You Can Do',
-                'Track your period, symptoms, and mood day to day. See predictions for your next period and fertile window. Learn about your cycle phases, contraception options, and conditions like PMOS and endometriosis in plain language. Everything is designed to be private, simple, and genuinely useful.',
+                'Track your period, symptoms, and mood day to day. See predictions for your next period and fertile window. Learn about your cycle phases, contraception options, and conditions like PCOS and endometriosis in plain language. Everything is designed to be private, simple, and genuinely useful.',
               ),
               _section(
                 'Why We Built This',
@@ -81,7 +84,11 @@ class AboutScreen extends StatelessWidget {
               borderRadius: BorderRadius.circular(10),
               border: Border.all(color: AppColors.cardBorder),
             ),
-            child: const Icon(Icons.arrow_back, size: 18, color: AppColors.textPrimary),
+            child: const Icon(
+              Icons.arrow_back,
+              size: 18,
+              color: AppColors.textPrimary,
+            ),
           ),
         ),
         const SizedBox(width: 12),
@@ -98,7 +105,11 @@ class AboutScreen extends StatelessWidget {
         children: [
           Text(
             heading,
-            style: AppTextStyles.sans(size: 14, weight: FontWeight.w700, color: AppColors.primary),
+            style: AppTextStyles.sans(
+              size: 14,
+              weight: FontWeight.w700,
+              color: AppColors.primary,
+            ),
           ),
           const SizedBox(height: 8),
           Text(

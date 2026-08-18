@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
-import 'pmos_screen.dart' show PmosCard, PmosLine, PmosTag;
+import 'pcos_screen.dart' show PcosCard, PcosLine, PcosTag;
 
 class EndoScreen extends StatefulWidget {
   const EndoScreen({super.key});
@@ -144,14 +144,14 @@ class _EndoScreenState extends State<EndoScreen> {
       const SizedBox(height: 24),
       _sectionLabel('WHAT IS ENDOMETRIOSIS?'),
       const SizedBox(height: 12),
-      PmosCard(
+      PcosCard(
         emoji: '💡',
         badgeColor: AppColors.moodYellow,
         title: 'Overview',
         subtitle: '',
         initiallyExpanded: true,
         lines: const [
-          PmosLine(
+          PcosLine(
             text:
                 'Endometriosis occurs when endometrial-like tissue implants on organs outside the uterus — most commonly the ovaries, fallopian tubes, and pelvic lining. This tissue responds to hormonal changes just like the uterine lining, causing inflammation, scarring, and pain.',
           ),
@@ -160,102 +160,102 @@ class _EndoScreenState extends State<EndoScreen> {
       const SizedBox(height: 20),
       _sectionLabel('SYMPTOMS'),
       const SizedBox(height: 12),
-      PmosCard(
+      PcosCard(
         emoji: '🩺',
         badgeColor: AppColors.periodRed,
         title: 'Common Symptoms',
         subtitle: 'How endometriosis presents',
         initiallyExpanded: true,
         lines: const [
-          PmosLine(
+          PcosLine(
             boldLead: 'Dysmenorrhoea',
             text:
                 'Severely painful periods that worsen over time, often not relieved by standard painkillers.',
           ),
-          PmosLine(
+          PcosLine(
             boldLead: 'Dyspareunia',
             text:
                 'Pain during or after sexual intercourse, particularly deep penetration.',
           ),
-          PmosLine(
+          PcosLine(
             boldLead: 'Chronic pelvic pain',
             text: 'Persistent lower abdominal pain outside of periods.',
           ),
-          PmosLine(
+          PcosLine(
             boldLead: 'Bowel & bladder symptoms',
             text:
                 'Pain during bowel movements or urination, especially during menstruation.',
           ),
-          PmosLine(
+          PcosLine(
             boldLead: 'Infertility',
             text:
                 'Present in up to 50% of people with endometriosis, often the first presenting complaint.',
           ),
         ],
         tags: const [
-          PmosTag('Severe period pain', AppColors.symptomOrange),
-          PmosTag('Painful sex', AppColors.symptomOrange),
-          PmosTag('Chronic pelvic pain', AppColors.symptomOrange),
-          PmosTag('Infertility', AppColors.periodRed),
+          PcosTag('Severe period pain', AppColors.symptomOrange),
+          PcosTag('Painful sex', AppColors.symptomOrange),
+          PcosTag('Chronic pelvic pain', AppColors.symptomOrange),
+          PcosTag('Infertility', AppColors.periodRed),
         ],
       ),
       const SizedBox(height: 20),
       _sectionLabel('DIAGNOSIS'),
       const SizedBox(height: 12),
-      PmosCard(
+      PcosCard(
         emoji: '🔬',
         badgeColor: AppColors.ovulationTeal,
         title: 'Stages & Diagnosis',
         subtitle: 'Classification and how it is confirmed',
         initiallyExpanded: true,
         lines: const [
-          PmosLine(
+          PcosLine(
             text:
                 'Endometriosis is staged I–IV (minimal to severe) based on the extent and location of lesions. Staging does not always correlate with symptom severity — Stage I can cause intense pain while Stage IV may be asymptomatic.',
           ),
-          PmosLine(
+          PcosLine(
             boldLead: 'Definitive diagnosis',
             text:
                 'requires laparoscopy (keyhole surgery) with biopsy. Ultrasound and MRI can detect endometriomas (ovarian cysts) and deep infiltrating disease but cannot confirm all forms.',
           ),
         ],
         tags: const [
-          PmosTag('Laparoscopy (gold standard)', AppColors.ovulationTeal),
-          PmosTag('Ultrasound', AppColors.moodYellow),
-          PmosTag('MRI', AppColors.symptomOrange),
+          PcosTag('Laparoscopy (gold standard)', AppColors.ovulationTeal),
+          PcosTag('Ultrasound', AppColors.moodYellow),
+          PcosTag('MRI', AppColors.symptomOrange),
         ],
       ),
       const SizedBox(height: 20),
       _sectionLabel('TREATMENT'),
       const SizedBox(height: 12),
-      PmosCard(
+      PcosCard(
         emoji: '💊',
         badgeColor: AppColors.periodRed,
         title: 'Medical & Surgical Options',
         subtitle: 'Managing pain and fertility',
         initiallyExpanded: true,
         lines: const [
-          PmosLine(
+          PcosLine(
             boldLead: 'Hormonal therapies',
             text:
                 'The combined OCP, progestogens, GnRH agonists, and the levonorgestrel IUD all suppress menstruation and reduce lesion activity.',
           ),
-          PmosLine(
+          PcosLine(
             boldLead: 'Pain management',
             text:
                 'NSAIDs (ibuprofen, naproxen) taken at the start of a period can reduce prostaglandin-driven pain.',
           ),
-          PmosLine(
+          PcosLine(
             boldLead: 'Surgery',
             text:
                 'Laparoscopic excision removes lesions and adhesions, providing significant pain relief. Recurrence rates vary. Hysterectomy is a last resort and does not guarantee cure if ovaries are retained.',
           ),
         ],
         tags: const [
-          PmosTag('OCP / progestogens', AppColors.ovulationTeal),
-          PmosTag('Excision surgery', AppColors.primary),
-          PmosTag('GnRH agonists', AppColors.symptomOrange),
-          PmosTag('NSAIDs', AppColors.periodRed),
+          PcosTag('OCP / progestogens', AppColors.ovulationTeal),
+          PcosTag('Excision surgery', AppColors.primary),
+          PcosTag('GnRH agonists', AppColors.symptomOrange),
+          PcosTag('NSAIDs', AppColors.periodRed),
         ],
       ),
     ];

@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/cycle_data.dart';
 import '../models/daily_log.dart';
@@ -16,13 +17,12 @@ class CycleProvider extends ChangeNotifier {
   bool _isLoggedIn = false;
   String _userName = '';
 
-  // Local "accounts" store: { email -> {password, name} }.
-  // NOTE: This is on-device only storage for offline/demo use — there is
-  // no real backend yet, and the password is only lightly obfuscated
-  // (not cryptographically secure). Good enough so Sign In actually
-  // checks credentials and Forgot Password can reset them, but this
-  // should be swapped for real server-side auth before shipping.
-  Map<String, Map<String, String>> _accounts = {};
+  // Accounts now live on the backend server (see /signup, /signin,
+  // /reset_password) so they survive app reinstalls and work across
+  // devices. Only the "remember me" flag + name are cached locally
+  // below, purely so the splash screen can skip sign-in on relaunch.
+  static const String _authBaseUrl =
+      'https://areeshasadaf56.pythonanywhere.com';
 
   Map<String, DailyLog> _dailyLogs = {};
 
@@ -99,19 +99,6 @@ class CycleProvider extends ChangeNotifier {
     _isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
     _userName = prefs.getString('userName') ?? '';
 
-    // Restore the local accounts store (email -> {password, name}).
-    final accountsJson = prefs.getString('accounts');
-    if (accountsJson != null) {
-      try {
-        final Map<String, dynamic> decoded = jsonDecode(accountsJson);
-        _accounts = decoded.map(
-          (key, value) => MapEntry(key, Map<String, String>.from(value)),
-        );
-      } catch (_) {
-        _accounts = {};
-      }
-    }
-
     _isLoaded = true;
     notifyListeners();
   }
@@ -136,75 +123,98 @@ class CycleProvider extends ChangeNotifier {
 
   String _normalizeEmail(String email) => email.trim().toLowerCase();
 
-  // Lightweight on-device obfuscation — NOT real encryption. Fine for a
-  // local-only demo account store, but swap for real hashing (or better,
-  // a real backend) before this ships to real users.
-  String _obscure(String password) => base64Encode(utf8.encode(password));
-
-  Future<void> _saveAccounts() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('accounts', jsonEncode(_accounts));
-  }
-
-  /// Creates a new local account. Returns null on success, or an
-  /// error message string if the email is already registered.
+  /// Creates a new account on the server. Returns null on success, or
+  /// an error message string on failure (e.g. email already taken, or
+  /// no internet connection).
   Future<String?> signUp({
     required String name,
     required String email,
     required String password,
   }) async {
-    final key = _normalizeEmail(email);
+    try {
+      final response = await http
+          .post(
+            Uri.parse('$_authBaseUrl/signup'),
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode({
+              'name': name,
+              'email': _normalizeEmail(email),
+              'password': password,
+            }),
+          )
+          .timeout(const Duration(seconds: 30));
 
-    if (_accounts.containsKey(key)) {
-      return 'An account with this email already exists. Try signing in instead.';
+      final body = jsonDecode(response.body);
+
+      if (response.statusCode != 200) {
+        return body['detail'] ?? 'Something went wrong. Please try again.';
+      }
+
+      await login(body['name'] ?? name);
+      return null;
+    } catch (_) {
+      return 'Could not reach the server. Please check your internet connection and try again.';
     }
-
-    _accounts[key] = {'password': _obscure(password), 'name': name};
-    await _saveAccounts();
-
-    await login(name);
-    return null;
   }
 
-  /// Validates credentials against the local account store. Returns
-  /// null on success, or an error message string on failure.
+  /// Validates credentials against the server. Returns null on success,
+  /// or an error message string on failure.
   Future<String?> signIn({
     required String email,
     required String password,
   }) async {
-    final key = _normalizeEmail(email);
-    final account = _accounts[key];
+    try {
+      final response = await http
+          .post(
+            Uri.parse('$_authBaseUrl/signin'),
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode({
+              'email': _normalizeEmail(email),
+              'password': password,
+            }),
+          )
+          .timeout(const Duration(seconds: 30));
 
-    if (account == null) {
-      return 'No account found for this email. Try signing up first.';
+      final body = jsonDecode(response.body);
+
+      if (response.statusCode != 200) {
+        return body['detail'] ?? 'Something went wrong. Please try again.';
+      }
+
+      await login(body['name'] ?? '');
+      return null;
+    } catch (_) {
+      return 'Could not reach the server. Please check your internet connection and try again.';
     }
-
-    if (account['password'] != _obscure(password)) {
-      return 'Incorrect password. Please try again.';
-    }
-
-    await login(account['name'] ?? '');
-    return null;
   }
 
-  /// Resets the password for an existing local account. Returns null on
-  /// success, or an error message string if no account exists for that
-  /// email.
+  /// Resets the password for an existing account on the server. Returns
+  /// null on success, or an error message string on failure.
   Future<String?> resetPassword({
     required String email,
     required String newPassword,
   }) async {
-    final key = _normalizeEmail(email);
-    final account = _accounts[key];
+    try {
+      final response = await http
+          .post(
+            Uri.parse('$_authBaseUrl/reset_password'),
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode({
+              'email': _normalizeEmail(email),
+              'new_password': newPassword,
+            }),
+          )
+          .timeout(const Duration(seconds: 30));
 
-    if (account == null) {
-      return 'No account found for this email.';
+      if (response.statusCode != 200) {
+        final body = jsonDecode(response.body);
+        return body['detail'] ?? 'Something went wrong. Please try again.';
+      }
+
+      return null;
+    } catch (_) {
+      return 'Could not reach the server. Please check your internet connection and try again.';
     }
-
-    account['password'] = _obscure(newPassword);
-    _accounts[key] = account;
-    await _saveAccounts();
-    return null;
   }
 
   /// Call from the Settings logout button. Clears the flag so Splash

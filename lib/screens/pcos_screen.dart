@@ -4,28 +4,28 @@ import '../services/pcos_api_service.dart';
 
 /// A single bullet/paragraph line inside a card body.
 /// If [boldLead] is set, it's rendered bold and inline before [text].
-class PmosLine {
+class PcosLine {
   final String? boldLead;
   final String text;
   final String? number; // e.g. "1", "2", "3" for numbered criteria
 
-  const PmosLine({this.boldLead, required this.text, this.number});
+  const PcosLine({this.boldLead, required this.text, this.number});
 }
 
-class PmosTag {
+class PcosTag {
   final String label;
   final Color color;
-  const PmosTag(this.label, this.color);
+  const PcosTag(this.label, this.color);
 }
 
-class PmosScreen extends StatefulWidget {
-  const PmosScreen({super.key});
+class PcosScreen extends StatefulWidget {
+  const PcosScreen({super.key});
 
   @override
-  State<PmosScreen> createState() => _PmosScreenState();
+  State<PcosScreen> createState() => _PcosScreenState();
 }
 
-class _PmosScreenState extends State<PmosScreen> {
+class _PcosScreenState extends State<PcosScreen> {
   int _activeTab = 0;
 
   // ---- Detection form state ----
@@ -213,83 +213,83 @@ class _PmosScreenState extends State<PmosScreen> {
     return [
       _heroCard(),
       const SizedBox(height: 24),
-      _sectionLabel('WHAT IS PMOS?'),
+      _sectionLabel('WHAT IS PCOS?'),
       const SizedBox(height: 12),
-      PmosCard(
+      PcosCard(
         emoji: '💡',
         badgeColor: AppColors.primary,
         title: 'Overview',
-        subtitle: 'PMOS basics',
+        subtitle: 'PCOS basics',
         initiallyExpanded: true,
         lines: const [
-          PmosLine(
+          PcosLine(
             text:
-                'PMOS (previously called PCOS — Polycystic Ovary Syndrome) is a common hormonal condition. The renaming reflects a broader understanding that the condition involves the whole endocrine and metabolic system. Many people with PMOS do not even have cysts on their ovaries.',
+                'PCOS (Polycystic Ovary Syndrome) is a common hormonal condition affecting the ovaries and metabolism. Despite the name, many people with PCOS do not actually have cysts on their ovaries — the name reflects how the condition was first described on ultrasound, not how it\'s diagnosed today.',
           ),
         ],
       ),
       const SizedBox(height: 20),
       _sectionLabel('SYMPTOMS & DIAGNOSIS'),
       const SizedBox(height: 12),
-      PmosCard(
+      PcosCard(
         emoji: '📋',
         badgeColor: AppColors.symptomOrange,
         title: 'Common Symptoms',
-        subtitle: 'How PMOS presents',
+        subtitle: 'How PCOS presents',
         initiallyExpanded: true,
         lines: const [
-          PmosLine(
+          PcosLine(
             boldLead: 'Menstrual irregularities',
             text:
                 'Infrequent, irregular, or prolonged periods. Some people have fewer than 8 cycles per year.',
           ),
-          PmosLine(
+          PcosLine(
             boldLead: 'Hyperandrogenism',
             text:
                 'Elevated androgens causing excess facial or body hair (hirsutism), acne, and scalp hair thinning.',
           ),
-          PmosLine(
+          PcosLine(
             boldLead: 'Metabolic symptoms',
             text:
                 'Weight gain, difficulty losing weight, fatigue, sugar cravings, and insulin resistance.',
           ),
-          PmosLine(
+          PcosLine(
             boldLead: 'Mood changes',
             text:
-                'Anxiety and depression are significantly more common in people with PMOS.',
+                'Anxiety and depression are significantly more common in people with PCOS.',
           ),
         ],
         tags: const [
-          PmosTag('Irregular periods', AppColors.ovulationTeal),
-          PmosTag('Hirsutism', AppColors.symptomOrange),
-          PmosTag('Acne', AppColors.periodRed),
-          PmosTag('Insulin resistance', AppColors.primary),
+          PcosTag('Irregular periods', AppColors.ovulationTeal),
+          PcosTag('Hirsutism', AppColors.symptomOrange),
+          PcosTag('Acne', AppColors.periodRed),
+          PcosTag('Insulin resistance', AppColors.primary),
         ],
       ),
       const SizedBox(height: 12),
-      PmosCard(
+      PcosCard(
         emoji: '🔍',
         badgeColor: AppColors.ovulationTeal,
         title: 'Diagnosis (Rotterdam Criteria)',
         subtitle: 'How it is identified',
         initiallyExpanded: true,
         lines: const [
-          PmosLine(
+          PcosLine(
             text:
-                'PMOS is diagnosed when at least 2 of the following 3 criteria are met:',
+                'PCOS is diagnosed when at least 2 of the following 3 criteria are met:',
           ),
-          PmosLine(
+          PcosLine(
             number: '1',
             boldLead: 'Irregular or absent ovulation',
             text: 'reflected in irregular or missing periods.',
           ),
-          PmosLine(
+          PcosLine(
             number: '2',
             boldLead: 'Clinical or biochemical hyperandrogenism',
             text:
                 'excess hair growth, acne, or elevated androgen levels on a blood test.',
           ),
-          PmosLine(
+          PcosLine(
             number: '3',
             boldLead: 'Polycystic ovarian morphology on ultrasound',
             text:
@@ -297,103 +297,103 @@ class _PmosScreenState extends State<PmosScreen> {
           ),
         ],
         tags: const [
-          PmosTag('Blood tests', AppColors.ovulationTeal),
-          PmosTag('Ultrasound', AppColors.primary),
-          PmosTag('2 of 3 criteria', AppColors.moodYellow),
+          PcosTag('Blood tests', AppColors.ovulationTeal),
+          PcosTag('Ultrasound', AppColors.primary),
+          PcosTag('2 of 3 criteria', AppColors.moodYellow),
         ],
       ),
       const SizedBox(height: 20),
       _sectionLabel('HORMONES & CAUSES'),
       const SizedBox(height: 12),
-      PmosCard(
+      PcosCard(
         emoji: '⚡',
         badgeColor: AppColors.accent,
         title: 'Hormonal Imbalances',
         subtitle: 'What goes wrong inside the body',
         initiallyExpanded: true,
         lines: const [
-          PmosLine(
+          PcosLine(
             text:
-                'In PMOS, the pituitary releases more LH relative to FSH, stimulating the ovaries to produce excess androgens instead of allowing normal follicle maturation and ovulation.',
+                'In PCOS, the pituitary releases more LH relative to FSH, stimulating the ovaries to produce excess androgens instead of allowing normal follicle maturation and ovulation.',
           ),
-          PmosLine(
+          PcosLine(
             boldLead: 'Insulin resistance',
             text:
-                'is present in up to 70% of people with PMOS. High insulin further stimulates androgen production and reduces sex-hormone-binding globulin (SHBG), leaving more free testosterone in the blood.',
+                'is present in up to 70% of people with PCOS. High insulin further stimulates androgen production and reduces sex-hormone-binding globulin (SHBG), leaving more free testosterone in the blood.',
           ),
-          PmosLine(
+          PcosLine(
             boldLead: 'Chronic low-grade inflammation',
             text:
                 'also contributes to androgen production and the metabolic features of the condition.',
           ),
         ],
         tags: const [
-          PmosTag('High LH', AppColors.accent),
-          PmosTag('High androgens', AppColors.periodRed),
-          PmosTag('Low SHBG', AppColors.moodYellow),
-          PmosTag('Insulin resistance', AppColors.primary),
+          PcosTag('High LH', AppColors.accent),
+          PcosTag('High androgens', AppColors.periodRed),
+          PcosTag('Low SHBG', AppColors.moodYellow),
+          PcosTag('Insulin resistance', AppColors.primary),
         ],
       ),
       const SizedBox(height: 20),
       _sectionLabel('MANAGEMENT & TREATMENT'),
       const SizedBox(height: 12),
-      PmosCard(
+      PcosCard(
         emoji: '🌿',
         badgeColor: AppColors.ovulationTeal,
         title: 'Lifestyle & Diet',
         subtitle: 'First-line management',
         initiallyExpanded: true,
         lines: const [
-          PmosLine(
+          PcosLine(
             text:
                 'Even a 5–10% reduction in body weight (where applicable) can significantly restore ovulation and reduce androgen levels.',
           ),
-          PmosLine(
+          PcosLine(
             boldLead: 'Diet',
             text:
                 'A low-GI diet helps manage insulin resistance. Focus on whole grains, legumes, lean protein, and healthy fats.',
           ),
-          PmosLine(
+          PcosLine(
             boldLead: 'Exercise',
             text:
                 'Both aerobic and resistance training improve insulin sensitivity. Aim for 150 minutes of moderate activity per week.',
           ),
-          PmosLine(
+          PcosLine(
             boldLead: 'Sleep & stress',
             text:
                 'Poor sleep and chronic stress worsen cortisol and insulin levels.',
           ),
         ],
         tags: const [
-          PmosTag('Low-GI diet', AppColors.ovulationTeal),
-          PmosTag('Exercise', AppColors.primary),
-          PmosTag('Sleep hygiene', AppColors.accent),
+          PcosTag('Low-GI diet', AppColors.ovulationTeal),
+          PcosTag('Exercise', AppColors.primary),
+          PcosTag('Sleep hygiene', AppColors.accent),
         ],
       ),
       const SizedBox(height: 12),
-      PmosCard(
+      PcosCard(
         emoji: '💊',
         badgeColor: AppColors.periodRed,
         title: 'Medications',
         subtitle: 'Medical treatment options',
         initiallyExpanded: false,
         lines: const [
-          PmosLine(
+          PcosLine(
             boldLead: 'Combined pill',
             text:
                 'Regulates cycles, lowers androgens, and protects the uterine lining.',
           ),
-          PmosLine(
+          PcosLine(
             boldLead: 'Metformin',
             text:
                 'Improves insulin sensitivity and can help restore ovulation.',
           ),
-          PmosLine(
+          PcosLine(
             boldLead: 'Anti-androgens',
             text:
                 'Reduce excess hair growth and acne, usually combined with contraception.',
           ),
-          PmosLine(
+          PcosLine(
             boldLead: 'Fertility medication',
             text:
                 'Such as letrozole may be used to induce ovulation when trying to conceive.',
@@ -401,24 +401,24 @@ class _PmosScreenState extends State<PmosScreen> {
         ],
       ),
       const SizedBox(height: 12),
-      PmosCard(
+      PcosCard(
         emoji: '⏳',
         badgeColor: AppColors.moodYellow,
         title: 'Long-Term Health Risks',
         subtitle: 'Why monitoring over time matters',
         initiallyExpanded: false,
         lines: const [
-          PmosLine(
+          PcosLine(
             boldLead: 'Type 2 diabetes',
             text:
                 'Insulin resistance raises long-term risk, so regular glucose screening is recommended.',
           ),
-          PmosLine(
+          PcosLine(
             boldLead: 'Cardiovascular disease',
             text:
-                'Higher rates of high blood pressure and cholesterol are seen in PMOS.',
+                'Higher rates of high blood pressure and cholesterol are seen in PCOS.',
           ),
-          PmosLine(
+          PcosLine(
             boldLead: 'Endometrial health',
             text:
                 'Infrequent periods can let the uterine lining build up, raising long-term risk if untreated.',
@@ -608,7 +608,7 @@ class _PmosScreenState extends State<PmosScreen> {
             ),
           ),
           const SizedBox(height: 14),
-          Text('PMOS Detection', style: AppTextStyles.serif(size: 19)),
+          Text('PCOS Detection', style: AppTextStyles.serif(size: 19)),
           const SizedBox(height: 8),
           Text(
             'Enter your medical details below for an AI-powered risk assessment, using a model trained on real clinical data.',
@@ -793,7 +793,7 @@ class _PmosScreenState extends State<PmosScreen> {
                 ),
               )
             : Text(
-                'Run PMOS Detection',
+                'Run PCOS Detection',
                 style: AppTextStyles.sans(
                   size: 14,
                   weight: FontWeight.w600,
@@ -830,7 +830,7 @@ class _PmosScreenState extends State<PmosScreen> {
           ),
           const SizedBox(height: 6),
           Text(
-            'Estimated PMOS likelihood: ${(result.pcosProbability * 100).clamp(0, 100).toStringAsFixed(1)}%',
+            'Estimated PCOS likelihood: ${(result.pcosProbability * 100).clamp(0, 100).toStringAsFixed(1)}%',
             style: AppTextStyles.sans(
               size: 13,
               weight: FontWeight.w600,
@@ -855,7 +855,7 @@ class _PmosScreenState extends State<PmosScreen> {
     );
   }
 
-  /// Called when the user taps "Run PMOS Detection". Validates the form,
+  /// Called when the user taps "Run PCOS Detection". Validates the form,
   /// then runs the prediction using the app's single deployed model.
   Future<void> _onRunDetectionPressed() async {
     setState(() {
@@ -943,10 +943,10 @@ class _PmosScreenState extends State<PmosScreen> {
             ),
           ),
           const SizedBox(height: 14),
-          Text('PMOS Guide', style: AppTextStyles.serif(size: 19)),
+          Text('PCOS Guide', style: AppTextStyles.serif(size: 19)),
           const SizedBox(height: 8),
           Text(
-            'Polycystic Metabolic Ovarian Syndrome — a hormonal and metabolic condition affecting people with ovaries, affecting nearly 1 in 10.',
+            'Polycystic Ovary Syndrome — a hormonal and metabolic condition affecting people with ovaries, affecting nearly 1 in 10.',
             textAlign: TextAlign.center,
             style: AppTextStyles.sans(
               size: 12,
@@ -959,19 +959,19 @@ class _PmosScreenState extends State<PmosScreen> {
   }
 }
 
-/// Accordion-style card used for every PMOS info section. Supports plain
+/// Accordion-style card used for every PCOS info section. Supports plain
 /// paragraphs, bold-lead bullet lines, numbered criteria lines, and an
 /// optional row of tag chips at the bottom.
-class PmosCard extends StatefulWidget {
+class PcosCard extends StatefulWidget {
   final String emoji;
   final Color badgeColor;
   final String title;
   final String subtitle;
-  final List<PmosLine> lines;
-  final List<PmosTag>? tags;
+  final List<PcosLine> lines;
+  final List<PcosTag>? tags;
   final bool initiallyExpanded;
 
-  const PmosCard({
+  const PcosCard({
     super.key,
     required this.emoji,
     required this.badgeColor,
@@ -983,10 +983,10 @@ class PmosCard extends StatefulWidget {
   });
 
   @override
-  State<PmosCard> createState() => _PmosCardState();
+  State<PcosCard> createState() => _PcosCardState();
 }
 
-class _PmosCardState extends State<PmosCard> {
+class _PcosCardState extends State<PcosCard> {
   late bool _expanded = widget.initiallyExpanded;
 
   @override
@@ -1106,7 +1106,7 @@ class _PmosCardState extends State<PmosCard> {
     );
   }
 
-  Widget _buildLine(PmosLine line) {
+  Widget _buildLine(PcosLine line) {
     final baseStyle = AppTextStyles.sans(
       size: 12,
       color: AppColors.textSecondary,

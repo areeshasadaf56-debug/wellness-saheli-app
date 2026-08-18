@@ -1,13 +1,11 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
+import '../config/api_config.dart';
 
 /// Handles communication with the FastAPI PCOS backend.
 class PcosApiService {
-  // Your laptop's CURRENT local IP on the shared WiFi network.
-  // Run `ipconfig` (Windows) or `ifconfig`/`ipconfig getifaddr en0` (Mac)
-  // to confirm this before testing — it can change when you reconnect to WiFi.
-  static const String _baseUrl = 'https://areeshasadaf56.pythonanywhere.com';
+  static String get _baseUrl => ApiConfig.baseUrl;
 
   /// Sends the form data to the /predict endpoint and returns the parsed result.
   ///
@@ -74,14 +72,11 @@ class PcosApiService {
           .timeout(const Duration(seconds: 30));
     } on SocketException {
       throw Exception(
-        'Could not reach the server. Make sure your phone and laptop are '
-        'on the same WiFi network and the IP address in pcos_api_service.dart '
-        'matches your laptop\'s current IP (run "ipconfig" to check).',
+        'No internet connection. Please check your network and try again.',
       );
     } on http.ClientException {
       throw Exception(
-        'Connection was refused. Make sure the FastAPI server is running '
-        'with --host 0.0.0.0 and that no firewall is blocking port 8080.',
+        'Could not reach the server right now. Please try again shortly.',
       );
     } catch (e) {
       throw Exception('Request timed out or failed: $e');

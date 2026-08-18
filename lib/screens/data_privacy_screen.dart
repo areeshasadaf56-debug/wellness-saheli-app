@@ -31,7 +31,7 @@ class DataPrivacyScreen extends StatelessWidget {
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
-                        'Your cycle data lives only on this device. Nothing is uploaded to a server.',
+                        'Your period, symptom, and mood logs live only on this device. A couple of optional health tools in the app do send the specific values you enter to our server — see below for exactly what and when.',
                         style: AppTextStyles.sans(
                           size: 12,
                           color: AppColors.textPrimary,
@@ -47,8 +47,16 @@ class DataPrivacyScreen extends StatelessWidget {
                 'Period start and end dates, cycle length settings, symptoms you log, moods you log, and reminder preferences. All of this is saved locally in the app\'s own storage on your phone — the same way notes or offline apps keep data on your device.',
               ),
               _section(
+                'What Is Sent to Our Server',
+                'Two tools in this app — the PCOS screening check and the contraceptive eligibility checker — need a server to calculate your result. When you use them, only the specific values you enter on that screen (like the health details you type into the PCOS form, or the conditions you select in My Plan) are sent for that one calculation. We don\'t attach your name, cycle history, or any other data to these requests, and results aren\'t stored on the server afterward.',
+              ),
+              _section(
+                'Account & Login',
+                'Creating an account lets you use the app and keeps your name in sync across screens. Your login details are currently stored on your device only, not on a server.',
+              ),
+              _section(
                 'What We Don\'t Do',
-                'We don\'t run analytics that identify you personally, we don\'t sell or share your health data with advertisers, and we don\'t require an account or login, so there\'s no profile of you sitting on a server anywhere.',
+                'We don\'t run analytics that identify you personally, and we don\'t sell or share your health data with advertisers.',
               ),
               _section(
                 'Why We Ask for This Data',

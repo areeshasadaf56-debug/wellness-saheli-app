@@ -30,7 +30,7 @@ class TermsScreen extends StatelessWidget {
               ),
               _section(
                 '2. Your Data',
-                'All cycle, symptom, and mood data you enter is stored locally on your device. We do not operate a server that stores your personal health data, and we do not sell, rent, or share your data with advertisers or third parties. You can delete your data at any time from within the app.',
+                'Cycle, symptom, and mood data you enter is stored locally on your device. The PCOS screening tool and the contraceptive eligibility checker send the values you enter on those screens to our server so it can calculate a result for you — these requests are not linked to your name or stored for later use. We do not sell, rent, or share your data with advertisers or third parties. You can delete your locally stored data at any time from within the app.',
               ),
               _section(
                 '3. Acceptable Use',

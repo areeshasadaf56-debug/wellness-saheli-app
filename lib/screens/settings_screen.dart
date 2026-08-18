@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../providers/cycle_provider.dart';
 import '../theme/app_theme.dart';
 import 'cycle_data_screen.dart';
@@ -16,6 +17,27 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
+  String _userName = 'Your Name';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserName();
+  }
+
+  Future<void> _loadUserName() async {
+    final prefs = await SharedPreferences.getInstance();
+    final savedName = prefs.getString('userName');
+    if (savedName != null && savedName.isNotEmpty && mounted) {
+      setState(() => _userName = savedName);
+    }
+  }
+
+  Future<void> _saveUserName(String name) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('userName', name);
+  }
+
   @override
   Widget build(BuildContext context) {
     final cycle = context.watch<CycleProvider>();
@@ -30,7 +52,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             children: [
               Text('Settings', style: AppTextStyles.serif(size: 22)),
               const SizedBox(height: 20),
-              _profileCard(context, cycle),
+              _profileCard(),
 
               const SizedBox(height: 20),
               _sectionHeading('CYCLE SETTINGS'),
@@ -44,30 +66,46 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 );
               }),
               _reminderToggleRow(context, cycle),
-              _settingsRow(context, '📊', 'Data & Privacy', 'Manage', () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const DataPrivacyScreen(),
-                  ),
-                );
-              }),
+              _settingsRow(
+                context,
+                '📊',
+                'Data & Privacy',
+                'Manage',
+                () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const DataPrivacyScreen()),
+                  );
+                },
+              ),
 
               const SizedBox(height: 20),
               _sectionHeading('ABOUT'),
               const SizedBox(height: 10),
-              _settingsRow(context, 'ℹ️', 'About Wellness Saheli', '', () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const AboutScreen()),
-                );
-              }),
-              _settingsRow(context, '📋', 'Terms & Privacy', '', () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const TermsScreen()),
-                );
-              }),
+              _settingsRow(
+                context,
+                'ℹ️',
+                'About Wellness Saheli',
+                '',
+                () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const AboutScreen()),
+                  );
+                },
+              ),
+              _settingsRow(
+                context,
+                '📋',
+                'Terms & Privacy',
+                '',
+                () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const TermsScreen()),
+                  );
+                },
+              ),
               _settingsRow(
                 context,
                 '⭐',
@@ -97,9 +135,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  Widget _profileCard(BuildContext context, CycleProvider cycle) {
+  Widget _profileCard() {
     return GestureDetector(
-      onTap: () => _showEditNameDialog(context, cycle),
+      onTap: () => _showEditNameDialog(context),
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
@@ -128,11 +166,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    cycle.userName.isNotEmpty ? cycle.userName : 'Your Name',
-                    style: AppTextStyles.sans(
-                      size: 15,
-                      weight: FontWeight.w600,
-                    ),
+                    _userName,
+                    style: AppTextStyles.sans(size: 15, weight: FontWeight.w600),
                   ),
                   const SizedBox(height: 4),
                   Text(
@@ -156,8 +191,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  void _showEditNameDialog(BuildContext context, CycleProvider cycle) {
-    final controller = TextEditingController(text: cycle.userName);
+  void _showEditNameDialog(BuildContext context) {
+    final controller = TextEditingController(text: _userName == 'Your Name' ? '' : _userName);
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
@@ -173,10 +208,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           cursorColor: AppColors.primary,
           decoration: InputDecoration(
             hintText: 'Enter your name',
-            hintStyle: AppTextStyles.sans(
-              size: 14,
-              color: AppColors.textSecondary,
-            ),
+            hintStyle: AppTextStyles.sans(size: 14, color: AppColors.textSecondary),
             enabledBorder: UnderlineInputBorder(
               borderSide: BorderSide(color: AppColors.cardBorder),
             ),
@@ -193,19 +225,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
           TextButton(
             onPressed: () {
               final newName = controller.text.trim();
-              // Persisted centrally in CycleProvider so Home's "Hello, {name}"
-              // greeting and this profile card always agree.
-              context.read<CycleProvider>().updateUserName(
-                newName.isEmpty ? 'Your Name' : newName,
-              );
+              final finalName = newName.isEmpty ? 'Your Name' : newName;
+              setState(() => _userName = finalName);
+              _saveUserName(finalName);
               Navigator.pop(dialogContext);
             },
             child: Text(
               'Save',
-              style: TextStyle(
-                color: AppColors.primary,
-                fontWeight: FontWeight.w600,
-              ),
+              style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.w600),
             ),
           ),
         ],
@@ -262,6 +289,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Widget _reminderToggleRow(BuildContext context, CycleProvider cycle) {
+    // NOTE: if this switch still doesn't visually turn on after tapping,
+    // the bug is inside cycle_provider.dart — either `remindersEnabled`
+    // isn't being updated, or `toggleReminders()` isn't calling
+    // notifyListeners(). This widget itself reads/writes correctly.
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(14),
@@ -317,15 +348,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
               TextButton(
                 onPressed: () {
-                  // Close the confirm dialog first, then clear login state
-                  // and clear the whole nav stack so Back can't return here.
+                  // Close the confirmation dialog first, then navigate to
+                  // Sign In and clear the entire navigation stack behind
+                  // it, so the back button can't return into the app.
                   Navigator.pop(dialogContext);
-                  context.read<CycleProvider>().logout();
                   Navigator.pushAndRemoveUntil(
                     context,
-                    MaterialPageRoute(
-                      builder: (context) => const SignInScreen(),
-                    ),
+                    MaterialPageRoute(builder: (context) => const SignInScreen()),
                     (route) => false,
                   );
                 },
