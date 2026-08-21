@@ -2,10 +2,6 @@ import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 import '../services/eligibility_api_service.dart';
 
-/// Renders an emoji glyph with proper color-emoji font fallbacks, so
-/// emoji show up as colored icons instead of blank/colorless boxes on
-/// platforms without a bundled Noto Color Emoji font (common on some
-/// Android builds and web).
 Widget emojiText(String emoji, {double size = 14}) {
   return Text(
     emoji,
@@ -21,25 +17,6 @@ Widget emojiText(String emoji, {double size = 14}) {
   );
 }
 
-// ============================================================
-// Condition grouping for the Eligibility tool's accordion UI.
-// This organizes condition ids/labels into categories matching the
-// official WHO Medical Eligibility Criteria wheel exactly (every
-// category and sub-option shown on the wheel and reference app).
-//
-// IMPORTANT: a group/sub-option only renders once the app's actual
-// backend (/conditions endpoint) returns a matching id. Many ids
-// below are new -- they reflect sub-options the reference app has
-// that this project's backend may not have yet (e.g. "Pelvic
-// Inflammatory Disease", "Post-Abortion", "Thyroid disorders",
-// "Malaria", finer Hypertension/Migraine/Smoking/SLE breakdowns,
-// and the full Antiretroviral Therapy drug-class tree). Nothing
-// here changes or removes any existing id; this only adds new
-// groups/ids so the UI is ready as soon as the backend supports
-// them. Ids already confirmed to exist in the current API are
-// unchanged from before.
-// ============================================================
-
 class ConditionNode {
   final String id;
   final List<ConditionNode> children;
@@ -51,7 +28,6 @@ class ConditionGroup {
   final List<ConditionNode> nodes;
   const ConditionGroup(this.title, this.nodes);
 
-  /// Every id in this group, including nested children, flattened.
   List<String> get allIds => _flatten(nodes);
 
   static List<String> _flatten(List<ConditionNode> nodes) {
@@ -64,8 +40,6 @@ class ConditionGroup {
   }
 }
 
-/// Helper to turn a flat list of ids into leaf nodes (no children) --
-/// used for every group that doesn't need nesting.
 List<ConditionNode> _leaves(List<String> ids) =>
     ids.map((id) => ConditionNode(id)).toList();
 
@@ -383,13 +357,6 @@ final List<ConditionGroup> _conditionGroups = [
   ),
 ];
 
-// Fallback display labels for condition ids that are new (added to
-// match the full WHO wheel) and may not exist in the live /conditions
-// API response yet. This lets the full condition list render in the
-// UI immediately. Selecting one of these and tapping "Check my
-// eligibility" will only be reflected in results once the backend's
-// /conditions and /eligibility endpoints recognize the id -- until
-// then the backend may ignore it or return an error for that id.
 const Map<String, String> _fallbackConditionLabels = {
   'malaria': 'Malaria',
   'obesity_adolescent_bmi30': 'Menarche to < 18 years and ≥ 30 kg/m² BMI',
@@ -452,12 +419,10 @@ const Map<String, String> _fallbackConditionLabels = {
       'Cervical cancer (awaiting treatment) — initiation',
   'cervical_cancer_continuation':
       'Cervical cancer (awaiting treatment) — continuation',
-  // Antiretroviral Therapy — drug classes
   'art_nrti': 'Nucleoside reverse transcriptase inhibitors (NRTIs)',
   'art_nnrti': 'Non-nucleoside reverse transcriptase inhibitors (NNRTIs)',
   'art_pi': 'Protease inhibitors (PIs)',
   'art_integrase': 'Integrase inhibitors',
-  // Antiretroviral Therapy — NRTIs
   'art_abacavir_init': 'Abacavir (ABC) / Initiation',
   'art_abacavir_cont': 'Abacavir (ABC) / Continuation',
   'art_tenofovir_init': 'Tenofovir (TDF) / Initiation',
@@ -472,7 +437,6 @@ const Map<String, String> _fallbackConditionLabels = {
   'art_emtricitabine_cont': 'Emtricitabine (FTC) / Continuation',
   'art_stavudine_init': 'Stavudine (D4T) / Initiation',
   'art_stavudine_cont': 'Stavudine (D4T) / Continuation',
-  // Antiretroviral Therapy — NNRTIs
   'art_efavirenz_init': 'Efavirenz (EFV) / Initiation',
   'art_efavirenz_cont': 'Efavirenz (EFV) / Continuation',
   'art_etravirine_init': 'Etravirine (ETR) / Initiation',
@@ -481,7 +445,6 @@ const Map<String, String> _fallbackConditionLabels = {
   'art_nevirapine_cont': 'Nevirapine (NVP) / Continuation',
   'art_rilpivirine_init': 'Rilpivirine (RPV) / Initiation',
   'art_rilpivirine_cont': 'Rilpivirine (RPV) / Continuation',
-  // Antiretroviral Therapy — PIs
   'art_atv_r_init': 'Ritonavir-boosted atazanavir (ATV/r) / Initiation',
   'art_atv_r_cont': 'Ritonavir-boosted atazanavir (ATV/r) / Continuation',
   'art_lpv_r_init': 'Ritonavir-boosted Lopinavir (LPV/r) / Initiation',
@@ -490,10 +453,8 @@ const Map<String, String> _fallbackConditionLabels = {
   'art_drv_r_cont': 'Ritonavir-boosted darunavir (DRV/r) / Continuation',
   'art_ritonavir_init': 'Ritonavir (RTV) / Initiation',
   'art_ritonavir_cont': 'Ritonavir (RTV) / Continuation',
-  // Antiretroviral Therapy — Integrase inhibitors
   'art_raltegravir_init': 'Raltegravir (RAL) / Initiation',
   'art_raltegravir_cont': 'Raltegravir (RAL) / Continuation',
-  // Breast Disease
   'breast_cancer_category': 'Breast cancer',
   'breast_undiagnosed_mass': 'Undiagnosed mass',
   'breast_benign_disease': 'Benign breast disease',
@@ -502,6 +463,174 @@ const Map<String, String> _fallbackConditionLabels = {
   'past_breast_cancer_5yrs':
       'Past and no evidence of current disease for 5 years',
 };
+
+// ============================================================
+// Emergency contraception reference data.
+// ============================================================
+class EcConditionRow {
+  final String label;
+  final String value;
+  const EcConditionRow(this.label, this.value);
+}
+
+class EcMethod {
+  final String abbreviation;
+  final String fullName;
+  final List<EcConditionRow>? rows;
+  const EcMethod({required this.abbreviation, required this.fullName, this.rows});
+}
+
+const List<EcMethod> _ecMethods = [
+  EcMethod(
+    abbreviation: 'COC',
+    fullName: 'Combined oral contraceptives',
+    rows: [
+      EcConditionRow('Pregnancy', 'NA'),
+      EcConditionRow('Breastfeeding', '1'),
+      EcConditionRow('Past ectopic pregnancy', '1'),
+      EcConditionRow('Obesity* (BMI ≥30 kg/m2)', '1'),
+      EcConditionRow(
+        'History of severe cardiovascular disease (ischaemic heart disease, cerebrovascular attack, or other thromboembolic conditions)',
+        '2',
+      ),
+      EcConditionRow('Migraine', '2'),
+      EcConditionRow('Severe liver disease (including jaundice)', '2'),
+      EcConditionRow(
+        'CYP3A4 inducers (e.g. rifampicin, phenytoin, phenobarbital, carbamazepine, efavirenz, fosphenytoin, nevirapine, oxcarbazepine, primidone, rifabutin, St John\'s wort/ hypericum perforatum)',
+        '1',
+      ),
+      EcConditionRow('Repeated emergency contraceptive pill use', '1'),
+      EcConditionRow('Rape', '1'),
+    ],
+  ),
+  EcMethod(abbreviation: 'LNG', fullName: 'Levonorgestrel'),
+  EcMethod(abbreviation: 'UPA', fullName: 'Ulipristal acetate'),
+  EcMethod(
+    abbreviation: 'Cu-IUD',
+    fullName: 'Copper intrauterine device',
+    rows: [
+      EcConditionRow(
+        'This method is highly effective for preventing pregnancy. It can be used within 5 days of unprotected intercourse as an emergency contraceptive. However, when the time of ovulation can be estimated, the Cu-IUD can be inserted beyond 5 days after intercourse, if necessary, as long as the insertion does not occur more than 5 days after ovulation.\n\nThe eligibility criteria for general Cu-IUD insertion also apply for the insertion of Cu-IUDs as emergency contraception.',
+        'NA',
+      ),
+      EcConditionRow('Pregnancy', '4'),
+      EcConditionRow('Rape (high risk of STI)', '3'),
+      EcConditionRow('Rape (low risk of STI)', '1'),
+    ],
+  ),
+];
+
+// ============================================================
+// Antiretroviral drug classes/abbreviations for Additional info.
+// ============================================================
+class ArtDrug {
+  final String abbr;
+  final String name;
+  const ArtDrug(this.abbr, this.name);
+}
+
+class ArtClass {
+  final String title;
+  final List<ArtDrug> drugs;
+  const ArtClass(this.title, this.drugs);
+}
+
+const List<ArtClass> _artClasses = [
+  ArtClass('Nucleoside reverse transcriptase inhibitors (NRTIs)', [
+    ArtDrug('ABC', 'Abacavir'),
+    ArtDrug('TDF', 'Tenofovir'),
+    ArtDrug('AZT', 'Zidovudine'),
+    ArtDrug('3TC', 'Lamivudine'),
+    ArtDrug('DDI', 'Didanosine'),
+    ArtDrug('FTC', 'Emtricitabine'),
+    ArtDrug('D4T', 'Stavudine'),
+  ]),
+  ArtClass('Non-nucleoside reverse transcriptase inhibitors (NNRTIs)', [
+    ArtDrug('EFV', 'Efavirenz'),
+    ArtDrug('ETR', 'Etravirine'),
+    ArtDrug('NVP', 'Nevirapine'),
+    ArtDrug('RPV', 'Rilpivirine'),
+  ]),
+  ArtClass('Protease inhibitors (PIs)', [
+    ArtDrug('ATV/r', 'Ritonavir-boosted atazanavir'),
+    ArtDrug('LPV/r', 'Ritonavir-boosted lopinavir'),
+    ArtDrug('DRV/r', 'Ritonavir-boosted darunavir'),
+    ArtDrug('RTV', 'Ritonavir'),
+  ]),
+  ArtClass('Integrase Inhibitors', [
+    ArtDrug('RAL', 'Raltegravir'),
+  ]),
+];
+
+// ============================================================
+// Effectiveness-of-methods reference data (Additional info tab).
+// ============================================================
+class EffMethod {
+  final String name;
+  final String percent;
+  const EffMethod(this.name, this.percent);
+}
+
+class EffectivenessTier {
+  final String title;
+  final Color color;
+  final List<EffMethod> methods;
+  final String note;
+  const EffectivenessTier({
+    required this.title,
+    required this.color,
+    required this.methods,
+    required this.note,
+  });
+}
+
+const List<EffectivenessTier> _effectivenessTiers = [
+  EffectivenessTier(
+    title: 'Most effective',
+    color: AppColors.ovulationTeal,
+    methods: [
+      EffMethod('Implants', '0.05%'),
+      EffMethod('IUD', '0.8%'),
+      EffMethod('Female sterilization', '0.5%'),
+      EffMethod('Vasectomy', '0.15%'),
+    ],
+    note:
+        'Implants, IUD, female sterilization: After procedure, little or nothing to do or remember. Vasectomy: Use another method for first 3 months.',
+  ),
+  EffectivenessTier(
+    title: 'Very effective',
+    color: AppColors.primary,
+    methods: [
+      EffMethod('Injectables', '6%'),
+      EffMethod('LAM', '—'),
+      EffMethod('Patch & vaginal ring', '9%'),
+      EffMethod('Pills', '9%'),
+    ],
+    note:
+        'Injectables: Get repeat injections on time. Lactational amenorrhea method, LAM (for 6 months): The baby is fully or near fully breastfed. To maintain effective protection against pregnancy, another method of contraception must be used as soon as menstruation resumes, the frequency or duration of breast-feeds is reduced, bottle feeds are introduced or the baby reaches 6 months of age. Pills: Take a pill each day. Patch, ring: Keep in place, change on time.',
+  ),
+  EffectivenessTier(
+    title: 'Moderately effective',
+    color: AppColors.moodYellow,
+    methods: [
+      EffMethod('Male condoms', '18%'),
+      EffMethod('Diaphragm', '12%'),
+      EffMethod('Female condoms', '21%'),
+      EffMethod('Fertility awareness methods', '24%'),
+    ],
+    note:
+        'Condoms, diaphragm: Use correctly every time you have sex. Fertility awareness methods: Abstain from sex or use condoms on fertile days. The Standard Days Method or TwoDay Method can also be used.',
+  ),
+  EffectivenessTier(
+    title: 'Least effective',
+    color: AppColors.periodRed,
+    methods: [
+      EffMethod('Withdrawal', '22%'),
+      EffMethod('Spermicides', '28%'),
+    ],
+    note: 'Withdrawal, spermicides: Use correctly every time you have sex.',
+  ),
+];
 
 class ProtectionScreen extends StatefulWidget {
   const ProtectionScreen({super.key});
@@ -513,33 +642,30 @@ class ProtectionScreen extends StatefulWidget {
 class _ProtectionScreenState extends State<ProtectionScreen> {
   int _activeTab = 0;
 
-  // ---- My Plan tab state ----
-  // 0 = home menu (cards), 1 = eligibility tool, 2 = methods reference,
-  // 3 = additional info, 4 = how to use the tool.
   int _myPlanView = 0;
 
-  // When set, the Methods list shows this method's detail page instead
-  // of the list (tap a row -> detail, tap Back -> list again).
   int? _selectedMethodIndex;
 
-  // ---- Eligibility checker state ----
+  int _additionalInfoView = 0;
+  final Set<String> _expandedEcMethods = {};
+  final Set<String> _expandedArtClasses = {};
+  final Set<int> _expandedEffTiers = {};
+
   final EligibilityApiService _api = EligibilityApiService();
   Future<List<Condition>>? _conditionsFuture;
-  Future<List<EffectivenessEntry>>? _effectivenessFuture;
   final Set<String> _selectedConditionIds = {};
   final Set<String> _expandedGroups = {};
+
+  /// IDs the backend actually recognizes. Populated once fetchConditions()
+  /// resolves. Anything NOT in this set is a frontend-only fallback label
+  /// (see _fallbackConditionLabels) and must never be sent to the backend.
+  Set<String> _apiConditionIds = {};
   List<MethodResult>? _eligibilityResults;
   bool _checkingEligibility = false;
   String? _eligibilityError;
 
-  // Inner tab within the Eligibility tool: 0 = Conditions, 1 = Preferences.
   int _eligibilitySubTab = 0;
 
-  // Age preference: a discrete step index into _ageBrackets (0 =
-  // menarche/under 18, last = 46+). This is currently a UI-only
-  // preference: the /eligibility endpoint only accepts condition_ids
-  // today, so age isn't sent with the request yet. Wire it in once
-  // the backend supports it.
   double _agePreference = 2;
   static const List<String> _ageBrackets = [
     'Menarche to < 18 years',
@@ -551,11 +677,6 @@ class _ProtectionScreenState extends State<ProtectionScreen> {
     '≥ 46 years',
   ];
 
-  // Preferences tab: personal preferences about method characteristics
-  // (as opposed to medical conditions). Each is an expandable info
-  // card -- tapping it reveals what the preference means and which
-  // methods from the Contraception tab best fit it. This is purely
-  // informational and isn't sent to the /eligibility endpoint.
   final Set<String> _expandedPreferences = {};
   final List<Map<String, dynamic>> _preferences = [
     {
@@ -657,7 +778,15 @@ class _ProtectionScreenState extends State<ProtectionScreen> {
   void initState() {
     super.initState();
     _conditionsFuture = _api.fetchConditions();
-    _effectivenessFuture = _api.fetchEffectiveness();
+    _conditionsFuture!.then((data) {
+      if (!mounted) return;
+      setState(() {
+        _apiConditionIds = data.map((c) => c.id).toSet();
+      });
+    }).catchError((_) {
+      // Leave _apiConditionIds empty; the FutureBuilder below already
+      // surfaces the fetch error to the user.
+    });
   }
 
   Future<void> _checkEligibility() async {
@@ -667,17 +796,35 @@ class _ProtectionScreenState extends State<ProtectionScreen> {
       );
       return;
     }
+
+    // Only send IDs the backend actually knows about. Some entries in
+    // _conditionGroups only exist as frontend fallback labels
+    // (_fallbackConditionLabels) and were never returned by fetchConditions(),
+    // so sending them causes an "Unknown condition id(s)" error from the API.
+    final validIds = _selectedConditionIds
+        .where((id) => _apiConditionIds.contains(id))
+        .toList();
+
+    if (validIds.isEmpty) {
+      setState(() {
+        _eligibilityError =
+            'The selected condition(s) aren\'t supported for eligibility checking yet. Please choose a different condition.';
+      });
+      return;
+    }
+
     setState(() {
       _checkingEligibility = true;
       _eligibilityError = null;
     });
     try {
-      final results = await _api.checkEligibility(
-        _selectedConditionIds.toList(),
-      );
+      final results = await _api.checkEligibility(validIds);
       setState(() => _eligibilityResults = results);
     } catch (e) {
-      setState(() => _eligibilityError = e.toString());
+      setState(() {
+        _eligibilityError =
+            'Could not check eligibility right now. Please try again in a moment.';
+      });
     } finally {
       setState(() => _checkingEligibility = false);
     }
@@ -713,10 +860,6 @@ class _ProtectionScreenState extends State<ProtectionScreen> {
     }
   }
 
-  // The 10 real contraceptive methods, matching the backend's
-  // /methods_reference and /eligibility responses 1:1 by name (plus
-  // vasectomy, shown alongside female sterilization as the two
-  // permanent options).
   final List<Map<String, dynamic>> _methods = const [
     {
       'emoji': '💊',
@@ -1002,9 +1145,6 @@ class _ProtectionScreenState extends State<ProtectionScreen> {
     ];
   }
 
-  // ============================================================
-  // MY PLAN TAB -- home menu with 4 cards, each opening a sub-view.
-  // ============================================================
   Widget _buildMyPlanTab() {
     switch (_myPlanView) {
       case 1:
@@ -1026,14 +1166,11 @@ class _ProtectionScreenState extends State<ProtectionScreen> {
         );
       case 3:
         return _buildSubView(
-          title: 'Additional info',
-          child: Column(
-            children: [
-              _categoryLegendCard(),
-              const SizedBox(height: 16),
-              _effectivenessCard(),
-            ],
-          ),
+          title: _additionalInfoTitle(),
+          onBack: _additionalInfoView == 0
+              ? null
+              : () => setState(() => _additionalInfoView = 0),
+          child: _buildAdditionalInfoContent(),
         );
       case 4:
         return _buildSubView(
@@ -1045,7 +1182,6 @@ class _ProtectionScreenState extends State<ProtectionScreen> {
     }
   }
 
-  // Home menu: matches the reference app's card-list layout.
   Widget _buildMyPlanMenu() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1084,7 +1220,10 @@ class _ProtectionScreenState extends State<ProtectionScreen> {
           icon: Icons.info_outline,
           title: 'Additional info',
           subtitle: 'Understand what your results mean',
-          onTap: () => setState(() => _myPlanView = 3),
+          onTap: () => setState(() {
+            _myPlanView = 3;
+            _additionalInfoView = 0;
+          }),
         ),
         const SizedBox(height: 10),
         _menuCard(
@@ -1156,10 +1295,6 @@ class _ProtectionScreenState extends State<ProtectionScreen> {
     );
   }
 
-  // Wraps a sub-view with a back button + title, so every card has a
-  // clean way back to the menu. If onBack is provided, it overrides the
-  // default "return to My Plan menu" behavior (used for nested views
-  // like the Methods list -> Methods detail).
   Widget _buildSubView({
     required String title,
     required Widget child,
@@ -1193,7 +1328,6 @@ class _ProtectionScreenState extends State<ProtectionScreen> {
     );
   }
 
-  // ---- Sub-view 1: Eligibility tool ----------------------------------
   Widget _buildEligibilityTool() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1316,8 +1450,6 @@ class _ProtectionScreenState extends State<ProtectionScreen> {
     );
   }
 
-  // Pill-style "Conditions / Preferences" tab bar inside the
-  // Eligibility tool, matching the reference app's layout.
   Widget _eligibilitySubTabs() {
     return Container(
       padding: const EdgeInsets.all(4),
@@ -1368,10 +1500,6 @@ class _ProtectionScreenState extends State<ProtectionScreen> {
     );
   }
 
-  // Age preference slider, matching the reference app's "Age" card
-  // under the Preferences tab: a single continuous slider running
-  // from menarche/under-18 to 46+, with end labels underneath. This
-  // is UI-only for now -- see the _agePreference field comment.
   Widget _agePreferenceCard() {
     final index = _agePreference.round().clamp(0, _ageBrackets.length - 1);
     return Container(
@@ -1453,11 +1581,6 @@ class _ProtectionScreenState extends State<ProtectionScreen> {
     );
   }
 
-  // Preferences list: colored icon circle, label, and a trailing
-  // indicator -- matching the reference app's Preferences tab layout
-  // exactly (icon, bold label, circular chevron). Tapping a row
-  // toggles it as a preference; the trailing circle shows a check
-  // once selected instead of a static chevron, for feedback.
   Widget _preferencesPicker() {
     return Container(
       decoration: BoxDecoration(
@@ -1595,16 +1718,6 @@ class _ProtectionScreenState extends State<ProtectionScreen> {
     );
   }
 
-  // Accordion-style condition picker: alphabetically sorted category
-  // headers with a chevron; tapping a header expands it to show its
-  // sub-options as single-select rows, matching the reference
-  // app's Conditions tab. Sub-options can themselves nest further
-  // (e.g. drug class -> individual drug -> Initiation/Continuation),
-  // rendered with increasing indentation. Categories that only
-  // resolve to a single condition render as a plain checkbox row
-  // instead (no chevron), same as "Benign Ovarian Tumours" and
-  // "Blood pressure measurement unavailable" in the reference
-  // screenshot.
   Widget _conditionPicker() {
     return FutureBuilder<List<Condition>>(
       future: _conditionsFuture,
@@ -1647,9 +1760,6 @@ class _ProtectionScreenState extends State<ProtectionScreen> {
 
         final byId = {for (final c in conditions) c.id: c};
 
-        // Fill in any id referenced by _conditionGroups that the live
-        // API doesn't return yet, using the fallback label map, so
-        // the full condition list renders immediately.
         for (final group in _conditionGroups) {
           for (final id in group.allIds) {
             if (!byId.containsKey(id) &&
@@ -1662,18 +1772,12 @@ class _ProtectionScreenState extends State<ProtectionScreen> {
           }
         }
 
-        // Only show groups that have at least one matching condition
-        // returned by the API, sorted alphabetically (matches the
-        // reference app's ordering).
         final groups =
             _conditionGroups
                 .where((g) => g.allIds.any((id) => byId.containsKey(id)))
                 .toList()
               ..sort((a, b) => a.title.compareTo(b.title));
 
-        // Any condition the API returns that isn't in our grouping map
-        // still gets shown, ungrouped, so nothing from the backend is
-        // ever silently dropped.
         final coveredIds = _conditionGroups.expand((g) => g.allIds).toSet();
         final ungrouped =
             conditions.where((c) => !coveredIds.contains(c.id)).toList()
@@ -1703,12 +1807,6 @@ class _ProtectionScreenState extends State<ProtectionScreen> {
     );
   }
 
-  // A category header (e.g. "Antiretroviral Therapy") that expands to
-  // show its sub-options -- which can themselves be nested (drug class
-  // -> individual drug -> Initiation/Continuation) -- as single-select
-  // radio rows, matching the reference app's accordion pattern. Falls
-  // back to a plain checkbox row if the group only resolves to one
-  // condition.
   Widget _groupTile(ConditionGroup group, Map<String, Condition> byId) {
     final presentIds = group.allIds
         .where((id) => byId.containsKey(id))
@@ -1777,11 +1875,6 @@ class _ProtectionScreenState extends State<ProtectionScreen> {
     );
   }
 
-  // Recursively renders a list of ConditionNodes, indenting children
-  // under their parent (e.g. drug class -> individual drug) with a
-  // thin connector line, matching the reference app's nested layout.
-  // All nodes within the same top-level group remain mutually
-  // exclusive, same as the flat case.
   List<Widget> _buildNodeRows(
     List<ConditionNode> nodes,
     Map<String, Condition> byId,
@@ -1793,73 +1886,113 @@ class _ProtectionScreenState extends State<ProtectionScreen> {
       if (!byId.containsKey(node.id)) continue;
       final c = byId[node.id]!;
       final selected = _selectedConditionIds.contains(node.id);
+
+      // A condition is only checkable once fetchConditions() has confirmed
+      // the backend recognizes it. Until then (or if it's a fallback-only
+      // label), keep it visible for context but not selectable — this is
+      // what stops "Unknown condition id(s)" errors at the source.
+      final isSupported = _apiConditionIds.contains(node.id);
+
       rows.add(
         InkWell(
-          onTap: () {
-            setState(() {
-              if (selected) {
-                _selectedConditionIds.remove(node.id);
-              } else {
-                for (final otherId in allPresentIds) {
-                  _selectedConditionIds.remove(otherId);
-                }
-                _selectedConditionIds.add(node.id);
-              }
-            });
-          },
-          child: Padding(
-            padding: EdgeInsets.only(left: depth * 20, top: 8, bottom: 8),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                if (depth > 0) ...[
-                  Container(
-                    width: 1,
-                    height: 18,
-                    margin: const EdgeInsets.only(right: 10, top: 2),
-                    color: AppColors.cardBorder,
-                  ),
-                ],
-                Container(
-                  margin: const EdgeInsets.only(top: 2),
-                  width: 18,
-                  height: 18,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: selected
-                          ? AppColors.primary
-                          : AppColors.cardBorder,
-                      width: 1.5,
+          onTap: !isSupported
+              ? null
+              : () {
+                  setState(() {
+                    if (selected) {
+                      _selectedConditionIds.remove(node.id);
+                    } else {
+                      for (final otherId in allPresentIds) {
+                        _selectedConditionIds.remove(otherId);
+                      }
+                      _selectedConditionIds.add(node.id);
+                    }
+                  });
+                },
+          child: Opacity(
+            opacity: isSupported ? 1.0 : 0.4,
+            child: Padding(
+              padding: EdgeInsets.only(left: depth * 20, top: 8, bottom: 8),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (depth > 0) ...[
+                    Container(
+                      width: 1,
+                      height: 18,
+                      margin: const EdgeInsets.only(right: 10, top: 2),
+                      color: AppColors.cardBorder,
                     ),
+                  ],
+                  Container(
+                    margin: const EdgeInsets.only(top: 2),
+                    width: 18,
+                    height: 18,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: selected
+                            ? AppColors.primary
+                            : AppColors.cardBorder,
+                        width: 1.5,
+                      ),
+                    ),
+                    child: selected
+                        ? Center(
+                            child: Container(
+                              width: 9,
+                              height: 9,
+                              decoration: const BoxDecoration(
+                                color: AppColors.primary,
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                          )
+                        : null,
                   ),
-                  child: selected
-                      ? Center(
-                          child: Container(
-                            width: 9,
-                            height: 9,
-                            decoration: const BoxDecoration(
-                              color: AppColors.primary,
-                              shape: BoxShape.circle,
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            c.label,
+                            style: AppTextStyles.sans(
+                              size: depth > 0 ? 12 : 12.5,
+                              weight: node.children.isNotEmpty
+                                  ? FontWeight.w600
+                                  : FontWeight.w400,
+                              color: AppColors.textPrimary,
+                            ).copyWith(height: 1.35),
+                          ),
+                        ),
+                        if (!isSupported) ...[
+                          const SizedBox(width: 6),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 6,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: AppColors.textSecondary.withOpacity(0.12),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Text(
+                              'Coming soon',
+                              style: AppTextStyles.sans(
+                                size: 9,
+                                weight: FontWeight.w600,
+                                color: AppColors.textSecondary,
+                              ),
                             ),
                           ),
-                        )
-                      : null,
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Text(
-                    c.label,
-                    style: AppTextStyles.sans(
-                      size: depth > 0 ? 12 : 12.5,
-                      weight: node.children.isNotEmpty
-                          ? FontWeight.w600
-                          : FontWeight.w400,
-                      color: AppColors.textPrimary,
-                    ).copyWith(height: 1.35),
+                        ],
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
@@ -1873,26 +2006,50 @@ class _ProtectionScreenState extends State<ProtectionScreen> {
     return rows;
   }
 
-  // A flat, non-expandable condition row (single checkbox) -- used for
-  // groups that only resolve to one condition, matching rows like
-  // "Benign Ovarian Tumours" and "Blood pressure measurement
-  // unavailable" in the reference app, which have no chevron.
   Widget _singleConditionTile(Condition c) {
     final selected = _selectedConditionIds.contains(c.id);
+    final isSupported = _apiConditionIds.contains(c.id);
     return CheckboxListTile(
       value: selected,
       activeColor: AppColors.primary,
       controlAffinity: ListTileControlAffinity.leading,
-      title: Text(c.label, style: AppTextStyles.sans(size: 13)),
-      onChanged: (checked) {
-        setState(() {
-          if (checked == true) {
-            _selectedConditionIds.add(c.id);
-          } else {
-            _selectedConditionIds.remove(c.id);
-          }
-        });
-      },
+      title: Opacity(
+        opacity: isSupported ? 1.0 : 0.4,
+        child: Row(
+          children: [
+            Flexible(child: Text(c.label, style: AppTextStyles.sans(size: 13))),
+            if (!isSupported) ...[
+              const SizedBox(width: 6),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                decoration: BoxDecoration(
+                  color: AppColors.textSecondary.withOpacity(0.12),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Text(
+                  'Coming soon',
+                  style: AppTextStyles.sans(
+                    size: 9,
+                    weight: FontWeight.w600,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+      onChanged: !isSupported
+          ? null
+          : (checked) {
+              setState(() {
+                if (checked == true) {
+                  _selectedConditionIds.add(c.id);
+                } else {
+                  _selectedConditionIds.remove(c.id);
+                }
+              });
+            },
     );
   }
 
@@ -1948,11 +2105,6 @@ class _ProtectionScreenState extends State<ProtectionScreen> {
     );
   }
 
-  // ---- Sub-view 2: Methods reference --------------------------------
-  // List style (icon in a ring, title, chevron) -- tap a row to open
-  // that method's detail page. This matches the reference app's
-  // Methods screen interaction pattern (list -> detail), rebuilt with
-  // our own colors/icons/layout.
   Widget _buildMethodsList() {
     return Container(
       decoration: BoxDecoration(
@@ -2033,7 +2185,6 @@ class _ProtectionScreenState extends State<ProtectionScreen> {
     );
   }
 
-  // Full detail page for a single method, opened from the list.
   Widget _buildMethodDetail(Map<String, dynamic> m) {
     final badgeColor = m['badgeColor'] as Color;
     final tags = m['tags'] as List<Map<String, dynamic>>;
@@ -2112,7 +2263,332 @@ class _ProtectionScreenState extends State<ProtectionScreen> {
     );
   }
 
-  // ---- Sub-view 3: Additional info -----------------------------------
+  String _additionalInfoTitle() {
+    switch (_additionalInfoView) {
+      case 1:
+        return 'Emergency contraception';
+      case 2:
+        return 'Effectiveness of methods';
+      case 3:
+        return 'Antiretroviral medications and abbreviations';
+      default:
+        return 'Additional info';
+    }
+  }
+
+  Widget _buildAdditionalInfoContent() {
+    switch (_additionalInfoView) {
+      case 1:
+        return _buildEmergencyContraception();
+      case 2:
+        return Column(
+          children: [
+            _categoryLegendCard(),
+            const SizedBox(height: 16),
+            _buildEffectivenessComparison(),
+          ],
+        );
+      case 3:
+        return _buildArtGlossary();
+      default:
+        return _additionalInfoMenu();
+    }
+  }
+
+  Widget _additionalInfoMenu() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _additionalInfoMenuCard(
+          title: 'Emergency contraception',
+          description:
+              'Safety ratings for emergency contraceptive pills and the copper IUD, organized by medical condition.',
+          onTap: () => setState(() => _additionalInfoView = 1),
+        ),
+        _additionalInfoMenuCard(
+          title: 'Effectiveness of methods',
+          description:
+              'Compare how effective each method is at preventing pregnancy, plus what the category numbers mean.',
+          onTap: () => setState(() => _additionalInfoView = 2),
+        ),
+        _additionalInfoMenuCard(
+          title: 'Antiretroviral medications and abbreviations',
+          description:
+              'A glossary of ARV drug classes and abbreviations used throughout the Antiretroviral Therapy condition list.',
+          onTap: () => setState(() => _additionalInfoView = 3),
+        ),
+      ],
+    );
+  }
+
+  Widget _additionalInfoMenuCard({
+    required String title,
+    required String description,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 16),
+        padding: const EdgeInsets.only(left: 14, top: 14, right: 14, bottom: 16),
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.circular(12),
+          border: Border(left: BorderSide(color: AppColors.primary, width: 3)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.04),
+              blurRadius: 6,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(title, style: AppTextStyles.sans(size: 15, weight: FontWeight.w700)),
+            const SizedBox(height: 8),
+            Text(
+              description,
+              style: AppTextStyles.sans(size: 12.5, color: AppColors.textSecondary).copyWith(height: 1.5),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEmergencyContraception() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        ..._ecMethods.map(_ecMethodCard),
+        const SizedBox(height: 8),
+        Text(
+          'NA = not applicable',
+          style: AppTextStyles.sans(size: 12, color: AppColors.textSecondary),
+        ),
+        const SizedBox(height: 10),
+        Text(
+          '*Emergency contraceptive pills may be less effective among women with BMI ≥ 30 kg/m2 than among women with BMI < 25 kg/m2. Despite this, there are no safety concerns.',
+          style: AppTextStyles.sans(size: 12, color: AppColors.textSecondary).copyWith(height: 1.5),
+        ),
+      ],
+    );
+  }
+
+  Widget _ecMethodCard(EcMethod method) {
+    final expanded = _expandedEcMethods.contains(method.abbreviation);
+    return Container(
+      margin: const EdgeInsets.only(bottom: 14),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(12),
+        border: Border(left: BorderSide(color: AppColors.primary, width: 3)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          InkWell(
+            onTap: () {
+              setState(() {
+                if (expanded) {
+                  _expandedEcMethods.remove(method.abbreviation);
+                } else {
+                  _expandedEcMethods.add(method.abbreviation);
+                }
+              });
+            },
+            child: Padding(
+              padding: const EdgeInsets.only(left: 14, top: 14, right: 14, bottom: 16),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          method.abbreviation,
+                          style: AppTextStyles.sans(size: 20, weight: FontWeight.w700, color: AppColors.primary),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          method.fullName,
+                          style: AppTextStyles.sans(size: 13, color: AppColors.textSecondary),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Icon(
+                    expanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
+                    color: AppColors.textSecondary,
+                  ),
+                ],
+              ),
+            ),
+          ),
+          if (expanded)
+            Padding(
+              padding: const EdgeInsets.only(left: 14, right: 14, bottom: 8),
+              child: method.rows == null
+                  ? Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: Text(
+                        'Full guidance for ${method.abbreviation} hasn\'t been added yet.',
+                        style: AppTextStyles.sans(size: 12, color: AppColors.textSecondary).copyWith(
+                          fontStyle: FontStyle.italic,
+                        ),
+                      ),
+                    )
+                  : Column(
+                      children: [
+                        for (int i = 0; i < method.rows!.length; i++) ...[
+                          if (i > 0) Divider(height: 1, color: AppColors.cardBorder),
+                          _ecConditionRow(method.rows![i]),
+                        ],
+                      ],
+                    ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _ecConditionRow(EcConditionRow row) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 12),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: Text(
+              row.label,
+              style: AppTextStyles.sans(size: 12.5, color: AppColors.textPrimary).copyWith(height: 1.4),
+            ),
+          ),
+          const SizedBox(width: 10),
+          Container(width: 1, height: 18, color: AppColors.primary),
+          const SizedBox(width: 10),
+          Text(
+            row.value,
+            style: AppTextStyles.sans(size: 13, weight: FontWeight.w600, color: AppColors.textPrimary),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildArtGlossary() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: _artClasses.map(_artClassCard).toList(),
+    );
+  }
+
+  Widget _artClassCard(ArtClass cls) {
+    final expanded = _expandedArtClasses.contains(cls.title);
+    return Container(
+      margin: const EdgeInsets.only(bottom: 14),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(12),
+        border: Border(left: BorderSide(color: AppColors.primary, width: 3)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          InkWell(
+            onTap: () {
+              setState(() {
+                if (expanded) {
+                  _expandedArtClasses.remove(cls.title);
+                } else {
+                  _expandedArtClasses.add(cls.title);
+                }
+              });
+            },
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 16),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      cls.title,
+                      style: AppTextStyles.sans(
+                        size: 15,
+                        weight: FontWeight.w700,
+                        color: AppColors.primary,
+                      ).copyWith(height: 1.3),
+                    ),
+                  ),
+                  Icon(
+                    expanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
+                    color: AppColors.textSecondary,
+                  ),
+                ],
+              ),
+            ),
+          ),
+          if (expanded)
+            Column(
+              children: [
+                for (int i = 0; i < cls.drugs.length; i++) ...[
+                  if (i > 0) Divider(height: 1, color: AppColors.cardBorder),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                    child: Row(
+                      children: [
+                        SizedBox(
+                          width: 62,
+                          child: Text(
+                            cls.drugs[i].abbr,
+                            style: AppTextStyles.sans(
+                              size: 13,
+                              weight: FontWeight.w700,
+                              color: AppColors.textPrimary,
+                            ),
+                          ),
+                        ),
+                        Container(
+                          width: 1,
+                          height: 16,
+                          margin: const EdgeInsets.symmetric(horizontal: 10),
+                          color: AppColors.primary,
+                        ),
+                        Expanded(
+                          child: Text(
+                            cls.drugs[i].name,
+                            style: AppTextStyles.sans(
+                              size: 13,
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ],
+            ),
+        ],
+      ),
+    );
+  }
+
   Widget _categoryLegendCard() {
     final rows = [
       (1, AppColors.ovulationTeal, 'Use in any circumstance'),
@@ -2191,10 +2667,40 @@ class _ProtectionScreenState extends State<ProtectionScreen> {
     );
   }
 
-  // ---- Additional info: effectiveness comparison, fetched from backend ----
-  Widget _effectivenessCard() {
+  Widget _buildEffectivenessComparison() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Comparing effectiveness',
+          style: AppTextStyles.sans(size: 13, weight: FontWeight.w600),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          'Chance of pregnancy in the first year of typical use — lower is more effective.',
+          style: AppTextStyles.sans(
+            size: 11,
+            color: AppColors.textSecondary,
+          ).copyWith(height: 1.4),
+        ),
+        const SizedBox(height: 14),
+        for (int i = 0; i < _effectivenessTiers.length; i++)
+          _effTierCard(i, _effectivenessTiers[i]),
+        Text(
+          'Numbers indicate % of women experiencing an unintended pregnancy during the first year of typical use of the method. Source: Trussell J., 2011.',
+          style: AppTextStyles.sans(
+            size: 10,
+            color: AppColors.textSecondary,
+          ).copyWith(fontStyle: FontStyle.italic, height: 1.4),
+        ),
+      ],
+    );
+  }
+
+  Widget _effTierCard(int index, EffectivenessTier tier) {
+    final expanded = _expandedEffTiers.contains(index);
     return Container(
-      padding: const EdgeInsets.all(16),
+      margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(14),
@@ -2203,94 +2709,100 @@ class _ProtectionScreenState extends State<ProtectionScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Comparing effectiveness',
-            style: AppTextStyles.sans(size: 13, weight: FontWeight.w600),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            'Chance of pregnancy in a year of typical use — lower is more effective.',
-            style: AppTextStyles.sans(
-              size: 11,
-              color: AppColors.textSecondary,
-            ).copyWith(height: 1.4),
-          ),
-          const SizedBox(height: 14),
-          FutureBuilder<List<EffectivenessEntry>>(
-            future: _effectivenessFuture,
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: CircularProgressIndicator(color: AppColors.primary),
+          InkWell(
+            onTap: () {
+              setState(() {
+                if (expanded) {
+                  _expandedEffTiers.remove(index);
+                } else {
+                  _expandedEffTiers.add(index);
+                }
+              });
+            },
+            child: Padding(
+              padding: const EdgeInsets.all(14),
+              child: Row(
+                children: [
+                  Container(
+                    width: 8,
+                    height: 32,
+                    decoration: BoxDecoration(
+                      color: tier.color,
+                      borderRadius: BorderRadius.circular(4),
+                    ),
                   ),
-                );
-              }
-              if (snapshot.hasError) {
-                return Text(
-                  'Could not load effectiveness data: ${snapshot.error}',
-                  style: AppTextStyles.sans(
-                    size: 12,
-                    color: AppColors.periodRed,
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          tier.title,
+                          style: AppTextStyles.sans(size: 13, weight: FontWeight.w700),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          '${tier.methods.length} methods',
+                          style: AppTextStyles.sans(size: 11, color: AppColors.textSecondary),
+                        ),
+                      ],
+                    ),
                   ),
-                );
-              }
-
-              final entries = snapshot.data ?? [];
-              return Column(
-                children: entries
-                    .map(
-                      (e) => Padding(
-                        padding: const EdgeInsets.only(bottom: 14),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                  Icon(
+                    expanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
+                    color: AppColors.textSecondary,
+                  ),
+                ],
+              ),
+            ),
+          ),
+          if (expanded)
+            Padding(
+              padding: const EdgeInsets.only(left: 14, right: 14, bottom: 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: tier.methods.map((m) {
+                      return Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: tier.color.withOpacity(0.12),
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: tier.color.withOpacity(0.35)),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
                           children: [
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: Text(
-                                    e.method,
-                                    style: AppTextStyles.sans(
-                                      size: 12,
-                                      weight: FontWeight.w600,
-                                    ),
-                                  ),
-                                ),
-                                Text(
-                                  '${e.typicalUseFailurePercent}%',
-                                  style: AppTextStyles.sans(
-                                    size: 13,
-                                    weight: FontWeight.w700,
-                                    color: AppColors.primary,
-                                  ),
-                                ),
-                              ],
+                            Text(
+                              m.name,
+                              style: AppTextStyles.sans(size: 11.5, weight: FontWeight.w600, color: AppColors.textPrimary),
                             ),
-                            if (e.note != null) ...[
-                              const SizedBox(height: 2),
-                              Text(
-                                e.note!,
-                                style: AppTextStyles.sans(
-                                  size: 11,
-                                  color: AppColors.textSecondary,
-                                ).copyWith(height: 1.4),
-                              ),
-                            ],
+                            const SizedBox(width: 6),
+                            Text(
+                              m.percent,
+                              style: AppTextStyles.sans(size: 11.5, weight: FontWeight.w700, color: tier.color),
+                            ),
                           ],
                         ),
-                      ),
-                    )
-                    .toList(),
-              );
-            },
-          ),
+                      );
+                    }).toList(),
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    tier.note,
+                    style: AppTextStyles.sans(size: 11.5, color: AppColors.textSecondary).copyWith(height: 1.5),
+                  ),
+                ],
+              ),
+            ),
         ],
       ),
     );
   }
 
-  // ---- Sub-view 4: How to use the tool -------------------------------
   Widget _buildHowToUse() {
     final steps = [
       (
@@ -2319,69 +2831,102 @@ class _ProtectionScreenState extends State<ProtectionScreen> {
         'This tool is educational — a healthcare provider can give guidance specific to you.',
       ),
     ];
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.cardBorder),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: steps
-            .map(
-              (s) => Padding(
-                padding: const EdgeInsets.only(bottom: 16),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      width: 22,
-                      height: 22,
-                      decoration: BoxDecoration(
-                        color: AppColors.periodRed.withOpacity(0.15),
-                        shape: BoxShape.circle,
-                      ),
-                      child: Center(
-                        child: Text(
-                          s.$1,
-                          style: AppTextStyles.sans(
-                            size: 11,
-                            weight: FontWeight.w700,
-                            color: AppColors.periodRed,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: AppColors.surface,
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: AppColors.cardBorder),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'The tool provides guidance on the safety of contraceptive methods for clients with specific medical conditions or characteristics, and allows searching by client preferences.',
+                style: AppTextStyles.sans(size: 13, color: AppColors.textSecondary).copyWith(height: 1.6),
+              ),
+              const SizedBox(height: 14),
+              Text(
+                'Begin by selecting the medical condition(s) of interest and client preferences. The app will then indicate the safety rating of each method, and will filter results by client preferences. The numbers 1, 2, 3, 4 correspond to recommendations, telling you whether the individual who has this known condition or characteristic is eligible to initiate this contraceptive method. If clinical judgement is limited, numbers 1 and 2 mean the method can be used (depicted in yellow), and 3 and 4 indicate the method should not be used (depicted in red). Recommendations that have caveats have additional explanations.',
+                style: AppTextStyles.sans(size: 13, color: AppColors.textSecondary).copyWith(height: 1.6),
+              ),
+              const SizedBox(height: 14),
+              Text(
+                'Once contraceptive method eligibility has been established, the Additional Info screen may be reviewed regarding other considerations. A chart of contraceptive effectiveness, comparing typical use for a diverse range of methods (including some not explicitly covered in this app) is included in this menu.',
+                style: AppTextStyles.sans(size: 13, color: AppColors.textSecondary).copyWith(height: 1.6),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 16),
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: AppColors.surface,
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: AppColors.cardBorder),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: steps
+                .map(
+                  (s) => Padding(
+                    padding: const EdgeInsets.only(bottom: 16),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          width: 22,
+                          height: 22,
+                          decoration: BoxDecoration(
+                            color: AppColors.periodRed.withOpacity(0.15),
+                            shape: BoxShape.circle,
                           ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            s.$2,
-                            style: AppTextStyles.sans(
-                              size: 13,
-                              weight: FontWeight.w600,
+                          child: Center(
+                            child: Text(
+                              s.$1,
+                              style: AppTextStyles.sans(
+                                size: 11,
+                                weight: FontWeight.w700,
+                                color: AppColors.periodRed,
+                              ),
                             ),
                           ),
-                          const SizedBox(height: 3),
-                          Text(
-                            s.$3,
-                            style: AppTextStyles.sans(
-                              size: 12,
-                              color: AppColors.textSecondary,
-                            ).copyWith(height: 1.4),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                s.$2,
+                                style: AppTextStyles.sans(
+                                  size: 13,
+                                  weight: FontWeight.w600,
+                                ),
+                              ),
+                              const SizedBox(height: 3),
+                              Text(
+                                s.$3,
+                                style: AppTextStyles.sans(
+                                  size: 12,
+                                  color: AppColors.textSecondary,
+                                ).copyWith(height: 1.4),
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-              ),
-            )
-            .toList(),
-      ),
+                  ),
+                )
+                .toList(),
+          ),
+        ),
+      ],
     );
   }
 
@@ -2421,10 +2966,6 @@ class _ProtectionScreenState extends State<ProtectionScreen> {
   }
 }
 
-// Always-expanded method card: emoji badge, title + effectiveness,
-// full description, and colored tag chips at the bottom. Used in the
-// Contraception tab, where showing full detail up front (rather than
-// list -> tap -> detail) fits the browsing experience.
 class MethodCard extends StatelessWidget {
   final String emoji;
   final Color badgeColor;
