@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../theme/app_theme.dart';
 import '../providers/cycle_provider.dart';
 import '../widgets/month_calendar.dart';
+import 'health_diary_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -39,7 +40,7 @@ class HomeScreen extends StatelessWidget {
           children: [
             _buildGreeting(cycle),
             const SizedBox(height: 12),
-            _buildHeader(),
+            _buildHeader(context),
             const SizedBox(height: 28),
             _buildCycleDial(cycle),
             const SizedBox(height: 24),
@@ -86,7 +87,7 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -112,9 +113,30 @@ class HomeScreen extends StatelessWidget {
             ],
           ),
         ),
-        Text(
-          _formattedDate(),
-          style: AppTextStyles.sans(size: 11, color: AppColors.textSecondary),
+        Row(
+          children: [
+            Text(
+              _formattedDate(),
+              style: AppTextStyles.sans(
+                size: 11,
+                color: AppColors.textSecondary,
+              ),
+            ),
+            const SizedBox(width: 10),
+            GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const HealthDiaryScreen()),
+                );
+              },
+              child: Icon(
+                Icons.menu_book_outlined,
+                size: 20,
+                color: AppColors.primary,
+              ),
+            ),
+          ],
         ),
       ],
     );

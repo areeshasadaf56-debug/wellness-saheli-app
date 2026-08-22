@@ -1,6 +1,10 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 import '../services/eligibility_api_service.dart';
+import '../services/health_profile_service.dart';
+import '../models/health_profile.dart';
+import '../widgets/wellness_check_in_dialog.dart';
 
 Widget emojiText(String emoji, {double size = 14}) {
   return Text(
@@ -477,7 +481,11 @@ class EcMethod {
   final String abbreviation;
   final String fullName;
   final List<EcConditionRow>? rows;
-  const EcMethod({required this.abbreviation, required this.fullName, this.rows});
+  const EcMethod({
+    required this.abbreviation,
+    required this.fullName,
+    this.rows,
+  });
 }
 
 const List<EcMethod> _ecMethods = [
@@ -557,9 +565,7 @@ const List<ArtClass> _artClasses = [
     ArtDrug('DRV/r', 'Ritonavir-boosted darunavir'),
     ArtDrug('RTV', 'Ritonavir'),
   ]),
-  ArtClass('Integrase Inhibitors', [
-    ArtDrug('RAL', 'Raltegravir'),
-  ]),
+  ArtClass('Integrase Inhibitors', [ArtDrug('RAL', 'Raltegravir')]),
 ];
 
 // ============================================================
@@ -624,10 +630,7 @@ const List<EffectivenessTier> _effectivenessTiers = [
   EffectivenessTier(
     title: 'Least effective',
     color: AppColors.periodRed,
-    methods: [
-      EffMethod('Withdrawal', '22%'),
-      EffMethod('Spermicides', '28%'),
-    ],
+    methods: [EffMethod('Withdrawal', '22%'), EffMethod('Spermicides', '28%')],
     note: 'Withdrawal, spermicides: Use correctly every time you have sex.',
   ),
 ];
@@ -645,6 +648,8 @@ class _ProtectionScreenState extends State<ProtectionScreen> {
   int _myPlanView = 0;
 
   int? _selectedMethodIndex;
+  bool _savingMethod = false;
+  String? _savedMethodName;
 
   int _additionalInfoView = 0;
   final Set<String> _expandedEcMethods = {};
@@ -778,15 +783,17 @@ class _ProtectionScreenState extends State<ProtectionScreen> {
   void initState() {
     super.initState();
     _conditionsFuture = _api.fetchConditions();
-    _conditionsFuture!.then((data) {
-      if (!mounted) return;
-      setState(() {
-        _apiConditionIds = data.map((c) => c.id).toSet();
-      });
-    }).catchError((_) {
-      // Leave _apiConditionIds empty; the FutureBuilder below already
-      // surfaces the fetch error to the user.
-    });
+    _conditionsFuture!
+        .then((data) {
+          if (!mounted) return;
+          setState(() {
+            _apiConditionIds = data.map((c) => c.id).toSet();
+          });
+        })
+        .catchError((_) {
+          // Leave _apiConditionIds empty; the FutureBuilder below already
+          // surfaces the fetch error to the user.
+        });
   }
 
   Future<void> _checkEligibility() async {
@@ -820,6 +827,8 @@ class _ProtectionScreenState extends State<ProtectionScreen> {
     try {
       final results = await _api.checkEligibility(validIds);
       setState(() => _eligibilityResults = results);
+      // Fire-and-forget: don't block showing results on the diary write.
+      unawaited(_logEligibilityResultsToDiary(results));
     } catch (e) {
       setState(() {
         _eligibilityError =
@@ -828,6 +837,97 @@ class _ProtectionScreenState extends State<ProtectionScreen> {
     } finally {
       setState(() => _checkingEligibility = false);
     }
+  }
+
+  Future<void> _logMethodToDiary(String methodName) async {
+    setState(() => _savingMethod = true);
+    try {
+      await HealthProfileService().updateProfile((p) {
+        final updatedHistory =
+            List<ContraceptionLogEntry>.from(
+              p.reproductiveHistory.contraceptionHistory,
+            )..add(
+              ContraceptionLogEntry(
+                date: DateTime.now(),
+                method: methodName,
+                note: 'Selected from Protection > Methods',
+              ),
+            );
+        return p.copyWith(
+          reproductiveHistory: p.reproductiveHistory.copyWith(
+            currentContraceptionMethod: methodName,
+            contraceptionHistory: updatedHistory,
+          ),
+        );
+      });
+      if (mounted) {
+        setState(() {
+          _savingMethod = false;
+          _savedMethodName = methodName;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('$methodName saved to your diary')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _savingMethod = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Could not save — please try again')),
+        );
+      }
+    }
+  }
+
+  /// Logs every method result from a completed eligibility check into the
+  /// diary. Reuses ContraceptionLogEntry (no backend/model changes needed)
+  /// with a note that distinguishes it from a manually-picked method, so
+  /// the diary timeline shows "checked eligibility for X — category N"
+  /// entries alongside PCOS checks and "I'm using this method" saves.
+  /// Runs silently in the background — a failed diary write should never
+  /// block the person from seeing their eligibility results.
+  Future<void> _logEligibilityResultsToDiary(List<MethodResult> results) async {
+    if (results.isEmpty) return;
+    try {
+      await HealthProfileService().updateProfile((p) {
+        final updatedHistory = List<ContraceptionLogEntry>.from(
+          p.reproductiveHistory.contraceptionHistory,
+        );
+        final now = DateTime.now();
+        for (final r in results) {
+          updatedHistory.add(
+            ContraceptionLogEntry(
+              date: now,
+              method: r.methodLabel,
+              note:
+                  'Eligibility check — ${_categoryShortLabel(r.category)} (category ${r.category})',
+            ),
+          );
+        }
+        return p.copyWith(
+          reproductiveHistory: p.reproductiveHistory.copyWith(
+            contraceptionHistory: updatedHistory,
+          ),
+        );
+      });
+    } catch (_) {
+      // Silent — eligibility results are already shown to the user;
+      // failing to log to the diary shouldn't surface as an error here.
+    }
+  }
+
+  /// Loads the current profile and opens the shared wellness check-in
+  /// dialog. Used to let someone log how they're feeling right after
+  /// seeing their eligibility results, the same way pcos_screen.dart does
+  /// after a PCOS result.
+  Future<void> _promptWellnessCheckIn() async {
+    final profile = await HealthProfileService().loadProfile();
+    if (!mounted) return;
+    await showWellnessCheckInDialog(
+      context,
+      current: profile,
+      onSaved: () {}, // nothing on this screen needs to refresh
+    );
   }
 
   Color _categoryColor(int category) {
@@ -1444,6 +1544,31 @@ class _ProtectionScreenState extends State<ProtectionScreen> {
             ),
             const SizedBox(height: 12),
             ..._eligibilityResults!.map(_resultCard),
+            const SizedBox(height: 8),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                onPressed: _promptWellnessCheckIn,
+                icon: const Icon(Icons.favorite_outline, size: 16),
+                label: Text(
+                  'How are you feeling about these results?',
+                  style: AppTextStyles.sans(
+                    size: 12.5,
+                    weight: FontWeight.w600,
+                  ),
+                ),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: AppColors.moodYellow,
+                  side: BorderSide(
+                    color: AppColors.moodYellow.withOpacity(0.6),
+                  ),
+                  padding: const EdgeInsets.symmetric(vertical: 11),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+              ),
+            ),
           ],
         ],
       ],
@@ -2188,6 +2313,8 @@ class _ProtectionScreenState extends State<ProtectionScreen> {
   Widget _buildMethodDetail(Map<String, dynamic> m) {
     final badgeColor = m['badgeColor'] as Color;
     final tags = m['tags'] as List<Map<String, dynamic>>;
+    final methodName = m['name'] as String;
+    final isSaved = _savedMethodName == methodName;
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
@@ -2257,6 +2384,44 @@ class _ProtectionScreenState extends State<ProtectionScreen> {
                 ),
               );
             }).toList(),
+          ),
+          const SizedBox(height: 18),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              onPressed: _savingMethod
+                  ? null
+                  : () => _logMethodToDiary(methodName),
+              icon: _savingMethod
+                  ? const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
+                    )
+                  : const Icon(Icons.check_circle_outline, size: 18),
+              label: Text(
+                isSaved ? 'Saved to My Diary' : 'I\'m using this method',
+                style: AppTextStyles.sans(
+                  size: 13,
+                  weight: FontWeight.w600,
+                  color: Colors.white,
+                ),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: isSaved
+                    ? AppColors.ovulationTeal
+                    : AppColors.primary,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 13),
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            ),
           ),
         ],
       ),
@@ -2330,7 +2495,12 @@ class _ProtectionScreenState extends State<ProtectionScreen> {
       onTap: onTap,
       child: Container(
         margin: const EdgeInsets.only(bottom: 16),
-        padding: const EdgeInsets.only(left: 14, top: 14, right: 14, bottom: 16),
+        padding: const EdgeInsets.only(
+          left: 14,
+          top: 14,
+          right: 14,
+          bottom: 16,
+        ),
         decoration: BoxDecoration(
           color: AppColors.surface,
           borderRadius: BorderRadius.circular(12),
@@ -2346,11 +2516,17 @@ class _ProtectionScreenState extends State<ProtectionScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(title, style: AppTextStyles.sans(size: 15, weight: FontWeight.w700)),
+            Text(
+              title,
+              style: AppTextStyles.sans(size: 15, weight: FontWeight.w700),
+            ),
             const SizedBox(height: 8),
             Text(
               description,
-              style: AppTextStyles.sans(size: 12.5, color: AppColors.textSecondary).copyWith(height: 1.5),
+              style: AppTextStyles.sans(
+                size: 12.5,
+                color: AppColors.textSecondary,
+              ).copyWith(height: 1.5),
             ),
           ],
         ),
@@ -2371,7 +2547,10 @@ class _ProtectionScreenState extends State<ProtectionScreen> {
         const SizedBox(height: 10),
         Text(
           '*Emergency contraceptive pills may be less effective among women with BMI ≥ 30 kg/m2 than among women with BMI < 25 kg/m2. Despite this, there are no safety concerns.',
-          style: AppTextStyles.sans(size: 12, color: AppColors.textSecondary).copyWith(height: 1.5),
+          style: AppTextStyles.sans(
+            size: 12,
+            color: AppColors.textSecondary,
+          ).copyWith(height: 1.5),
         ),
       ],
     );
@@ -2407,7 +2586,12 @@ class _ProtectionScreenState extends State<ProtectionScreen> {
               });
             },
             child: Padding(
-              padding: const EdgeInsets.only(left: 14, top: 14, right: 14, bottom: 16),
+              padding: const EdgeInsets.only(
+                left: 14,
+                top: 14,
+                right: 14,
+                bottom: 16,
+              ),
               child: Row(
                 children: [
                   Expanded(
@@ -2416,18 +2600,27 @@ class _ProtectionScreenState extends State<ProtectionScreen> {
                       children: [
                         Text(
                           method.abbreviation,
-                          style: AppTextStyles.sans(size: 20, weight: FontWeight.w700, color: AppColors.primary),
+                          style: AppTextStyles.sans(
+                            size: 20,
+                            weight: FontWeight.w700,
+                            color: AppColors.primary,
+                          ),
                         ),
                         const SizedBox(height: 4),
                         Text(
                           method.fullName,
-                          style: AppTextStyles.sans(size: 13, color: AppColors.textSecondary),
+                          style: AppTextStyles.sans(
+                            size: 13,
+                            color: AppColors.textSecondary,
+                          ),
                         ),
                       ],
                     ),
                   ),
                   Icon(
-                    expanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
+                    expanded
+                        ? Icons.keyboard_arrow_up
+                        : Icons.keyboard_arrow_down,
                     color: AppColors.textSecondary,
                   ),
                 ],
@@ -2442,15 +2635,17 @@ class _ProtectionScreenState extends State<ProtectionScreen> {
                       padding: const EdgeInsets.only(bottom: 12),
                       child: Text(
                         'Full guidance for ${method.abbreviation} hasn\'t been added yet.',
-                        style: AppTextStyles.sans(size: 12, color: AppColors.textSecondary).copyWith(
-                          fontStyle: FontStyle.italic,
-                        ),
+                        style: AppTextStyles.sans(
+                          size: 12,
+                          color: AppColors.textSecondary,
+                        ).copyWith(fontStyle: FontStyle.italic),
                       ),
                     )
                   : Column(
                       children: [
                         for (int i = 0; i < method.rows!.length; i++) ...[
-                          if (i > 0) Divider(height: 1, color: AppColors.cardBorder),
+                          if (i > 0)
+                            Divider(height: 1, color: AppColors.cardBorder),
                           _ecConditionRow(method.rows![i]),
                         ],
                       ],
@@ -2470,7 +2665,10 @@ class _ProtectionScreenState extends State<ProtectionScreen> {
           Expanded(
             child: Text(
               row.label,
-              style: AppTextStyles.sans(size: 12.5, color: AppColors.textPrimary).copyWith(height: 1.4),
+              style: AppTextStyles.sans(
+                size: 12.5,
+                color: AppColors.textPrimary,
+              ).copyWith(height: 1.4),
             ),
           ),
           const SizedBox(width: 10),
@@ -2478,7 +2676,11 @@ class _ProtectionScreenState extends State<ProtectionScreen> {
           const SizedBox(width: 10),
           Text(
             row.value,
-            style: AppTextStyles.sans(size: 13, weight: FontWeight.w600, color: AppColors.textPrimary),
+            style: AppTextStyles.sans(
+              size: 13,
+              weight: FontWeight.w600,
+              color: AppColors.textPrimary,
+            ),
           ),
         ],
       ),
@@ -2536,7 +2738,9 @@ class _ProtectionScreenState extends State<ProtectionScreen> {
                     ),
                   ),
                   Icon(
-                    expanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
+                    expanded
+                        ? Icons.keyboard_arrow_up
+                        : Icons.keyboard_arrow_down,
                     color: AppColors.textSecondary,
                   ),
                 ],
@@ -2549,7 +2753,10 @@ class _ProtectionScreenState extends State<ProtectionScreen> {
                 for (int i = 0; i < cls.drugs.length; i++) ...[
                   if (i > 0) Divider(height: 1, color: AppColors.cardBorder),
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 12,
+                    ),
                     child: Row(
                       children: [
                         SizedBox(
@@ -2738,18 +2945,26 @@ class _ProtectionScreenState extends State<ProtectionScreen> {
                       children: [
                         Text(
                           tier.title,
-                          style: AppTextStyles.sans(size: 13, weight: FontWeight.w700),
+                          style: AppTextStyles.sans(
+                            size: 13,
+                            weight: FontWeight.w700,
+                          ),
                         ),
                         const SizedBox(height: 2),
                         Text(
                           '${tier.methods.length} methods',
-                          style: AppTextStyles.sans(size: 11, color: AppColors.textSecondary),
+                          style: AppTextStyles.sans(
+                            size: 11,
+                            color: AppColors.textSecondary,
+                          ),
                         ),
                       ],
                     ),
                   ),
                   Icon(
-                    expanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
+                    expanded
+                        ? Icons.keyboard_arrow_up
+                        : Icons.keyboard_arrow_down,
                     color: AppColors.textSecondary,
                   ),
                 ],
@@ -2767,23 +2982,36 @@ class _ProtectionScreenState extends State<ProtectionScreen> {
                     runSpacing: 8,
                     children: tier.methods.map((m) {
                       return Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 6,
+                        ),
                         decoration: BoxDecoration(
                           color: tier.color.withOpacity(0.12),
                           borderRadius: BorderRadius.circular(10),
-                          border: Border.all(color: tier.color.withOpacity(0.35)),
+                          border: Border.all(
+                            color: tier.color.withOpacity(0.35),
+                          ),
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Text(
                               m.name,
-                              style: AppTextStyles.sans(size: 11.5, weight: FontWeight.w600, color: AppColors.textPrimary),
+                              style: AppTextStyles.sans(
+                                size: 11.5,
+                                weight: FontWeight.w600,
+                                color: AppColors.textPrimary,
+                              ),
                             ),
                             const SizedBox(width: 6),
                             Text(
                               m.percent,
-                              style: AppTextStyles.sans(size: 11.5, weight: FontWeight.w700, color: tier.color),
+                              style: AppTextStyles.sans(
+                                size: 11.5,
+                                weight: FontWeight.w700,
+                                color: tier.color,
+                              ),
                             ),
                           ],
                         ),
@@ -2793,7 +3021,10 @@ class _ProtectionScreenState extends State<ProtectionScreen> {
                   const SizedBox(height: 10),
                   Text(
                     tier.note,
-                    style: AppTextStyles.sans(size: 11.5, color: AppColors.textSecondary).copyWith(height: 1.5),
+                    style: AppTextStyles.sans(
+                      size: 11.5,
+                      color: AppColors.textSecondary,
+                    ).copyWith(height: 1.5),
                   ),
                 ],
               ),
@@ -2846,17 +3077,26 @@ class _ProtectionScreenState extends State<ProtectionScreen> {
             children: [
               Text(
                 'The tool provides guidance on the safety of contraceptive methods for clients with specific medical conditions or characteristics, and allows searching by client preferences.',
-                style: AppTextStyles.sans(size: 13, color: AppColors.textSecondary).copyWith(height: 1.6),
+                style: AppTextStyles.sans(
+                  size: 13,
+                  color: AppColors.textSecondary,
+                ).copyWith(height: 1.6),
               ),
               const SizedBox(height: 14),
               Text(
                 'Begin by selecting the medical condition(s) of interest and client preferences. The app will then indicate the safety rating of each method, and will filter results by client preferences. The numbers 1, 2, 3, 4 correspond to recommendations, telling you whether the individual who has this known condition or characteristic is eligible to initiate this contraceptive method. If clinical judgement is limited, numbers 1 and 2 mean the method can be used (depicted in yellow), and 3 and 4 indicate the method should not be used (depicted in red). Recommendations that have caveats have additional explanations.',
-                style: AppTextStyles.sans(size: 13, color: AppColors.textSecondary).copyWith(height: 1.6),
+                style: AppTextStyles.sans(
+                  size: 13,
+                  color: AppColors.textSecondary,
+                ).copyWith(height: 1.6),
               ),
               const SizedBox(height: 14),
               Text(
                 'Once contraceptive method eligibility has been established, the Additional Info screen may be reviewed regarding other considerations. A chart of contraceptive effectiveness, comparing typical use for a diverse range of methods (including some not explicitly covered in this app) is included in this menu.',
-                style: AppTextStyles.sans(size: 13, color: AppColors.textSecondary).copyWith(height: 1.6),
+                style: AppTextStyles.sans(
+                  size: 13,
+                  color: AppColors.textSecondary,
+                ).copyWith(height: 1.6),
               ),
             ],
           ),

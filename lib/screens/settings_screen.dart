@@ -8,6 +8,7 @@ import 'about_screen.dart';
 import 'terms_screen.dart';
 import 'data_privacy_screen.dart';
 import 'sign_in_screen.dart';
+import 'health_diary_screen.dart'; // ← NEW IMPORT
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -55,6 +56,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
               _profileCard(),
 
               const SizedBox(height: 20),
+              _sectionHeading('HEALTH'),
+              const SizedBox(height: 10),
+              _settingsRow(context, '📖', 'My Health Diary', 'View', () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const HealthDiaryScreen(),
+                  ),
+                );
+              }),
+
+              const SizedBox(height: 20),
               _sectionHeading('CYCLE SETTINGS'),
               const SizedBox(height: 10),
               _settingsRow(context, '🩸', 'Cycle Data', 'Edit', () {
@@ -66,46 +79,30 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 );
               }),
               _reminderToggleRow(context, cycle),
-              _settingsRow(
-                context,
-                '📊',
-                'Data & Privacy',
-                'Manage',
-                () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const DataPrivacyScreen()),
-                  );
-                },
-              ),
+              _settingsRow(context, '📊', 'Data & Privacy', 'Manage', () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const DataPrivacyScreen(),
+                  ),
+                );
+              }),
 
               const SizedBox(height: 20),
               _sectionHeading('ABOUT'),
               const SizedBox(height: 10),
-              _settingsRow(
-                context,
-                'ℹ️',
-                'About Wellness Saheli',
-                '',
-                () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const AboutScreen()),
-                  );
-                },
-              ),
-              _settingsRow(
-                context,
-                '📋',
-                'Terms & Privacy',
-                '',
-                () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const TermsScreen()),
-                  );
-                },
-              ),
+              _settingsRow(context, 'ℹ️', 'About Wellness Saheli', '', () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const AboutScreen()),
+                );
+              }),
+              _settingsRow(context, '📋', 'Terms & Privacy', '', () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const TermsScreen()),
+                );
+              }),
               _settingsRow(
                 context,
                 '⭐',
@@ -167,7 +164,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 children: [
                   Text(
                     _userName,
-                    style: AppTextStyles.sans(size: 15, weight: FontWeight.w600),
+                    style: AppTextStyles.sans(
+                      size: 15,
+                      weight: FontWeight.w600,
+                    ),
                   ),
                   const SizedBox(height: 4),
                   Text(
@@ -192,7 +192,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   void _showEditNameDialog(BuildContext context) {
-    final controller = TextEditingController(text: _userName == 'Your Name' ? '' : _userName);
+    final controller = TextEditingController(
+      text: _userName == 'Your Name' ? '' : _userName,
+    );
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
@@ -208,7 +210,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
           cursorColor: AppColors.primary,
           decoration: InputDecoration(
             hintText: 'Enter your name',
-            hintStyle: AppTextStyles.sans(size: 14, color: AppColors.textSecondary),
+            hintStyle: AppTextStyles.sans(
+              size: 14,
+              color: AppColors.textSecondary,
+            ),
             enabledBorder: UnderlineInputBorder(
               borderSide: BorderSide(color: AppColors.cardBorder),
             ),
@@ -232,7 +237,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
             },
             child: Text(
               'Save',
-              style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.w600),
+              style: TextStyle(
+                color: AppColors.primary,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
         ],
@@ -354,7 +362,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   Navigator.pop(dialogContext);
                   Navigator.pushAndRemoveUntil(
                     context,
-                    MaterialPageRoute(builder: (context) => const SignInScreen()),
+                    MaterialPageRoute(
+                      builder: (context) => const SignInScreen(),
+                    ),
                     (route) => false,
                   );
                 },
