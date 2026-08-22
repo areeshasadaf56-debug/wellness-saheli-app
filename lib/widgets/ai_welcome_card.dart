@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 
 /// AI Welcome Card
-/// 
+///
 /// A beautiful, premium-looking AI companion introduction card that appears
 /// at the top of the home dashboard. Designed to make users feel like they
 /// have a personal health companion available.
@@ -57,14 +57,14 @@ class AiWelcomeCard extends StatelessWidget {
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              AppColors.primary.withOpacity(0.85),
-              AppColors.accent.withOpacity(0.7),
+              AppColors.primary.withValues(alpha: 0.85),
+              AppColors.accent.withValues(alpha: 0.7),
             ],
           ),
           borderRadius: BorderRadius.circular(18),
           boxShadow: [
             BoxShadow(
-              color: AppColors.primary.withOpacity(0.2),
+              color: AppColors.primary.withValues(alpha: 0.2),
               blurRadius: 16,
               offset: const Offset(0, 8),
             ),
@@ -81,7 +81,7 @@ class AiWelcomeCard extends StatelessWidget {
                 height: 140,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: Colors.white.withOpacity(0.08),
+                  color: Colors.white.withValues(alpha: 0.08),
                 ),
               ),
             ),
@@ -93,7 +93,7 @@ class AiWelcomeCard extends StatelessWidget {
                 height: 120,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: Colors.white.withOpacity(0.06),
+                  color: Colors.white.withValues(alpha: 0.06),
                 ),
               ),
             ),
@@ -125,7 +125,7 @@ class AiWelcomeCard extends StatelessWidget {
                               style: AppTextStyles.sans(
                                 size: 12,
                                 weight: FontWeight.w500,
-                                color: Colors.white.withOpacity(0.85),
+                                color: Colors.white.withValues(alpha: 0.85),
                               ),
                             ),
                           ],
@@ -137,9 +137,9 @@ class AiWelcomeCard extends StatelessWidget {
                         height: 56,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: Colors.white.withOpacity(0.25),
+                          color: Colors.white.withValues(alpha: 0.25),
                           border: Border.all(
-                            color: Colors.white.withOpacity(0.4),
+                            color: Colors.white.withValues(alpha: 0.4),
                             width: 2,
                           ),
                         ),
@@ -158,10 +158,10 @@ class AiWelcomeCard extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.all(14),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.15),
+                      color: Colors.white.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
-                        color: Colors.white.withOpacity(0.25),
+                        color: Colors.white.withValues(alpha: 0.25),
                       ),
                     ),
                     child: Row(
@@ -169,7 +169,7 @@ class AiWelcomeCard extends StatelessWidget {
                         Icon(
                           Icons.chat_bubble_outline_rounded,
                           size: 18,
-                          color: Colors.white.withOpacity(0.9),
+                          color: Colors.white.withValues(alpha: 0.9),
                         ),
                         const SizedBox(width: 10),
                         Expanded(
@@ -178,7 +178,7 @@ class AiWelcomeCard extends StatelessWidget {
                             style: AppTextStyles.sans(
                               size: 14,
                               weight: FontWeight.w500,
-                              color: Colors.white.withOpacity(0.9),
+                              color: Colors.white.withValues(alpha: 0.9),
                             ),
                           ),
                         ),
@@ -219,7 +219,7 @@ class AiWelcomeCard extends StatelessWidget {
                         vertical: 8,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.12),
+                        color: Colors.white.withValues(alpha: 0.12),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Row(
@@ -228,7 +228,7 @@ class AiWelcomeCard extends StatelessWidget {
                           Icon(
                             _getPhaseIcon(currentPhase!),
                             size: 14,
-                            color: Colors.white.withOpacity(0.9),
+                            color: Colors.white.withValues(alpha: 0.9),
                           ),
                           const SizedBox(width: 6),
                           Text(
@@ -236,7 +236,7 @@ class AiWelcomeCard extends StatelessWidget {
                             style: AppTextStyles.sans(
                               size: 11,
                               weight: FontWeight.w500,
-                              color: Colors.white.withOpacity(0.85),
+                              color: Colors.white.withValues(alpha: 0.85),
                             ),
                           ),
                         ],
