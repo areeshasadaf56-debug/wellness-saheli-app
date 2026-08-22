@@ -4,6 +4,7 @@ import '../theme/app_theme.dart';
 import '../providers/cycle_provider.dart';
 import '../widgets/month_calendar.dart';
 import 'health_diary_screen.dart';
+import 'ai_checkin_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -120,6 +121,25 @@ class HomeScreen extends StatelessWidget {
               style: AppTextStyles.sans(
                 size: 11,
                 color: AppColors.textSecondary,
+              ),
+            ),
+            const SizedBox(width: 10),
+            // AI check-in entry point. Pushed the same way as the diary
+            // icon below -- this is a temporary way in until the AI
+            // check-in screen gets a proper spot in the app's main tab
+            // bar (that lives in a different file this screen doesn't
+            // have access to).
+            GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const AiCheckinScreen()),
+                );
+              },
+              child: Icon(
+                Icons.favorite_border,
+                size: 20,
+                color: AppColors.primary,
               ),
             ),
             const SizedBox(width: 10),
