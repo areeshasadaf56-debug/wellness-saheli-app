@@ -1,13 +1,58 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../theme/app_theme.dart';
 import '../providers/cycle_provider.dart';
 import '../widgets/month_calendar.dart';
 import 'health_diary_screen.dart';
-import 'ai_checkin_screen.dart';
 
-class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
+class HomeScreen extends StatefulWidget {
+  /// Called with a tab name ('checkin', 'pcos', 'protection', etc.) when
+  /// something on this screen should switch the shell's selected bottom
+  /// -nav tab. Wired from HomeShell:
+  ///   HomeScreen(onNavigateToTab: (tab) => _navigateToTab(tab))
+  final void Function(String tabName)? onNavigateToTab;
+
+  const HomeScreen({super.key, this.onNavigateToTab});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  static const _bannerDismissedKey = 'ai_checkin_banner_dismissed';
+
+  bool _showAiBanner = false;
+  bool _bannerStateLoaded = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadBannerState();
+  }
+
+  Future<void> _loadBannerState() async {
+    final prefs = await SharedPreferences.getInstance();
+    final dismissed = prefs.getBool(_bannerDismissedKey) ?? false;
+    if (!mounted) return;
+    setState(() {
+      _showAiBanner = !dismissed;
+      _bannerStateLoaded = true;
+    });
+  }
+
+  Future<void> _dismissAiBanner() async {
+    setState(() => _showAiBanner = false);
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_bannerDismissedKey, true);
+  }
+
+  /// Switches the shell to the Check-in tab (see home_shell.dart), rather
+  /// than pushing a separate screen instance -- this way there's only
+  /// ever one AiCheckinScreen, kept alive in the shell's IndexedStack.
+  void _openAiCheckin() {
+    widget.onNavigateToTab?.call('checkin');
+  }
 
   String _formattedDate() {
     const weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
@@ -42,6 +87,10 @@ class HomeScreen extends StatelessWidget {
             _buildGreeting(cycle),
             const SizedBox(height: 12),
             _buildHeader(context),
+            if (_bannerStateLoaded && _showAiBanner) ...[
+              const SizedBox(height: 18),
+              _buildAiCheckinBanner(context),
+            ],
             const SizedBox(height: 28),
             _buildCycleDial(cycle),
             const SizedBox(height: 24),
@@ -124,25 +173,6 @@ class HomeScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 10),
-            // AI check-in entry point. Pushed the same way as the diary
-            // icon below -- this is a temporary way in until the AI
-            // check-in screen gets a proper spot in the app's main tab
-            // bar (that lives in a different file this screen doesn't
-            // have access to).
-            GestureDetector(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const AiCheckinScreen()),
-                );
-              },
-              child: Icon(
-                Icons.favorite_border,
-                size: 20,
-                color: AppColors.primary,
-              ),
-            ),
-            const SizedBox(width: 10),
             GestureDetector(
               onTap: () {
                 Navigator.push(
@@ -159,6 +189,83 @@ class HomeScreen extends StatelessWidget {
           ],
         ),
       ],
+    );
+  }
+
+  /// Optional, dismissible entry point into the AI check-in -- per the
+  /// chosen onboarding approach, this is NOT a forced flow. It sits on
+  /// Home so it's easy to find, but a tap of the X hides it permanently
+  /// (persisted via SharedPreferences) for users who'd rather explore
+  /// the app on their own. Tapping the banner itself switches to the
+  /// Check-in tab rather than opening a separate screen.
+  Widget _buildAiCheckinBanner(BuildContext context) {
+    return GestureDetector(
+      onTap: _openAiCheckin,
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              AppColors.primary.withOpacity(0.12),
+              AppColors.accent.withOpacity(0.12),
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: AppColors.primary.withOpacity(0.3)),
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: AppColors.primary.withOpacity(0.18),
+                shape: BoxShape.circle,
+              ),
+              child: const Center(
+                child: Text('✨', style: TextStyle(fontSize: 18)),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Want a quick check-in?',
+                    style: AppTextStyles.sans(
+                      size: 13.5,
+                      weight: FontWeight.w700,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                  const SizedBox(height: 3),
+                  Text(
+                    "I'll ask a few questions and point you to what's "
+                    "most useful, based on how you're doing.",
+                    style: AppTextStyles.sans(
+                      size: 11.5,
+                      color: AppColors.textSecondary,
+                    ).copyWith(height: 1.4),
+                  ),
+                ],
+              ),
+            ),
+            GestureDetector(
+              onTap: _dismissAiBanner,
+              child: Icon(
+                Icons.close,
+                size: 18,
+                color: AppColors.textSecondary.withOpacity(0.6),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 

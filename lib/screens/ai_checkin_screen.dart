@@ -1,30 +1,48 @@
-/// ai_checkin_screen.dart
-///
-/// The "personal check-in" chat screen. Loads past conversation from the
-/// user's HealthProfile (so returning users pick up where they left off),
-/// sends new messages to the backend /chat endpoint, and:
-///   - appends both sides of the conversation to the diary
-///   - applies any structured profile updates the AI extracted
-///   - shows a "check this out" card when the AI suggests a tab
-///   - shows a crisis-resources banner if the AI flags a concern
-///
-/// This screen does NOT perform navigation itself -- pass an
-/// [onNavigateToTab] callback (e.g. from your bottom-nav / IndexedStack
-/// shell) so this widget stays decoupled from your specific navigation
-/// setup. If you don't pass one, the suggestion card still shows but
-/// tapping it just tells the user which tab to open manually.
-library;
-
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
-import '../models/health_profile.dart';
 import '../services/health_profile_service.dart';
-import '../services/ai_checkin_service.dart';
+import '../widgets/wellness_check_in_dialog.dart';
 
+class _Concern {
+  final String id;
+  final String label;
+  const _Concern(this.id, this.label);
+}
+
+/// Concerns that, when selected, point toward the PCOS tab.
+const List<_Concern> _pcosConcerns = [
+  _Concern('irregular_periods', 'Irregular or missing periods'),
+  _Concern('excess_hair_acne', 'Excess hair growth or acne'),
+  _Concern('weight_changes', 'Unexplained weight changes'),
+];
+
+/// Concerns that point toward the Protection tab.
+const List<_Concern> _protectionConcerns = [
+  _Concern('need_contraception', 'Thinking about contraception options'),
+  _Concern('unsure_eligibility', 'Not sure what\'s medically safe for me'),
+];
+
+/// Concerns that point toward a wellness check-in rather than either tab.
+const List<_Concern> _moodConcerns = [
+  _Concern('mood_stress', 'Feeling stressed or low lately'),
+];
+
+const _Concern _noneConcern = _Concern(
+  'none',
+  'Nothing in particular, just checking in',
+);
+
+enum _Suggestion { pcos, protection, mood, none }
+
+/// A short, tappable check-in that asks what's on someone's mind and
+/// points them to the most relevant part of the app -- the PCOS tab,
+/// the Protection tab, or a quick wellness log. This lives as its own
+/// tab in the bottom nav (see home_shell.dart) so it's always reachable,
+/// and the Home screen's dismissible banner also lands here.
 class AiCheckinScreen extends StatefulWidget {
-  /// Called with 'pcos' or 'protection' when the user taps a tab
-  /// suggestion card. Wire this to whatever switches your main
-  /// IndexedStack/bottom-nav tab.
+  /// Called with 'pcos' or 'protection' when the person taps the
+  /// suggestion's "Take me there" button. Wired from HomeShell so it can
+  /// switch the selected bottom-nav tab.
   final void Function(String tabName)? onNavigateToTab;
 
   const AiCheckinScreen({super.key, this.onNavigateToTab});
@@ -34,387 +52,314 @@ class AiCheckinScreen extends StatefulWidget {
 }
 
 class _AiCheckinScreenState extends State<AiCheckinScreen> {
-  final HealthProfileService _profileService = HealthProfileService();
-  final AiCheckinService _chatService = AiCheckinService();
-  final TextEditingController _inputController = TextEditingController();
-  final ScrollController _scrollController = ScrollController();
+  final Set<String> _selected = {};
+  bool _showResult = false;
 
-  // This field may be used in future to hold the loaded health profile.
-  // Keep it to avoid refactor churn; suppress unused-field analyzer warning.
-  // ignore: unused_field
-  HealthProfile? _profile;
-  final List<ConversationEntry> _messages = [];
-  bool _loading = true;
-  bool _sending = false;
-  bool _showCrisisBanner = false;
-  String? _pendingSuggestedTab;
-  String? _pendingSuggestedReason;
-  String? _errorText;
-
-  static const _openingGreeting =
-      "Hi — I'm here to check in on how you've been doing. There's no "
-      "right or wrong way to answer, and we can go at whatever pace "
-      "feels comfortable. To start, how have the last couple of weeks "
-      "been for you overall?";
-
-  @override
-  void initState() {
-    super.initState();
-    _loadInitialState();
+  String _formattedDate() {
+    const weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    const months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
+    final now = DateTime.now();
+    return '${weekdays[now.weekday - 1]}, ${months[now.month - 1]} ${now.day}';
   }
 
-  @override
-  void dispose() {
-    _inputController.dispose();
-    _scrollController.dispose();
-    super.dispose();
-  }
-
-  Future<void> _loadInitialState() async {
-    final profile = await _profileService.loadProfile();
-    if (!mounted) return;
+  void _toggle(String id) {
     setState(() {
-      _profile = profile;
-      // Every time this screen opens, start a fresh conversation rather
-      // than replaying every past check-in ever had. Past turns are
-      // still permanently saved to the diary via
-      // appendConversationEntry() on each send below -- they're just not
-      // redisplayed here. Replaying full history on every open would also
-      // keep growing the context sent to the AI on every single message.
-      _messages.add(
-        ConversationEntry(
-          timestamp: DateTime.now(),
-          role: 'assistant',
-          message: _openingGreeting,
-        ),
-      );
-      _loading = false;
-    });
-  }
-
-  Future<void> _sendMessage() async {
-    final text = _inputController.text.trim();
-    if (text.isEmpty || _sending) return;
-
-    _inputController.clear();
-    setState(() {
-      _sending = true;
-      _errorText = null;
-      _pendingSuggestedTab = null;
-      _pendingSuggestedReason = null;
-    });
-
-    // History sent to the backend is everything before this new message.
-    final historyForRequest = List<ConversationEntry>.from(_messages);
-
-    final userEntry = ConversationEntry(
-      timestamp: DateTime.now(),
-      role: 'user',
-      message: text,
-    );
-    setState(() => _messages.add(userEntry));
-    _scrollToBottom();
-
-    // Persist the user's turn to the diary immediately -- even if the AI
-    // call below fails, their message shouldn't be lost.
-    await _profileService.appendConversationEntry('user', text);
-
-    try {
-      final result = await _chatService.sendMessage(
-        message: text,
-        history: historyForRequest,
-      );
-
-      final assistantEntry = ConversationEntry(
-        timestamp: DateTime.now(),
-        role: 'assistant',
-        message: result.reply,
-      );
-
-      await _profileService.appendConversationEntry('assistant', result.reply);
-
-      HealthProfile? updatedProfile;
-      if (result.profileUpdates != null) {
-        updatedProfile = await _profileService.updateProfile(
-          (p) => _applyStructuredUpdates(p, result.profileUpdates!),
-        );
+      if (id == 'none') {
+        // "None of these" is exclusive -- picking it clears everything else.
+        _selected.clear();
+        _selected.add('none');
+      } else {
+        _selected.remove('none');
+        if (_selected.contains(id)) {
+          _selected.remove(id);
+        } else {
+          _selected.add(id);
+        }
       }
-
-      if (!mounted) return;
-      setState(() {
-        _messages.add(assistantEntry);
-        if (updatedProfile != null) _profile = updatedProfile;
-        _pendingSuggestedTab = result.suggestedTab;
-        _pendingSuggestedReason = result.suggestedTabReason;
-        if (result.crisisConcern) _showCrisisBanner = true;
-        _sending = false;
-      });
-      _scrollToBottom();
-    } catch (e) {
-      if (!mounted) return;
-      setState(() {
-        _sending = false;
-        _errorText =
-            "Couldn't reach the check-in assistant just now. Please try again in a moment.";
-      });
-    }
+    });
   }
 
-  /// Shallow-merges the AI's partial update maps (snake_case, matching
-  /// health_profile.dart's toJson shape) into the corresponding nested
-  /// object of [current]. A shallow merge is correct here because every
-  /// field inside lifestyle/mental_health/reproductive_history is a flat
-  /// scalar -- there's no nested structure within them that a shallow
-  /// merge would clobber.
-  HealthProfile _applyStructuredUpdates(
-    HealthProfile current,
-    Map<String, dynamic> updates,
-  ) {
-    var result = current;
+  _Suggestion _computeSuggestion() {
+    final pcosCount = _pcosConcerns
+        .where((c) => _selected.contains(c.id))
+        .length;
+    final protectionCount = _protectionConcerns
+        .where((c) => _selected.contains(c.id))
+        .length;
+    final moodCount = _moodConcerns
+        .where((c) => _selected.contains(c.id))
+        .length;
 
-    final lifestyleUpdate = updates['lifestyle'] as Map<String, dynamic>?;
-    if (lifestyleUpdate != null && lifestyleUpdate.isNotEmpty) {
-      final merged = {...result.lifestyle.toJson(), ...lifestyleUpdate};
-      result = result.copyWith(lifestyle: Lifestyle.fromJson(merged));
+    if (pcosCount == 0 && protectionCount == 0 && moodCount == 0) {
+      return _Suggestion.none;
     }
-
-    final mentalHealthUpdate =
-        updates['mental_health'] as Map<String, dynamic>?;
-    if (mentalHealthUpdate != null && mentalHealthUpdate.isNotEmpty) {
-      final merged = {
-        ...result.mentalHealth.toJson(),
-        ...mentalHealthUpdate,
-        'last_check_in': DateTime.now().toIso8601String(),
-      };
-      result = result.copyWith(
-        mentalHealth: MentalHealthFlags.fromJson(merged),
-      );
+    // Priority: PCOS and Protection are actionable health-guidance tools,
+    // so they outrank a mood-only signal when both are present.
+    if (pcosCount >= protectionCount &&
+        pcosCount >= moodCount &&
+        pcosCount > 0) {
+      return _Suggestion.pcos;
     }
-
-    final reproUpdate =
-        updates['reproductive_history'] as Map<String, dynamic>?;
-    if (reproUpdate != null && reproUpdate.isNotEmpty) {
-      final merged = {...result.reproductiveHistory.toJson(), ...reproUpdate};
-      result = result.copyWith(
-        reproductiveHistory: ReproductiveHistory.fromJson(merged),
-      );
+    if (protectionCount >= moodCount && protectionCount > 0) {
+      return _Suggestion.protection;
     }
-
-    return result;
+    return _Suggestion.mood;
   }
 
-  void _scrollToBottom() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!_scrollController.hasClients) return;
-      _scrollController.animateTo(
-        _scrollController.position.maxScrollExtent,
-        duration: const Duration(milliseconds: 250),
-        curve: Curves.easeOut,
-      );
+  Future<void> _promptWellnessCheckIn() async {
+    final profile = await HealthProfileService().loadProfile();
+    if (!mounted) return;
+    await showWellnessCheckInDialog(context, current: profile, onSaved: () {});
+  }
+
+  void _reset() {
+    setState(() {
+      _selected.clear();
+      _showResult = false;
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    // FIX: this screen is pushed directly via Navigator.push from
-    // HomeScreen, with no Scaffold/Material ancestor above it anywhere in
-    // the tree. The chat input below is a TextField, and TextField (like
-    // most Material widgets) requires a Material ancestor to render --
-    // without this Scaffold, Flutter throws "No Material widget found"
-    // the moment this screen builds. Every other pushed screen in this
-    // app (HealthDiaryScreen, etc.) wraps itself in its own Scaffold for
-    // exactly this reason; this screen was just missing it.
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      body: SafeArea(
-        child: _loading
-            ? const Center(child: CircularProgressIndicator())
-            : Column(
-                children: [
-                  _buildHeader(context),
-                  if (_showCrisisBanner) _crisisBanner(),
-                  Expanded(
-                    child: ListView.builder(
-                      controller: _scrollController,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 12,
-                      ),
-                      itemCount:
-                          _messages.length +
-                          (_pendingSuggestedTab != null ? 1 : 0),
-                      itemBuilder: (context, index) {
-                        if (index < _messages.length) {
-                          return _messageBubble(_messages[index]);
-                        }
-                        return _suggestionCard(
-                          _pendingSuggestedTab!,
-                          _pendingSuggestedReason,
-                        );
-                      },
-                    ),
-                  ),
-                  if (_errorText != null)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 4,
-                      ),
-                      child: Text(
-                        _errorText!,
-                        style: AppTextStyles.sans(
-                          size: 12,
-                          color: AppColors.periodRed,
-                        ),
-                      ),
-                    ),
-                  _inputBar(),
-                ],
-              ),
+    return SafeArea(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildHeader(),
+            const SizedBox(height: 20),
+            if (!_showResult)
+              ..._buildQuestionView()
+            else
+              ..._buildResultView(),
+            const SizedBox(height: 16),
+          ],
+        ),
       ),
     );
   }
 
-  /// Matches the back-button + title pattern used by HealthDiaryScreen,
-  /// since this screen (like that one) is pushed via Navigator.push and
-  /// has no bottom-nav/AppBar of its own to provide a way back.
-  Widget _buildHeader(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
-      child: Row(
-        children: [
-          GestureDetector(
-            onTap: () => Navigator.pop(context),
-            child: const Icon(
-              Icons.arrow_back_ios_new,
-              size: 18,
-              color: AppColors.textSecondary,
-            ),
-          ),
-          const SizedBox(width: 12),
-          RichText(
-            text: TextSpan(
-              children: [
-                TextSpan(
-                  text: 'Check ',
-                  style: AppTextStyles.serif(
-                    size: 20,
-                    weight: FontWeight.w600,
-                    color: AppColors.accent,
-                  ).copyWith(fontStyle: FontStyle.italic),
-                ),
-                TextSpan(
-                  text: 'In',
-                  style: AppTextStyles.serif(
-                    size: 20,
-                    weight: FontWeight.w600,
-                    color: AppColors.primary,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _crisisBanner() {
-    return Container(
-      width: double.infinity,
-      margin: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: AppColors.periodRed.withOpacity(0.08),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.periodRed.withOpacity(0.35)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
+  Widget _buildHeader() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        RichText(
+          text: TextSpan(
             children: [
-              Icon(Icons.favorite, size: 16, color: AppColors.periodRed),
-              const SizedBox(width: 8),
-              Text(
-                'You matter, and support is available',
-                style: AppTextStyles.sans(
-                  size: 12.5,
-                  weight: FontWeight.w700,
-                  color: AppColors.periodRed,
+              TextSpan(
+                text: 'Wellness ',
+                style: AppTextStyles.serif(
+                  size: 22,
+                  weight: FontWeight.w600,
+                  color: AppColors.accent,
+                ).copyWith(fontStyle: FontStyle.italic),
+              ),
+              TextSpan(
+                text: 'Saheli',
+                style: AppTextStyles.serif(
+                  size: 22,
+                  weight: FontWeight.w600,
+                  color: AppColors.primary,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 6),
-          Text(
-            'If things feel like too much right now, please consider reaching '
-            'out to a crisis helpline in your area, or to someone you trust. '
-            "You don't have to go through this alone.",
-            style: AppTextStyles.sans(
-              size: 12,
-              color: AppColors.textSecondary,
-            ).copyWith(height: 1.5),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            // TODO: replace with a locale-specific national helpline once
-            // you know your primary user base's country — a wrong number
-            // here is worse than a generic international directory.
-            'Befrienders Worldwide (befrienders.org) lists crisis lines by country.',
-            style: AppTextStyles.sans(
-              size: 11,
-              color: AppColors.periodRed,
-            ).copyWith(fontStyle: FontStyle.italic),
-          ),
+        ),
+        Text(
+          _formattedDate(),
+          style: AppTextStyles.sans(size: 11, color: AppColors.textSecondary),
+        ),
+      ],
+    );
+  }
+
+  List<Widget> _buildQuestionView() {
+    return [
+      _heroCard(),
+      const SizedBox(height: 24),
+      Text(
+        'WHAT\'S ON YOUR MIND?',
+        style: AppTextStyles.sans(
+          size: 11,
+          weight: FontWeight.w600,
+          color: AppColors.textSecondary,
+        ),
+      ),
+      const SizedBox(height: 4),
+      Text(
+        'Select anything that applies -- I\'ll point you to what\'s most useful.',
+        style: AppTextStyles.sans(size: 12, color: AppColors.textSecondary),
+      ),
+      const SizedBox(height: 14),
+      Wrap(
+        spacing: 8,
+        runSpacing: 8,
+        children: [
+          ..._pcosConcerns.map(_concernChip),
+          ..._protectionConcerns.map(_concernChip),
+          ..._moodConcerns.map(_concernChip),
+          _concernChip(_noneConcern),
         ],
       ),
-    );
+      const SizedBox(height: 24),
+      SizedBox(
+        width: double.infinity,
+        child: ElevatedButton(
+          onPressed: _selected.isEmpty
+              ? null
+              : () => setState(() => _showResult = true),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: AppColors.primary,
+            disabledBackgroundColor: AppColors.primary.withOpacity(0.4),
+            foregroundColor: Colors.white,
+            padding: const EdgeInsets.symmetric(vertical: 14),
+            elevation: 0,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+          child: Text(
+            'See what\'s useful for me',
+            style: AppTextStyles.sans(
+              size: 14,
+              weight: FontWeight.w600,
+              color: Colors.white,
+            ),
+          ),
+        ),
+      ),
+    ];
   }
 
-  Widget _messageBubble(ConversationEntry entry) {
-    final isUser = entry.role == 'user';
-    return Align(
-      alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
+  Widget _concernChip(_Concern c) {
+    final selected = _selected.contains(c.id);
+    return GestureDetector(
+      onTap: () => _toggle(c.id),
       child: Container(
-        constraints: BoxConstraints(
-          maxWidth: MediaQuery.of(context).size.width * 0.78,
-        ),
-        margin: const EdgeInsets.only(bottom: 10),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
         decoration: BoxDecoration(
-          color: isUser ? AppColors.primary : AppColors.surface,
-          borderRadius: BorderRadius.only(
-            topLeft: const Radius.circular(14),
-            topRight: const Radius.circular(14),
-            bottomLeft: Radius.circular(isUser ? 14 : 4),
-            bottomRight: Radius.circular(isUser ? 4 : 14),
+          color: selected
+              ? AppColors.primary.withOpacity(0.15)
+              : AppColors.surface,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: selected ? AppColors.primary : AppColors.cardBorder,
           ),
-          border: isUser ? null : Border.all(color: AppColors.cardBorder),
         ),
         child: Text(
-          entry.message,
+          c.label,
           style: AppTextStyles.sans(
-            size: 13.5,
-            color: isUser ? Colors.white : AppColors.textPrimary,
-          ).copyWith(height: 1.45),
+            size: 12.5,
+            weight: selected ? FontWeight.w600 : FontWeight.w400,
+            color: selected ? AppColors.primary : AppColors.textPrimary,
+          ),
         ),
       ),
     );
   }
 
-  Widget _suggestionCard(String tab, String? reason) {
-    final label = tab == 'pcos'
-        ? 'PCOS Detection'
-        : 'Contraception & Protection';
-    final color = tab == 'pcos' ? AppColors.periodRed : AppColors.ovulationTeal;
+  List<Widget> _buildResultView() {
+    final suggestion = _computeSuggestion();
+    final showMoodPrompt = _selected.any(
+      (id) => _moodConcerns.any((c) => c.id == id),
+    );
 
+    return [
+      _resultCard(suggestion),
+      if (showMoodPrompt) ...[const SizedBox(height: 14), _moodPromptCard()],
+      const SizedBox(height: 20),
+      GestureDetector(
+        onTap: _reset,
+        child: Row(
+          children: [
+            Icon(Icons.refresh, size: 16, color: AppColors.primary),
+            const SizedBox(width: 6),
+            Text(
+              'Start over',
+              style: AppTextStyles.sans(
+                size: 13,
+                weight: FontWeight.w600,
+                color: AppColors.primary,
+              ),
+            ),
+          ],
+        ),
+      ),
+    ];
+  }
+
+  Widget _resultCard(_Suggestion suggestion) {
+    switch (suggestion) {
+      case _Suggestion.pcos:
+        return _suggestionCard(
+          emoji: '🧪',
+          color: AppColors.ovulationTeal,
+          title: 'The PCOS tab looks relevant',
+          body:
+              'What you selected -- irregular periods, hair or skin changes, or weight changes -- overlaps with common PCOS symptoms. The PCOS tab has an information guide and a screening tool that gives an estimate based on your details.',
+          buttonLabel: 'Take me to PCOS',
+          onTap: () => widget.onNavigateToTab?.call('pcos'),
+        );
+      case _Suggestion.protection:
+        return _suggestionCard(
+          emoji: '🛡️',
+          color: AppColors.primary,
+          title: 'The Protection tab looks relevant',
+          body:
+              'You mentioned thinking about contraception or wanting to know what\'s medically safe for you. The Protection tab has an eligibility tool that checks your conditions against medical guidance, plus a full method comparison.',
+          buttonLabel: 'Take me to Protection',
+          onTap: () => widget.onNavigateToTab?.call('protection'),
+        );
+      case _Suggestion.mood:
+        return _suggestionCard(
+          emoji: '💛',
+          color: AppColors.moodYellow,
+          title: 'Sounds like today\'s been a lot',
+          body:
+              'Nothing you selected points to a specific screening tool right now -- but it might help to log how you\'re feeling. It\'s private, just for you, and takes a few seconds.',
+          buttonLabel: 'Log how I\'m feeling',
+          onTap: _promptWellnessCheckIn,
+        );
+      case _Suggestion.none:
+        return _suggestionCard(
+          emoji: '✨',
+          color: AppColors.accent,
+          title: 'Good to hear',
+          body:
+              'Nothing specific stood out, so there\'s no particular tab to point you to right now. Feel free to explore the Learn tab, or come back here anytime something changes.',
+          buttonLabel: null,
+          onTap: null,
+        );
+    }
+  }
+
+  Widget _suggestionCard({
+    required String emoji,
+    required Color color,
+    required String title,
+    required String body,
+    required String? buttonLabel,
+    required VoidCallback? onTap,
+  }) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 14),
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.08),
-        borderRadius: BorderRadius.circular(12),
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(color: color.withOpacity(0.4)),
       ),
       child: Column(
@@ -422,54 +367,93 @@ class _AiCheckinScreenState extends State<AiCheckinScreen> {
         children: [
           Row(
             children: [
-              Icon(Icons.explore_outlined, size: 16, color: color),
-              const SizedBox(width: 6),
-              Text(
-                'Worth a look: $label',
-                style: AppTextStyles.sans(
-                  size: 12.5,
-                  weight: FontWeight.w700,
-                  color: color,
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: color.withOpacity(0.18),
+                  shape: BoxShape.circle,
+                ),
+                child: Center(
+                  child: Text(emoji, style: const TextStyle(fontSize: 20)),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  title,
+                  style: AppTextStyles.sans(size: 15, weight: FontWeight.w700),
                 ),
               ),
             ],
           ),
-          if (reason != null) ...[
-            const SizedBox(height: 6),
-            Text(
-              reason,
+          const SizedBox(height: 12),
+          Text(
+            body,
+            style: AppTextStyles.sans(
+              size: 12.5,
+              color: AppColors.textSecondary,
+            ).copyWith(height: 1.5),
+          ),
+          if (buttonLabel != null) ...[
+            const SizedBox(height: 16),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: onTap,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: color,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 13),
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: Text(
+                  buttonLabel,
+                  style: AppTextStyles.sans(
+                    size: 13.5,
+                    weight: FontWeight.w600,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _moodPromptCard() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppColors.moodYellow.withOpacity(0.4)),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              'You also mentioned feeling stressed or low -- want to log that too?',
               style: AppTextStyles.sans(
-                size: 12,
+                size: 12.5,
                 color: AppColors.textSecondary,
               ).copyWith(height: 1.4),
             ),
-          ],
-          const SizedBox(height: 10),
-          SizedBox(
-            width: double.infinity,
-            child: OutlinedButton(
-              onPressed: () {
-                if (widget.onNavigateToTab != null) {
-                  widget.onNavigateToTab!(tab);
-                } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Open the $label tab to check this out'),
-                    ),
-                  );
-                }
-              },
-              style: OutlinedButton.styleFrom(
-                foregroundColor: color,
-                side: BorderSide(color: color.withOpacity(0.6)),
-                padding: const EdgeInsets.symmetric(vertical: 11),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-              ),
-              child: Text(
-                'Take me there',
-                style: AppTextStyles.sans(size: 12.5, weight: FontWeight.w600),
+          ),
+          const SizedBox(width: 10),
+          TextButton(
+            onPressed: _promptWellnessCheckIn,
+            child: Text(
+              'Log it',
+              style: AppTextStyles.sans(
+                size: 12.5,
+                weight: FontWeight.w700,
+                color: AppColors.moodYellow,
               ),
             ),
           ),
@@ -478,60 +462,38 @@ class _AiCheckinScreenState extends State<AiCheckinScreen> {
     );
   }
 
-  Widget _inputBar() {
+  Widget _heroCard() {
     return Container(
-      padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
+      padding: const EdgeInsets.symmetric(vertical: 28, horizontal: 20),
       decoration: BoxDecoration(
         color: AppColors.surface,
-        border: Border(top: BorderSide(color: AppColors.cardBorder)),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: AppColors.accent.withOpacity(0.3)),
       ),
-      child: Row(
+      child: Column(
         children: [
-          Expanded(
-            child: TextField(
-              controller: _inputController,
-              minLines: 1,
-              maxLines: 4,
-              textCapitalization: TextCapitalization.sentences,
-              onSubmitted: (_) => _sendMessage(),
-              decoration: InputDecoration(
-                hintText: 'Type your reply…',
-                hintStyle: AppTextStyles.sans(
-                  size: 13,
-                  color: AppColors.textSecondary,
-                ),
-                filled: true,
-                fillColor: AppColors.background,
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 14,
-                  vertical: 10,
-                ),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(20),
-                  borderSide: BorderSide(color: AppColors.cardBorder),
-                ),
-              ),
+          Container(
+            width: 56,
+            height: 56,
+            decoration: const BoxDecoration(
+              shape: BoxShape.circle,
+              color: Colors.white,
+            ),
+            child: const Center(
+              child: Text('✨', style: TextStyle(fontSize: 24)),
             ),
           ),
-          const SizedBox(width: 8),
-          _sending
-              ? const SizedBox(
-                  width: 40,
-                  height: 40,
-                  child: Padding(
-                    padding: EdgeInsets.all(8),
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  ),
-                )
-              : IconButton(
-                  onPressed: _sendMessage,
-                  icon: const Icon(Icons.send_rounded),
-                  color: AppColors.primary,
-                  style: IconButton.styleFrom(
-                    backgroundColor: AppColors.primary.withOpacity(0.1),
-                    shape: const CircleBorder(),
-                  ),
-                ),
+          const SizedBox(height: 14),
+          Text('Quick Check-in', style: AppTextStyles.serif(size: 19)),
+          const SizedBox(height: 8),
+          Text(
+            'A few taps to point you toward whatever\'s most useful right now -- no forms, no pressure.',
+            textAlign: TextAlign.center,
+            style: AppTextStyles.sans(
+              size: 12,
+              color: AppColors.textSecondary,
+            ).copyWith(height: 1.5),
+          ),
         ],
       ),
     );

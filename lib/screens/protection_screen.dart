@@ -1,10 +1,8 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 import '../services/eligibility_api_service.dart';
 import '../services/health_profile_service.dart';
 import '../models/health_profile.dart';
-import '../widgets/wellness_check_in_dialog.dart';
 
 Widget emojiText(String emoji, {double size = 14}) {
   return Text(
@@ -648,6 +646,11 @@ class _ProtectionScreenState extends State<ProtectionScreen> {
   int _myPlanView = 0;
 
   int? _selectedMethodIndex;
+
+  // ---- Diary logging state ----
+  // Tracks whether a save-to-diary call is in flight, and which method
+  // name was most recently saved, so the button on the method detail
+  // screen can show a spinner / confirmed state correctly.
   bool _savingMethod = false;
   String? _savedMethodName;
 
@@ -827,8 +830,6 @@ class _ProtectionScreenState extends State<ProtectionScreen> {
     try {
       final results = await _api.checkEligibility(validIds);
       setState(() => _eligibilityResults = results);
-      // Fire-and-forget: don't block showing results on the diary write.
-      unawaited(_logEligibilityResultsToDiary(results));
     } catch (e) {
       setState(() {
         _eligibilityError =
@@ -839,6 +840,11 @@ class _ProtectionScreenState extends State<ProtectionScreen> {
     }
   }
 
+  /// Saves the chosen contraception method into the user's Health Diary
+  /// (HealthProfile.reproductiveHistory) — both as the new "current
+  /// method" and as a new dated entry in the contraception history list,
+  /// so it shows up in the Health Diary's unified timeline alongside
+  /// PCOS checks and AI check-ins.
   Future<void> _logMethodToDiary(String methodName) async {
     setState(() => _savingMethod = true);
     try {
@@ -877,57 +883,6 @@ class _ProtectionScreenState extends State<ProtectionScreen> {
         );
       }
     }
-  }
-
-  /// Logs every method result from a completed eligibility check into the
-  /// diary. Reuses ContraceptionLogEntry (no backend/model changes needed)
-  /// with a note that distinguishes it from a manually-picked method, so
-  /// the diary timeline shows "checked eligibility for X — category N"
-  /// entries alongside PCOS checks and "I'm using this method" saves.
-  /// Runs silently in the background — a failed diary write should never
-  /// block the person from seeing their eligibility results.
-  Future<void> _logEligibilityResultsToDiary(List<MethodResult> results) async {
-    if (results.isEmpty) return;
-    try {
-      await HealthProfileService().updateProfile((p) {
-        final updatedHistory = List<ContraceptionLogEntry>.from(
-          p.reproductiveHistory.contraceptionHistory,
-        );
-        final now = DateTime.now();
-        for (final r in results) {
-          updatedHistory.add(
-            ContraceptionLogEntry(
-              date: now,
-              method: r.methodLabel,
-              note:
-                  'Eligibility check — ${_categoryShortLabel(r.category)} (category ${r.category})',
-            ),
-          );
-        }
-        return p.copyWith(
-          reproductiveHistory: p.reproductiveHistory.copyWith(
-            contraceptionHistory: updatedHistory,
-          ),
-        );
-      });
-    } catch (_) {
-      // Silent — eligibility results are already shown to the user;
-      // failing to log to the diary shouldn't surface as an error here.
-    }
-  }
-
-  /// Loads the current profile and opens the shared wellness check-in
-  /// dialog. Used to let someone log how they're feeling right after
-  /// seeing their eligibility results, the same way pcos_screen.dart does
-  /// after a PCOS result.
-  Future<void> _promptWellnessCheckIn() async {
-    final profile = await HealthProfileService().loadProfile();
-    if (!mounted) return;
-    await showWellnessCheckInDialog(
-      context,
-      current: profile,
-      onSaved: () {}, // nothing on this screen needs to refresh
-    );
   }
 
   Color _categoryColor(int category) {
@@ -1544,31 +1499,6 @@ class _ProtectionScreenState extends State<ProtectionScreen> {
             ),
             const SizedBox(height: 12),
             ..._eligibilityResults!.map(_resultCard),
-            const SizedBox(height: 8),
-            SizedBox(
-              width: double.infinity,
-              child: OutlinedButton.icon(
-                onPressed: _promptWellnessCheckIn,
-                icon: const Icon(Icons.favorite_outline, size: 16),
-                label: Text(
-                  'How are you feeling about these results?',
-                  style: AppTextStyles.sans(
-                    size: 12.5,
-                    weight: FontWeight.w600,
-                  ),
-                ),
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: AppColors.moodYellow,
-                  side: BorderSide(
-                    color: AppColors.moodYellow.withOpacity(0.6),
-                  ),
-                  padding: const EdgeInsets.symmetric(vertical: 11),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-              ),
-            ),
           ],
         ],
       ],
@@ -2314,7 +2244,8 @@ class _ProtectionScreenState extends State<ProtectionScreen> {
     final badgeColor = m['badgeColor'] as Color;
     final tags = m['tags'] as List<Map<String, dynamic>>;
     final methodName = m['name'] as String;
-    final isSaved = _savedMethodName == methodName;
+    final isSavedMethod = _savedMethodName == methodName;
+
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
@@ -2386,6 +2317,9 @@ class _ProtectionScreenState extends State<ProtectionScreen> {
             }).toList(),
           ),
           const SizedBox(height: 18),
+          // "Save to My Diary" — logs this method as the user's current
+          // contraception choice and appends a dated entry to their
+          // Health Diary timeline (see HealthProfileService).
           SizedBox(
             width: double.infinity,
             child: ElevatedButton.icon(
@@ -2401,9 +2335,14 @@ class _ProtectionScreenState extends State<ProtectionScreen> {
                         color: Colors.white,
                       ),
                     )
-                  : const Icon(Icons.check_circle_outline, size: 18),
+                  : Icon(
+                      isSavedMethod
+                          ? Icons.check_circle
+                          : Icons.check_circle_outline,
+                      size: 18,
+                    ),
               label: Text(
-                isSaved ? 'Saved to My Diary' : 'I\'m using this method',
+                isSavedMethod ? 'Saved to My Diary' : 'I\'m using this method',
                 style: AppTextStyles.sans(
                   size: 13,
                   weight: FontWeight.w600,
@@ -2411,7 +2350,7 @@ class _ProtectionScreenState extends State<ProtectionScreen> {
                 ),
               ),
               style: ElevatedButton.styleFrom(
-                backgroundColor: isSaved
+                backgroundColor: isSavedMethod
                     ? AppColors.ovulationTeal
                     : AppColors.primary,
                 foregroundColor: Colors.white,

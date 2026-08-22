@@ -3,10 +3,12 @@ import '../theme/app_theme.dart';
 import '../models/health_profile.dart';
 import '../services/health_profile_service.dart';
 import '../widgets/wellness_check_in_dialog.dart';
+import '../widgets/diary_entry_dialog.dart';
 
-/// Unified entry type so PCOS results, contraception changes, and AI
-/// conversation turns can all live in one sorted timeline.
-enum _EntryKind { pcos, contraception, conversation }
+/// Unified entry type so PCOS results, contraception changes, free-text
+/// diary entries, and AI conversation turns can all live in one sorted
+/// timeline.
+enum _EntryKind { pcos, contraception, diary, conversation }
 
 class _TimelineEntry {
   final DateTime date;
@@ -57,7 +59,7 @@ class _HealthDiaryScreenState extends State<HealthDiaryScreen> {
 
   /// True when a contraceptionHistory entry came from the Eligibility tool
   /// rather than a manual "I'm using this method" save on the Methods tab.
-  /// Both share the same ContraceptionLogEntry model — this is the only
+  /// Both share the same ContraceptionLogEntry model -- this is the only
   /// thing that tells them apart, set in protection_screen.dart.
   bool _isEligibilityCheck(ContraceptionLogEntry c) =>
       (c.note ?? '').startsWith('Eligibility check');
@@ -100,6 +102,25 @@ class _HealthDiaryScreenState extends State<HealthDiaryScreen> {
       );
     }
 
+    for (final d in p.diaryEntries) {
+      final subtitleParts = <String>[];
+      if (d.mood != null) subtitleParts.add(d.mood!);
+      if (d.symptomTags.isNotEmpty) subtitleParts.add(d.symptomTags.join(', '));
+      subtitleParts.add(
+        d.text.length > 80 ? '${d.text.substring(0, 80)}…' : d.text,
+      );
+      entries.add(
+        _TimelineEntry(
+          date: d.date,
+          kind: _EntryKind.diary,
+          title: 'Diary Entry',
+          subtitle: subtitleParts.join(' · '),
+          color: AppColors.accent,
+          emoji: '📝',
+        ),
+      );
+    }
+
     for (final e in p.conversationLog) {
       entries.add(
         _TimelineEntry(
@@ -138,6 +159,8 @@ class _HealthDiaryScreenState extends State<HealthDiaryScreen> {
                       _buildHeader(context),
                       const SizedBox(height: 20),
                       _buildStatsRow(_profile!),
+                      const SizedBox(height: 16),
+                      _buildWriteDiaryButton(),
                       const SizedBox(height: 20),
                       _buildTabs(),
                       const SizedBox(height: 16),
@@ -207,6 +230,35 @@ class _HealthDiaryScreenState extends State<HealthDiaryScreen> {
     );
   }
 
+  // ---------------- Write diary entry ----------------
+
+  Widget _buildWriteDiaryButton() {
+    return SizedBox(
+      width: double.infinity,
+      child: ElevatedButton.icon(
+        onPressed: () => showDiaryEntryDialog(context, onSaved: _load),
+        icon: const Icon(Icons.edit_outlined, size: 18),
+        label: Text(
+          'Write in your diary',
+          style: AppTextStyles.sans(
+            size: 13.5,
+            weight: FontWeight.w600,
+            color: Colors.white,
+          ),
+        ),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: AppColors.accent,
+          foregroundColor: Colors.white,
+          padding: const EdgeInsets.symmetric(vertical: 13),
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+      ),
+    );
+  }
+
   // ---------------- Stats ----------------
 
   Widget _buildStatsRow(HealthProfile p) {
@@ -220,61 +272,65 @@ class _HealthDiaryScreenState extends State<HealthDiaryScreen> {
         .where(_isEligibilityCheck)
         .length;
 
-    return Row(
-      children: [
-        Expanded(
-          child: _statCard(
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: [
+          _statCard(
             '${p.pcosHistory.length}',
             'PCOS checks',
             AppColors.ovulationTeal,
           ),
-        ),
-        const SizedBox(width: 10),
-        Expanded(
-          child: _statCard('$methodsSaved', 'Methods saved', AppColors.primary),
-        ),
-        const SizedBox(width: 10),
-        Expanded(
-          child: _statCard(
+          const SizedBox(width: 10),
+          _statCard('$methodsSaved', 'Methods saved', AppColors.primary),
+          const SizedBox(width: 10),
+          _statCard(
             '$eligibilityChecks',
             'Eligibility checks',
             AppColors.moodYellow,
           ),
-        ),
-        const SizedBox(width: 10),
-        Expanded(
-          child: _statCard(
-            '${p.conversationLog.length}',
-            'AI check-ins',
+          const SizedBox(width: 10),
+          _statCard(
+            '${p.diaryEntries.length}',
+            'Diary entries',
             AppColors.accent,
           ),
-        ),
-      ],
+          const SizedBox(width: 10),
+          _statCard(
+            '${p.conversationLog.length}',
+            'AI check-ins',
+            AppColors.textSecondary,
+          ),
+        ],
+      ),
     );
   }
 
   Widget _statCard(String value, String label, Color color) {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 8),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: color.withOpacity(0.3)),
-      ),
-      child: Column(
-        children: [
-          Text(value, style: AppTextStyles.serif(size: 22, color: color)),
-          const SizedBox(height: 4),
-          Text(
-            label,
-            textAlign: TextAlign.center,
-            style: AppTextStyles.sans(
-              size: 10,
-              weight: FontWeight.w600,
-              color: AppColors.textSecondary,
+    return SizedBox(
+      width: 110,
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 8),
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: color.withOpacity(0.3)),
+        ),
+        child: Column(
+          children: [
+            Text(value, style: AppTextStyles.serif(size: 22, color: color)),
+            const SizedBox(height: 4),
+            Text(
+              label,
+              textAlign: TextAlign.center,
+              style: AppTextStyles.sans(
+                size: 10,
+                weight: FontWeight.w600,
+                color: AppColors.textSecondary,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -442,7 +498,7 @@ class _HealthDiaryScreenState extends State<HealthDiaryScreen> {
           ),
           const SizedBox(height: 6),
           Text(
-            'PCOS checks, protection method changes, and AI check-ins will show up here automatically as you use the app.',
+            'PCOS checks, protection method changes, diary entries, and AI check-ins will show up here automatically as you use the app.',
             textAlign: TextAlign.center,
             style: AppTextStyles.sans(
               size: 12,

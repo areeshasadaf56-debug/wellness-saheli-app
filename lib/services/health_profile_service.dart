@@ -12,6 +12,7 @@
 /// eligibility_api_service.dart.)
 library;
 
+import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
 import 'package:http/http.dart' as http;
@@ -54,13 +55,43 @@ class HealthProfileService {
         '${hex.substring(16, 20)}-${hex.substring(20, 32)}';
   }
 
-  /// Loads the profile: tries the backend first (so data syncs across
-  /// devices/reinstalls if you add that later), falls back to the local
-  /// cache if the network is unavailable, and falls back to a blank
-  /// profile if neither exists yet (first-ever launch).
+  /// Loads the profile: LOCAL CACHE FIRST, backend as a background sync.
+  ///
+  /// This used to check the backend first and fall back to local cache
+  /// only on failure. That was backwards in practice: if the backend
+  /// ever had an older/emptier profile than what's on-device (e.g. a
+  /// previous saveProfile()'s background PUT silently failed due to a
+  /// network hiccup, CORS, or the endpoint not being fully live yet),
+  /// the *next* loadProfile() would happily fetch that stale backend
+  /// copy and overwrite fresh local writes -- so a PCOS result or
+  /// contraception choice saved seconds ago could vanish from the
+  /// Diary the moment you reopened it, even though it was safely
+  /// sitting in local storage the whole time.
+  ///
+  /// Now: local cache is returned immediately (it's authoritative for
+  /// "what did this device just do"), and a backend fetch happens in
+  /// the background purely to pick up data saved from a *different*
+  /// device -- and even then, it's only adopted if it's actually newer
+  /// than what's already local (compared via lastUpdated), so a stale
+  /// backend record can never clobber a fresher local one.
   Future<HealthProfile> loadProfile() async {
     final userId = await getDeviceId();
 
+    final local = await _loadFromCache(userId);
+
+    // Fire-and-forget: sync from backend if it turns out to be newer.
+    // Intentionally not awaited -- the UI should never block on this,
+    // and _refreshFromBackendIfNewer() safely no-ops on any failure.
+    unawaited(_refreshFromBackendIfNewer(userId, local));
+
+    if (local != null) {
+      _cachedProfile = local;
+      return local;
+    }
+
+    // No local cache at all (first-ever launch on this device) -- in
+    // this one case it's worth waiting on the network, since there's
+    // nothing better to show yet.
     try {
       final uri = Uri.parse('${ApiConfig.baseUrl}/profile/$userId');
       final response = await http.get(uri).timeout(const Duration(seconds: 8));
@@ -73,18 +104,39 @@ class HealthProfileService {
         return profile;
       }
     } catch (_) {
-      // Network unavailable / server down -- fall through to local cache.
-    }
-
-    final local = await _loadFromCache(userId);
-    if (local != null) {
-      _cachedProfile = local;
-      return local;
+      // Network unavailable / server down / endpoint not live yet --
+      // fall through to a blank profile below.
     }
 
     final blank = HealthProfile.empty(userId);
     _cachedProfile = blank;
     return blank;
+  }
+
+  /// Background helper for loadProfile(): fetches the backend copy and
+  /// only adopts it (overwriting local cache + in-memory cache) if it
+  /// is strictly newer than what's already local. This is what makes
+  /// cross-device sync safe without risking data loss on this device.
+  Future<void> _refreshFromBackendIfNewer(
+    String userId,
+    HealthProfile? local,
+  ) async {
+    try {
+      final uri = Uri.parse('${ApiConfig.baseUrl}/profile/$userId');
+      final response = await http.get(uri).timeout(const Duration(seconds: 8));
+      if (response.statusCode != 200) return;
+
+      final json = jsonDecode(response.body) as Map<String, dynamic>;
+      final remote = HealthProfile.fromJson(json);
+
+      if (local == null || remote.lastUpdated.isAfter(local.lastUpdated)) {
+        await _cacheLocally(remote);
+        _cachedProfile = remote;
+      }
+    } catch (_) {
+      // Best-effort background sync -- any failure here is silent and
+      // harmless, since the local copy is already what's showing.
+    }
   }
 
   /// Saves the profile: writes to local cache immediately (so the UI
