@@ -4,7 +4,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../theme/app_theme.dart';
 import '../providers/cycle_provider.dart';
 import '../widgets/month_calendar.dart';
+import '../widgets/ai_welcome_card.dart';
+import '../widgets/ai_suggestion_card.dart';
 import 'health_diary_screen.dart';
+import 'ai_checkin_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   /// Called with a tab name ('checkin', 'pcos', 'protection', etc.) when
@@ -20,40 +23,6 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  static const _bannerDismissedKey = 'ai_checkin_banner_dismissed';
-
-  bool _showAiBanner = false;
-  bool _bannerStateLoaded = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadBannerState();
-  }
-
-  Future<void> _loadBannerState() async {
-    final prefs = await SharedPreferences.getInstance();
-    final dismissed = prefs.getBool(_bannerDismissedKey) ?? false;
-    if (!mounted) return;
-    setState(() {
-      _showAiBanner = !dismissed;
-      _bannerStateLoaded = true;
-    });
-  }
-
-  Future<void> _dismissAiBanner() async {
-    setState(() => _showAiBanner = false);
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool(_bannerDismissedKey, true);
-  }
-
-  /// Switches the shell to the Check-in tab (see home_shell.dart), rather
-  /// than pushing a separate screen instance -- this way there's only
-  /// ever one AiCheckinScreen, kept alive in the shell's IndexedStack.
-  void _openAiCheckin() {
-    widget.onNavigateToTab?.call('checkin');
-  }
-
   String _formattedDate() {
     const weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
     const months = [
@@ -74,6 +43,11 @@ class _HomeScreenState extends State<HomeScreen> {
     return '${weekdays[now.weekday - 1]}, ${months[now.month - 1]} ${now.day}';
   }
 
+  /// Navigate to AI Check-in via the shell's tab navigation
+  void _openAiCheckin() {
+    widget.onNavigateToTab?.call('checkin');
+  }
+
   @override
   Widget build(BuildContext context) {
     final cycle = context.watch<CycleProvider>();
@@ -84,55 +58,50 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildGreeting(cycle),
-            const SizedBox(height: 12),
+            // Header with title and utility icons
             _buildHeader(context),
-            if (_bannerStateLoaded && _showAiBanner) ...[
-              const SizedBox(height: 18),
-              _buildAiCheckinBanner(context),
-            ],
+            const SizedBox(height: 20),
+
+            // ===== PRIMARY FEATURE: AI Welcome Card =====
+            AiWelcomeCard(
+              userName: cycle.userName,
+              onTap: _openAiCheckin,
+              currentPhase: cycle.currentPhase,
+              currentCycleDay: cycle.currentCycleDay,
+            ),
+            const SizedBox(height: 24),
+
+            // ===== CONTEXTUAL SUGGESTIONS =====
+            _buildContextualSuggestions(cycle),
             const SizedBox(height: 28),
+
+            // Cycle dial - moved down (secondary feature now)
             _buildCycleDial(cycle),
             const SizedBox(height: 24),
+
+            // Status cards
             _buildStatusCards(cycle),
             const SizedBox(height: 24),
+
+            // Calendar
             _sectionLabel('THIS WEEK'),
             const SizedBox(height: 10),
             const MonthCalendar(),
             const SizedBox(height: 24),
+
+            // Quick logging
             _sectionLabel('LOG TODAY'),
             const SizedBox(height: 10),
             _buildLogButtons(context),
             const SizedBox(height: 24),
+
+            // Insight
             _sectionLabel("TODAY'S INSIGHT"),
             const SizedBox(height: 10),
             _buildInsightCard(cycle),
             const SizedBox(height: 16),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildGreeting(CycleProvider cycle) {
-    final name = cycle.userName.isNotEmpty ? cycle.userName : 'there';
-    return Text(
-      'Hello, $name 👋',
-      style: AppTextStyles.sans(
-        size: 13,
-        weight: FontWeight.w600,
-        color: AppColors.textSecondary,
-      ),
-    );
-  }
-
-  Widget _sectionLabel(String text) {
-    return Text(
-      text,
-      style: AppTextStyles.sans(
-        size: 11,
-        weight: FontWeight.w600,
-        color: AppColors.textSecondary,
       ),
     );
   }
@@ -192,79 +161,59 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  /// Optional, dismissible entry point into the AI check-in -- per the
-  /// chosen onboarding approach, this is NOT a forced flow. It sits on
-  /// Home so it's easy to find, but a tap of the X hides it permanently
-  /// (persisted via SharedPreferences) for users who'd rather explore
-  /// the app on their own. Tapping the banner itself switches to the
-  /// Check-in tab rather than opening a separate screen.
-  Widget _buildAiCheckinBanner(BuildContext context) {
-    return GestureDetector(
-      onTap: _openAiCheckin,
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              AppColors.primary.withOpacity(0.12),
-              AppColors.accent.withOpacity(0.12),
-            ],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppColors.primary.withOpacity(0.3)),
-        ),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                color: AppColors.primary.withOpacity(0.18),
-                shape: BoxShape.circle,
-              ),
-              child: const Center(
-                child: Text('✨', style: TextStyle(fontSize: 18)),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Want a quick check-in?',
-                    style: AppTextStyles.sans(
-                      size: 13.5,
-                      weight: FontWeight.w700,
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
-                  const SizedBox(height: 3),
-                  Text(
-                    "I'll ask a few questions and point you to what's "
-                    "most useful, based on how you're doing.",
-                    style: AppTextStyles.sans(
-                      size: 11.5,
-                      color: AppColors.textSecondary,
-                    ).copyWith(height: 1.4),
-                  ),
-                ],
-              ),
-            ),
-            GestureDetector(
-              onTap: _dismissAiBanner,
-              child: Icon(
-                Icons.close,
-                size: 18,
-                color: AppColors.textSecondary.withOpacity(0.6),
-              ),
-            ),
-          ],
-        ),
+  /// Contextual suggestions based on cycle phase or user data
+  /// For now: show relevant suggestion cards
+  Widget _buildContextualSuggestions(CycleProvider cycle) {
+    // Example: Show different suggestions based on cycle phase
+    final phase = cycle.currentPhase;
+    String suggestionTitle = '';
+    String suggestionDesc = '';
+    IconData suggestionIcon = Icons.lightbulb_outline;
+    Color suggestionColor = AppColors.primary;
+
+    if (phase == 'Menstrual') {
+      suggestionTitle = 'Self-Care During Period';
+      suggestionDesc = 'Tips for managing discomfort and boosting energy';
+      suggestionIcon = Icons.favorite_border;
+      suggestionColor = AppColors.periodRed;
+    } else if (phase == 'Ovulation') {
+      suggestionTitle = 'Fertility Window Guide';
+      suggestionDesc = 'Understanding ovulation and your most fertile days';
+      suggestionIcon = Icons.wb_sunny;
+      suggestionColor = AppColors.accent;
+    } else if (phase == 'Luteal') {
+      suggestionTitle = 'Managing Luteal Phase';
+      suggestionDesc = 'Nutrition and exercise for this phase';
+      suggestionIcon = Icons.nightlife_outlined;
+      suggestionColor = AppColors.primary;
+    } else {
+      suggestionTitle = 'Explore Your Cycle';
+      suggestionDesc = 'Learn more about your follicular phase';
+      suggestionIcon = Icons.local_florist_outlined;
+      suggestionColor = AppColors.primary;
+    }
+
+    return AiSuggestionCard(
+      title: suggestionTitle,
+      description: suggestionDesc,
+      actionText: 'Learn More',
+      icon: suggestionIcon,
+      accentColor: suggestionColor,
+      prominent: false,
+      onTap: () {
+        // Navigate to Learn tab or show more details
+        widget.onNavigateToTab?.call('learn');
+      },
+    );
+  }
+
+  Widget _sectionLabel(String text) {
+    return Text(
+      text,
+      style: AppTextStyles.sans(
+        size: 11,
+        weight: FontWeight.w600,
+        color: AppColors.textSecondary,
       ),
     );
   }
@@ -322,7 +271,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     vertical: 5,
                   ),
                   decoration: BoxDecoration(
-                    color: AppColors.periodRed.withOpacity(0.2),
+                    color: AppColors.periodRed.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
@@ -414,7 +363,7 @@ class _HomeScreenState extends State<HomeScreen> {
         borderRadius: BorderRadius.circular(14),
         border: Border.all(
           color: useAccent
-              ? accentColor.withOpacity(0.35)
+              ? accentColor.withValues(alpha: 0.35)
               : AppColors.cardBorder,
         ),
       ),
@@ -506,7 +455,7 @@ class _HomeScreenState extends State<HomeScreen> {
               width: 36,
               height: 36,
               decoration: BoxDecoration(
-                color: iconColor.withOpacity(0.18),
+                color: iconColor.withValues(alpha: 0.18),
                 shape: BoxShape.circle,
               ),
               child: Center(child: Icon(icon, size: 18, color: iconColor)),
@@ -764,7 +713,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               ),
                               decoration: BoxDecoration(
                                 color: isSelected
-                                    ? AppColors.primary.withOpacity(0.2)
+                                    ? AppColors.primary.withValues(alpha: 0.2)
                                     : AppColors.background,
                                 borderRadius: BorderRadius.circular(20),
                                 border: Border.all(
@@ -865,7 +814,7 @@ class _HomeScreenState extends State<HomeScreen> {
             width: 36,
             height: 36,
             decoration: BoxDecoration(
-              color: phaseColor.withOpacity(0.18),
+              color: phaseColor.withValues(alpha: 0.18),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Center(child: Icon(phaseIcon, size: 18, color: phaseColor)),
@@ -898,13 +847,13 @@ class _HomeScreenState extends State<HomeScreen> {
   String _phaseDetails(String phase) {
     switch (phase) {
       case 'Menstrual':
-        return 'Your uterine lining is shedding, which is why energy tends to run low right now. Rest when you can and don\'t feel guilty about slowing down. Iron-rich foods like spinach, lentils, and red meat help replenish what\'s lost through bleeding, and staying hydrated eases bloating. A heating pad or warm bath on your lower abdomen relaxes the uterine muscle and can noticeably cut cramping. Light movement like walking or gentle stretching often helps more than staying still, even though it\'s tempting to just curl up.';
+        return 'Your uterine lining is shedding, which is why energy tends to run low right now. Rest when you can and don\'t feel guilty about slowing down. Iron-rich foods like spinach, lentils[...]';
       case 'Follicular':
-        return 'Estrogen is climbing steadily, and most people feel their energy, mood, and focus lifting day by day. This is usually the best window for starting new projects, tackling harder workouts, or scheduling things that need sharp thinking, since the brain tends to feel clearer here. Your body is also more receptive to strength training right now, so it\'s a good time to push a little in the gym. Skin often looks better too as estrogen supports collagen production.';
+        return 'Estrogen is climbing steadily, and most people feel their energy, mood, and focus lifting day by day. This is usually the best window for starting new projects, tackling harder wo[...]';
       case 'Ovulation':
-        return 'This is your most fertile window, typically lasting about 24 hours around the release of an egg, though sperm can survive several days beforehand. Estrogen peaks and testosterone rises slightly, which is why confidence, sociability, and libido often feel highest here. Some people notice mild one-sided pelvic twinges (ovulation pain), a slight temperature rise, or clearer, stretchier cervical mucus. If you\'re tracking for conception or avoidance, this is the highest-priority window to pay attention to.';
+        return 'This is your most fertile window, typically lasting about 24 hours around the release of an egg, though sperm can survive several days beforehand. Estrogen peaks and testosterone [...]';
       case 'Luteal':
-        return 'Progesterone rises after ovulation and then drops sharply if pregnancy doesn\'t occur, which is what drives PMS symptoms like irritability, bloating, breast tenderness, and food cravings in the days before your period. Energy typically declines through this phase, especially in the last week. Cutting back on caffeine, alcohol, and sugar can meaningfully soften mood swings, and prioritizing sleep helps your body handle the hormonal drop. Magnesium-rich foods like dark chocolate, nuts, and leafy greens are commonly reported to ease cramping and irritability.';
+        return 'Progesterone rises after ovulation and then drops sharply if pregnancy doesn\'t occur, which is what drives PMS symptoms like irritability, bloating, breast tenderness, and food c[...]';
       default:
         return 'Track your cycle regularly to get personalized insights about each phase.';
     }
