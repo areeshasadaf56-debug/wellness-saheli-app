@@ -24,7 +24,6 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-<<<<<<< HEAD
   HealthProfile? _profile;
 
   @override
@@ -39,8 +38,6 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() => _profile = profile);
   }
 
-=======
->>>>>>> 24ff9339eb1ccd6ddb208d864f531a57d43013d0
   String _formattedDate() {
     const weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
     const months = [
@@ -86,7 +83,6 @@ class _HomeScreenState extends State<HomeScreen> {
               onTap: _openAiCheckin,
               currentPhase: cycle.currentPhase,
               currentCycleDay: cycle.currentCycleDay,
-<<<<<<< HEAD
               lastCheckIn: _profile?.mentalHealth.lastCheckIn,
               selfReportedStressLevel:
                   _profile?.mentalHealth.selfReportedStressLevel,
@@ -94,8 +90,6 @@ class _HomeScreenState extends State<HomeScreen> {
                   _profile != null && _profile!.diaryEntries.isNotEmpty
                   ? _profile!.diaryEntries.last.mood
                   : null,
-=======
->>>>>>> 24ff9339eb1ccd6ddb208d864f531a57d43013d0
             ),
             const SizedBox(height: 24),
 
@@ -111,7 +105,6 @@ class _HomeScreenState extends State<HomeScreen> {
             _buildStatusCards(cycle),
             const SizedBox(height: 24),
 
-<<<<<<< HEAD
             // Today's mood + recent symptoms
             _buildTodaySnapshot(cycle),
             const SizedBox(height: 24),
@@ -120,8 +113,6 @@ class _HomeScreenState extends State<HomeScreen> {
             _buildTrendsCard(cycle),
             const SizedBox(height: 24),
 
-=======
->>>>>>> 24ff9339eb1ccd6ddb208d864f531a57d43013d0
             // Calendar
             _sectionLabel('THIS WEEK'),
             const SizedBox(height: 10),
@@ -246,7 +237,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-<<<<<<< HEAD
   Widget _buildTodaySnapshot(CycleProvider cycle) {
     final today = cycle.getLogFor(DateTime.now());
     final hasMood = today.mood != null;
@@ -382,8 +372,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-=======
->>>>>>> 24ff9339eb1ccd6ddb208d864f531a57d43013d0
   Widget _sectionLabel(String text) {
     return Text(
       text,
