@@ -39,48 +39,47 @@ class _HomeShellState extends State<HomeShell> {
     setState(() => _tabIndex = newIndex);
   }
 
-  final List<_NavItem> _navItems = const [
-    _NavItem(icon: Icons.nightlight_round, label: 'Cycle', shortLabel: 'Cycle'),
-    _NavItem(icon: Icons.egg_outlined, label: 'Ovulation', shortLabel: 'Ovu'),
-<<<<<<< HEAD
-    _NavItem(
+  final List<_NavItem> _navItems = [
+    const _NavItem(
+      icon: Icons.nightlight_round,
+      label: 'Cycle',
+      shortLabel: 'Cycle',
+    ),
+    const _NavItem(
+      icon: Icons.egg_outlined,
+      label: 'Ovulation',
+      shortLabel: 'Ovu',
+    ),
+    const _NavItem(
       icon: Icons.shield_outlined,
       label: 'Protection',
       shortLabel: 'Prot',
     ),
-    _NavItem(
+    const _NavItem(
       icon: Icons.bubble_chart_outlined,
       label: 'PCOS',
       shortLabel: 'PCOS',
     ),
-    _NavItem(
+    const _NavItem(
       icon: Icons.local_florist_outlined,
       label: 'Endo',
       shortLabel: 'Endo',
     ),
-    _NavItem(
+    const _NavItem(
       icon: Icons.menu_book_outlined,
       label: 'Learn',
       shortLabel: 'Learn',
     ),
-    _NavItem(
+    const _NavItem(
       icon: Icons.settings_outlined,
       label: 'Settings',
       shortLabel: 'Set',
     ),
-    _NavItem(
+    const _NavItem(
       icon: Icons.favorite_rounded,
       label: 'Check-in',
       shortLabel: 'Chat',
     ),
-=======
-    _NavItem(icon: Icons.shield_outlined, label: 'Protection', shortLabel: 'Prot'),
-    _NavItem(icon: Icons.bubble_chart_outlined, label: 'PCOS', shortLabel: 'PCOS'),
-    _NavItem(icon: Icons.local_florist_outlined, label: 'Endo', shortLabel: 'Endo'),
-    _NavItem(icon: Icons.menu_book_outlined, label: 'Learn', shortLabel: 'Learn'),
-    _NavItem(icon: Icons.settings_outlined, label: 'Settings', shortLabel: 'Set'),
-    _NavItem(icon: Icons.favorite_rounded, label: 'Check-in', shortLabel: 'Chat'),
->>>>>>> 24ff9339eb1ccd6ddb208d864f531a57d43013d0
   ];
 
   @override
@@ -111,7 +110,6 @@ class _HomeShellState extends State<HomeShell> {
         child: SafeArea(
           top: false,
           child: Row(
-<<<<<<< HEAD
             children: List.generate(_navItems.length, (i) {
               final item = _navItems[i];
               final active = _tabIndex == i;
@@ -141,62 +139,20 @@ class _HomeShellState extends State<HomeShell> {
                           style: AppTextStyles.sans(
                             size: 7.5,
                             weight: active ? FontWeight.w600 : FontWeight.w500,
-=======
-            children: List.generate(
-              _navItems.length,
-              (i) {
-                final item = _navItems[i];
-                final active = _tabIndex == i;
-                return Expanded(
-                  child: GestureDetector(
-                    onTap: () => setState(() => _tabIndex = i),
-                    behavior: HitTestBehavior.opaque,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 2,
-                        vertical: 6,
-                      ),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            item.icon,
-                            size: 18,
->>>>>>> 24ff9339eb1ccd6ddb208d864f531a57d43013d0
                             color: active
                                 ? AppColors.primary
                                 : AppColors.textSecondary,
                           ),
-<<<<<<< HEAD
                           textAlign: TextAlign.center,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
                       ],
-=======
-                          const SizedBox(height: 3),
-                          Text(
-                            item.shortLabel,
-                            style: AppTextStyles.sans(
-                              size: 7.5,
-                              weight: active ? FontWeight.w600 : FontWeight.w500,
-                              color: active
-                                  ? AppColors.primary
-                                  : AppColors.textSecondary,
-                            ),
-                            textAlign: TextAlign.center,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
-                      ),
->>>>>>> 24ff9339eb1ccd6ddb208d864f531a57d43013d0
                     ),
                   ),
-                );
-              },
-            ),
+                ),
+              );
+            }),
           ),
         ),
       ),

@@ -32,6 +32,7 @@ class AppTextStyles {
     );
   }
 
+  // ✅ FIXED — removed the accidental `required List<Expanded> children` parameter
   static TextStyle sans({
     double size = 14,
     FontWeight weight = FontWeight.normal,

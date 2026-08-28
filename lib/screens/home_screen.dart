@@ -8,7 +8,6 @@ import '../widgets/month_calendar.dart';
 import '../widgets/ai_welcome_card.dart';
 import '../widgets/ai_suggestion_card.dart';
 import 'health_diary_screen.dart';
-import 'ai_checkin_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   /// Called with a tab name ('checkin', 'pcos', 'protection', etc.) when

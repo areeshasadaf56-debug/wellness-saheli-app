@@ -13,14 +13,13 @@ class AboutScreen extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
+            children: <Widget>[
               _backHeader(context, 'About'),
               const SizedBox(height: 20),
               Container(
                 width: 64,
                 height: 64,
                 decoration: BoxDecoration(
-                  // ignore: deprecated_member_use
                   color: AppColors.primary.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(16),
                 ),
@@ -73,7 +72,7 @@ class AboutScreen extends StatelessWidget {
 
   Widget _backHeader(BuildContext context, String title) {
     return Row(
-      children: [
+      children: <Widget>[
         GestureDetector(
           onTap: () => Navigator.pop(context),
           child: Container(
@@ -102,7 +101,7 @@ class AboutScreen extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
+        children: <Widget>[
           Text(
             heading,
             style: AppTextStyles.sans(
