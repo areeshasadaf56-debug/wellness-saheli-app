@@ -668,8 +668,18 @@ class _ProtectionScreenState extends State<ProtectionScreen> {
   /// resolves. Anything NOT in this set is a frontend-only fallback label
   /// (see _fallbackConditionLabels) and must never be sent to the backend.
   Set<String> _apiConditionIds = {};
+
+  /// The full fetched condition list (id + label), kept at class level
+  /// so it can be used to translate the user's selected condition IDs
+  /// into readable labels when saving an eligibility check to the
+  /// diary -- without needing to rebuild the FutureBuilder's local
+  /// lookup map from _conditionPicker().
+  List<Condition> _fetchedConditions = [];
+
   List<MethodResult>? _eligibilityResults;
   bool _checkingEligibility = false;
+  bool _savingEligibility = false;
+  bool _eligibilitySaved = false;
   String? _eligibilityError;
 
   int _eligibilitySubTab = 0;
@@ -791,6 +801,7 @@ class _ProtectionScreenState extends State<ProtectionScreen> {
           if (!mounted) return;
           setState(() {
             _apiConditionIds = data.map((c) => c.id).toSet();
+            _fetchedConditions = data;
           });
         })
         .catchError((_) {
@@ -829,7 +840,12 @@ class _ProtectionScreenState extends State<ProtectionScreen> {
     });
     try {
       final results = await _api.checkEligibility(validIds);
-      setState(() => _eligibilityResults = results);
+      setState(() {
+        _eligibilityResults = results;
+        // A fresh check produced new results -- clear the "saved" state
+        // from any previous check so the save button is live again.
+        _eligibilitySaved = false;
+      });
     } catch (e) {
       setState(() {
         _eligibilityError =
@@ -837,6 +853,58 @@ class _ProtectionScreenState extends State<ProtectionScreen> {
       });
     } finally {
       setState(() => _checkingEligibility = false);
+    }
+  }
+
+  /// Translates the currently selected condition IDs into human-readable
+  /// labels (falling back to _fallbackConditionLabels for IDs the API
+  /// didn't return directly), for saving a readable record to the diary.
+  List<String> _selectedConditionLabels() {
+    final byId = {for (final c in _fetchedConditions) c.id: c.label};
+    for (final entry in _fallbackConditionLabels.entries) {
+      byId.putIfAbsent(entry.key, () => entry.value);
+    }
+    return _selectedConditionIds.map((id) => byId[id] ?? id).toList();
+  }
+
+  /// Saves the most recent eligibility check -- the conditions selected
+  /// and the resulting method-by-method category ratings -- into the
+  /// Health Diary. Without this, running the Eligibility tool never left
+  /// any trace once the user navigated away from this screen.
+  Future<void> _logEligibilityCheckToDiary() async {
+    if (_eligibilityResults == null || _eligibilityResults!.isEmpty) return;
+
+    setState(() => _savingEligibility = true);
+    try {
+      await HealthProfileService().appendEligibilityCheck(
+        conditions: _selectedConditionLabels(),
+        results: _eligibilityResults!
+            .map(
+              (r) => EligibilityResultEntry(
+                methodLabel: r.methodLabel,
+                category: r.category,
+              ),
+            )
+            .toList(),
+      );
+      if (mounted) {
+        setState(() {
+          _savingEligibility = false;
+          _eligibilitySaved = true;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Eligibility results saved to your diary'),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _savingEligibility = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Could not save — please try again')),
+        );
+      }
     }
   }
 
@@ -1195,6 +1263,13 @@ class _ProtectionScreenState extends State<ProtectionScreen> {
           subtitle: m['effectiveness'] as String,
           detail: m['detail'] as String,
           tags: m['tags'] as List<Map<String, dynamic>>,
+          // The save-to-diary button now lives directly on every method
+          // card here on the main Contraception tab (not just buried in
+          // My Plan > Methods), since this is the entry point most
+          // people actually browse from.
+          isSaving: _savingMethod,
+          isSaved: _savedMethodName == m['name'],
+          onSave: () => _logMethodToDiary(m['name'] as String),
         ),
       ),
     ];
@@ -1499,6 +1574,52 @@ class _ProtectionScreenState extends State<ProtectionScreen> {
             ),
             const SizedBox(height: 12),
             ..._eligibilityResults!.map(_resultCard),
+            const SizedBox(height: 8),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                onPressed: _savingEligibility
+                    ? null
+                    : _logEligibilityCheckToDiary,
+                icon: _savingEligibility
+                    ? SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: AppColors.primary,
+                        ),
+                      )
+                    : Icon(
+                        _eligibilitySaved
+                            ? Icons.check_circle
+                            : Icons.bookmark_add_outlined,
+                        size: 18,
+                      ),
+                label: Text(
+                  _eligibilitySaved
+                      ? 'Saved to My Diary'
+                      : 'Save these results to my diary',
+                  style: AppTextStyles.sans(size: 13, weight: FontWeight.w600),
+                ),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: _eligibilitySaved
+                      ? AppColors.ovulationTeal
+                      : AppColors.primary,
+                  side: BorderSide(
+                    color:
+                        (_eligibilitySaved
+                                ? AppColors.ovulationTeal
+                                : AppColors.primary)
+                            .withOpacity(0.6),
+                  ),
+                  padding: const EdgeInsets.symmetric(vertical: 13),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              ),
+            ),
           ],
         ],
       ],
@@ -3153,6 +3274,13 @@ class MethodCard extends StatelessWidget {
   final String detail;
   final List<Map<String, dynamic>> tags;
 
+  /// Save-to-diary hooks. All optional so MethodCard can still be used
+  /// purely for display elsewhere without wiring diary logic -- when
+  /// [onSave] is null, no button is rendered at all.
+  final VoidCallback? onSave;
+  final bool isSaving;
+  final bool isSaved;
+
   const MethodCard({
     super.key,
     required this.emoji,
@@ -3161,6 +3289,9 @@ class MethodCard extends StatelessWidget {
     required this.subtitle,
     required this.detail,
     required this.tags,
+    this.onSave,
+    this.isSaving = false,
+    this.isSaved = false,
   });
 
   @override
@@ -3246,6 +3377,49 @@ class MethodCard extends StatelessWidget {
               );
             }).toList(),
           ),
+          if (onSave != null) ...[
+            const SizedBox(height: 14),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: isSaving ? null : onSave,
+                icon: isSaving
+                    ? const SizedBox(
+                        width: 15,
+                        height: 15,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      )
+                    : Icon(
+                        isSaved
+                            ? Icons.check_circle
+                            : Icons.check_circle_outline,
+                        size: 17,
+                      ),
+                label: Text(
+                  isSaved ? 'Saved to My Diary' : "I'm using this method",
+                  style: AppTextStyles.sans(
+                    size: 12.5,
+                    weight: FontWeight.w600,
+                    color: Colors.white,
+                  ),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: isSaved
+                      ? AppColors.ovulationTeal
+                      : AppColors.primary,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 11),
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+              ),
+            ),
+          ],
         ],
       ),
     );

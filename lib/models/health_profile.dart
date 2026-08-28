@@ -2,10 +2,10 @@
 ///
 /// The single source of truth for everything the app knows about a user
 /// over time -- their "health diary". Every tab (PCOS, Protection, and the
-/// future AI check-in chat) reads from and writes to this same model, so
-/// the AI agent can reference past answers instead of re-asking, and so a
-/// PCOS result or a contraception choice made today is still visible next
-/// month.
+/// AI check-in chat) reads from and writes to this same model, so the AI
+/// agent can reference past answers instead of re-asking, and so a PCOS
+/// result, a contraception choice, or an eligibility check made today is
+/// still visible next month.
 ///
 /// This is intentionally a loose, nested JSON-friendly structure (not a
 /// rigid SQL schema) because the fields here will keep growing as you add
@@ -20,23 +20,21 @@ class HealthProfile {
   final Lifestyle lifestyle;
   final ReproductiveHistory reproductiveHistory;
   final List<PcosCheckResult> pcosHistory;
+  final List<EligibilityCheckResult> eligibilityHistory;
   final MentalHealthFlags mentalHealth;
   final List<ConversationEntry> conversationLog;
 
-  /// Free-standing journal entries the user writes herself (separate from
-  /// AI chat turns in conversationLog) -- e.g. "Today I felt exhausted."
-  /// See DiaryEntry below. Whether the AI is allowed to read these is
-  /// governed by privacySettings.aiCanAccessDiary, not by this list
-  /// existing or not -- the entries are always saved locally regardless
-  /// of that toggle; the toggle only controls what context assembly is
-  /// permitted to pull from them later.
-  final List<DiaryEntry> diaryEntries;
-
-  /// User-controlled privacy switches (section 14 of the product brief):
-  /// what the AI is allowed to read, and whether it's allowed to retain
-  /// memory across sessions at all. Defaults are conservative (AI access
-  /// off) so a fresh profile never silently opts someone in.
+  /// User-controlled toggles for what the AI check-in is allowed to use
+  /// -- e.g. whether it remembers past chat turns, and whether it can
+  /// read recent free-text diary entries as context. Read/written from
+  /// data_privacy_screen.dart.
   final PrivacySettings privacySettings;
+
+  /// Free-text personal journal entries (separate from the
+  /// auto-generated Health Diary timeline in health_diary_screen.dart,
+  /// which is built from PCOS/Protection/Cycle/AI history instead of
+  /// entries the user writes themselves).
+  final List<DiaryEntry> diaryEntries;
 
   final DateTime lastUpdated;
 
@@ -46,10 +44,11 @@ class HealthProfile {
     required this.lifestyle,
     required this.reproductiveHistory,
     required this.pcosHistory,
+    required this.eligibilityHistory,
     required this.mentalHealth,
     required this.conversationLog,
-    this.diaryEntries = const [],
-    this.privacySettings = const PrivacySettings(),
+    required this.privacySettings,
+    required this.diaryEntries,
     required this.lastUpdated,
   });
 
@@ -61,10 +60,11 @@ class HealthProfile {
       lifestyle: const Lifestyle(),
       reproductiveHistory: const ReproductiveHistory(),
       pcosHistory: const [],
+      eligibilityHistory: const [],
       mentalHealth: const MentalHealthFlags(),
       conversationLog: const [],
-      diaryEntries: const [],
       privacySettings: const PrivacySettings(),
+      diaryEntries: const [],
       lastUpdated: DateTime.now(),
     );
   }
@@ -74,10 +74,11 @@ class HealthProfile {
     Lifestyle? lifestyle,
     ReproductiveHistory? reproductiveHistory,
     List<PcosCheckResult>? pcosHistory,
+    List<EligibilityCheckResult>? eligibilityHistory,
     MentalHealthFlags? mentalHealth,
     List<ConversationEntry>? conversationLog,
-    List<DiaryEntry>? diaryEntries,
     PrivacySettings? privacySettings,
+    List<DiaryEntry>? diaryEntries,
   }) {
     return HealthProfile(
       userId: userId,
@@ -85,10 +86,11 @@ class HealthProfile {
       lifestyle: lifestyle ?? this.lifestyle,
       reproductiveHistory: reproductiveHistory ?? this.reproductiveHistory,
       pcosHistory: pcosHistory ?? this.pcosHistory,
+      eligibilityHistory: eligibilityHistory ?? this.eligibilityHistory,
       mentalHealth: mentalHealth ?? this.mentalHealth,
       conversationLog: conversationLog ?? this.conversationLog,
-      diaryEntries: diaryEntries ?? this.diaryEntries,
       privacySettings: privacySettings ?? this.privacySettings,
+      diaryEntries: diaryEntries ?? this.diaryEntries,
       lastUpdated: DateTime.now(),
     );
   }
@@ -99,10 +101,11 @@ class HealthProfile {
     'lifestyle': lifestyle.toJson(),
     'reproductive_history': reproductiveHistory.toJson(),
     'pcos_history': pcosHistory.map((e) => e.toJson()).toList(),
+    'eligibility_history': eligibilityHistory.map((e) => e.toJson()).toList(),
     'mental_health': mentalHealth.toJson(),
     'conversation_log': conversationLog.map((e) => e.toJson()).toList(),
-    'diary_entries': diaryEntries.map((e) => e.toJson()).toList(),
     'privacy_settings': privacySettings.toJson(),
+    'diary_entries': diaryEntries.map((e) => e.toJson()).toList(),
     'last_updated': lastUpdated.toIso8601String(),
   };
 
@@ -121,25 +124,106 @@ class HealthProfile {
       pcosHistory: (json['pcos_history'] as List<dynamic>? ?? [])
           .map((e) => PcosCheckResult.fromJson(e as Map<String, dynamic>))
           .toList(),
+      eligibilityHistory: (json['eligibility_history'] as List<dynamic>? ?? [])
+          .map(
+            (e) => EligibilityCheckResult.fromJson(e as Map<String, dynamic>),
+          )
+          .toList(),
       mentalHealth: MentalHealthFlags.fromJson(
         json['mental_health'] as Map<String, dynamic>? ?? {},
       ),
       conversationLog: (json['conversation_log'] as List<dynamic>? ?? [])
           .map((e) => ConversationEntry.fromJson(e as Map<String, dynamic>))
           .toList(),
-      // Both default to empty/conservative if absent, so loading an
-      // OLDER saved profile (written before these fields existed) never
-      // throws -- it just comes back with no diary entries and AI access
-      // off, which is the safe default anyway.
-      diaryEntries: (json['diary_entries'] as List<dynamic>? ?? [])
-          .map((e) => DiaryEntry.fromJson(e as Map<String, dynamic>))
-          .toList(),
       privacySettings: PrivacySettings.fromJson(
         json['privacy_settings'] as Map<String, dynamic>? ?? {},
       ),
+      diaryEntries: (json['diary_entries'] as List<dynamic>? ?? [])
+          .map((e) => DiaryEntry.fromJson(e as Map<String, dynamic>))
+          .toList(),
       lastUpdated: json['last_updated'] != null
           ? DateTime.parse(json['last_updated'] as String)
           : DateTime.now(),
+    );
+  }
+}
+
+/// ---------------------------------------------------------------
+/// Privacy settings -- user-controlled toggles for what the AI
+/// check-in is allowed to use. Both default to true so existing AI
+/// features keep working exactly as before for anyone who never
+/// visits Settings > Data & Privacy to change them; the toggles exist
+/// so users CAN opt out, not so the app starts locked down.
+/// ---------------------------------------------------------------
+class PrivacySettings {
+  /// Whether the AI check-in sends past turns of the current chat
+  /// session as context on each new message (i.e. "remembers" the
+  /// conversation so far). When false, each message is sent with no
+  /// history, so the AI has no memory even within one session.
+  final bool aiMemoryEnabled;
+
+  /// Whether the AI check-in may read recent free-text diaryEntries as
+  /// additional context (mood, symptom tags, journal text) when
+  /// building its replies.
+  final bool aiCanAccessDiary;
+
+  const PrivacySettings({
+    this.aiMemoryEnabled = true,
+    this.aiCanAccessDiary = true,
+  });
+
+  PrivacySettings copyWith({bool? aiMemoryEnabled, bool? aiCanAccessDiary}) {
+    return PrivacySettings(
+      aiMemoryEnabled: aiMemoryEnabled ?? this.aiMemoryEnabled,
+      aiCanAccessDiary: aiCanAccessDiary ?? this.aiCanAccessDiary,
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+    'ai_memory_enabled': aiMemoryEnabled,
+    'ai_can_access_diary': aiCanAccessDiary,
+  };
+
+  factory PrivacySettings.fromJson(Map<String, dynamic> json) {
+    return PrivacySettings(
+      aiMemoryEnabled: json['ai_memory_enabled'] as bool? ?? true,
+      aiCanAccessDiary: json['ai_can_access_diary'] as bool? ?? true,
+    );
+  }
+}
+
+/// ---------------------------------------------------------------
+/// A free-text personal journal entry -- distinct from the
+/// auto-generated Health Diary timeline (health_diary_screen.dart),
+/// which is built purely from PCOS/Protection/Cycle/AI history rather
+/// than something the user writes themselves.
+/// ---------------------------------------------------------------
+class DiaryEntry {
+  final DateTime date;
+  final String? mood;
+  final List<String> symptomTags;
+  final String text;
+
+  const DiaryEntry({
+    required this.date,
+    this.mood,
+    this.symptomTags = const [],
+    required this.text,
+  });
+
+  Map<String, dynamic> toJson() => {
+    'date': date.toIso8601String(),
+    'mood': mood,
+    'symptom_tags': symptomTags,
+    'text': text,
+  };
+
+  factory DiaryEntry.fromJson(Map<String, dynamic> json) {
+    return DiaryEntry(
+      date: DateTime.parse(json['date'] as String),
+      mood: json['mood'] as String?,
+      symptomTags: List<String>.from(json['symptom_tags'] ?? []),
+      text: json['text'] as String? ?? '',
     );
   }
 }
@@ -389,6 +473,69 @@ class PcosCheckResult {
 }
 
 /// ---------------------------------------------------------------
+/// Eligibility check history -- every time the user runs the
+/// Protection > My Plan > Eligibility tool, the conditions they
+/// selected and the per-method category results are saved here, so
+/// past checks are visible in the Health Diary instead of vanishing
+/// the moment the user leaves that screen.
+/// ---------------------------------------------------------------
+class EligibilityResultEntry {
+  final String methodLabel;
+  final int category;
+
+  const EligibilityResultEntry({
+    required this.methodLabel,
+    required this.category,
+  });
+
+  Map<String, dynamic> toJson() => {
+    'method_label': methodLabel,
+    'category': category,
+  };
+
+  factory EligibilityResultEntry.fromJson(Map<String, dynamic> json) {
+    return EligibilityResultEntry(
+      methodLabel: json['method_label'] as String,
+      category: json['category'] as int,
+    );
+  }
+}
+
+class EligibilityCheckResult {
+  final DateTime date;
+
+  /// Human-readable labels of the conditions the user selected (not raw
+  /// backend IDs), so the Diary can display something meaningful without
+  /// needing to re-fetch the condition list.
+  final List<String> conditions;
+  final List<EligibilityResultEntry> results;
+
+  const EligibilityCheckResult({
+    required this.date,
+    required this.conditions,
+    required this.results,
+  });
+
+  Map<String, dynamic> toJson() => {
+    'date': date.toIso8601String(),
+    'conditions': conditions,
+    'results': results.map((e) => e.toJson()).toList(),
+  };
+
+  factory EligibilityCheckResult.fromJson(Map<String, dynamic> json) {
+    return EligibilityCheckResult(
+      date: DateTime.parse(json['date'] as String),
+      conditions: List<String>.from(json['conditions'] ?? []),
+      results: (json['results'] as List<dynamic>? ?? [])
+          .map(
+            (e) => EligibilityResultEntry.fromJson(e as Map<String, dynamic>),
+          )
+          .toList(),
+    );
+  }
+}
+
+/// ---------------------------------------------------------------
 /// Mental health flags -- deliberately lightweight and NON-diagnostic.
 /// This app must never claim to diagnose anxiety, depression, or any
 /// mental health condition. These fields exist only to let the AI
@@ -442,24 +589,32 @@ class MentalHealthFlags {
 
 /// ---------------------------------------------------------------
 /// Conversation log -- the raw AI check-in chat history, so the AI
-/// agent (built in the next phase) has memory of past conversations
-/// instead of starting fresh every time.
+/// agent has memory of past conversations instead of starting fresh
+/// every time.
 /// ---------------------------------------------------------------
 class ConversationEntry {
   final DateTime timestamp;
   final String role; // 'user' or 'assistant'
   final String message;
 
+  /// Groups turns into distinct chat sessions (see AiCheckinScreen's
+  /// "Chats" history sheet). Entries saved before this field existed
+  /// have no sessionId, so the screen treats those as one combined
+  /// "legacy" session rather than losing them.
+  final String? sessionId;
+
   const ConversationEntry({
     required this.timestamp,
     required this.role,
     required this.message,
+    this.sessionId,
   });
 
   Map<String, dynamic> toJson() => {
     'timestamp': timestamp.toIso8601String(),
     'role': role,
     'message': message,
+    'session_id': sessionId,
   };
 
   factory ConversationEntry.fromJson(Map<String, dynamic> json) {
@@ -467,145 +622,7 @@ class ConversationEntry {
       timestamp: DateTime.parse(json['timestamp'] as String),
       role: json['role'] as String,
       message: json['message'] as String,
-    );
-  }
-}
-
-/// ---------------------------------------------------------------
-/// Diary entries -- free-text journal entries the user writes
-/// herself (section 13 of the product brief). Distinct from
-/// ConversationEntry: a diary entry is not part of a chat turn, it's
-/// a standalone note ("Today I felt exhausted and didn't want to
-/// talk to anyone") that may optionally carry a mood, symptom tags,
-/// or free-form tags.
-///
-/// Whether the AI context-assembly layer is allowed to read these at
-/// all is controlled by PrivacySettings.aiCanAccessDiary below -- this
-/// class itself has no opinion on that; it's just storage.
-/// ---------------------------------------------------------------
-class DiaryEntry {
-  final String id;
-  final DateTime date;
-  final String text;
-
-  /// Optional single mood label, free-form to match whatever picker UI
-  /// ends up being used (e.g. '😊 Happy', '😰 Anxious') -- kept as a
-  /// plain string rather than an enum so it can share vocabulary with
-  /// CycleProvider's existing mood logging without a hard dependency.
-  final String? mood;
-
-  /// Optional symptom tags the user attaches to this entry, e.g.
-  /// ['Cramps', 'Fatigue'] -- free-form strings for the same reason.
-  final List<String> symptomTags;
-
-  /// Optional free-form tags for anything else the user wants to mark
-  /// this entry with (e.g. 'stress', 'family', 'breakup') -- these are
-  /// what let the AI later notice a pattern like "stress mentioned in
-  /// 4 of the last 5 entries before your period", presented only as an
-  /// observation per the product brief, never a diagnosis.
-  final List<String> tags;
-
-  const DiaryEntry({
-    required this.id,
-    required this.date,
-    required this.text,
-    this.mood,
-    this.symptomTags = const [],
-    this.tags = const [],
-  });
-
-  DiaryEntry copyWith({
-    DateTime? date,
-    String? text,
-    String? mood,
-    List<String>? symptomTags,
-    List<String>? tags,
-  }) {
-    return DiaryEntry(
-      id: id,
-      date: date ?? this.date,
-      text: text ?? this.text,
-      mood: mood ?? this.mood,
-      symptomTags: symptomTags ?? this.symptomTags,
-      tags: tags ?? this.tags,
-    );
-  }
-
-  Map<String, dynamic> toJson() => {
-    'id': id,
-    'date': date.toIso8601String(),
-    'text': text,
-    'mood': mood,
-    'symptom_tags': symptomTags,
-    'tags': tags,
-  };
-
-  factory DiaryEntry.fromJson(Map<String, dynamic> json) {
-    return DiaryEntry(
-      id: json['id'] as String,
-      date: DateTime.parse(json['date'] as String),
-      text: json['text'] as String,
-      mood: json['mood'] as String?,
-      symptomTags:
-          (json['symptom_tags'] as List<dynamic>?)
-              ?.map((e) => e as String)
-              .toList() ??
-          const [],
-      tags:
-          (json['tags'] as List<dynamic>?)?.map((e) => e as String).toList() ??
-          const [],
-    );
-  }
-}
-
-/// ---------------------------------------------------------------
-/// Privacy settings -- user-controlled switches for what the AI is
-/// permitted to read and remember (section 14 of the product brief).
-/// Deliberately defaults to conservative/off values so a brand-new
-/// profile never silently grants AI access to anything -- the user
-/// has to explicitly opt in, and can revoke at any time.
-///
-/// This object controls PERMISSION only. It does not delete data --
-/// deleting diary entries, clearing AI memory, etc. are separate
-/// explicit actions (to be built in the Settings/privacy screen) that
-/// mutate diaryEntries / conversationLog directly. Turning
-/// aiCanAccessDiary off, for example, does not erase diaryEntries; it
-/// just means the context-assembly layer must skip them.
-/// ---------------------------------------------------------------
-class PrivacySettings {
-  /// Whether the AI context-assembly layer may read diaryEntries when
-  /// building context for a chat turn. Off by default.
-  final bool aiCanAccessDiary;
-
-  /// Whether the AI is allowed to retain conversation memory across
-  /// sessions at all (i.e. read conversationLog / build any
-  /// cross-session context). If false, every chat should be treated
-  /// as a fresh conversation with no prior history included. On by
-  /// default since without it the "AI remembers your journey" feature
-  /// in the brief can't function -- but the user can turn it off.
-  final bool aiMemoryEnabled;
-
-  const PrivacySettings({
-    this.aiCanAccessDiary = false,
-    this.aiMemoryEnabled = true,
-  });
-
-  PrivacySettings copyWith({bool? aiCanAccessDiary, bool? aiMemoryEnabled}) {
-    return PrivacySettings(
-      aiCanAccessDiary: aiCanAccessDiary ?? this.aiCanAccessDiary,
-      aiMemoryEnabled: aiMemoryEnabled ?? this.aiMemoryEnabled,
-    );
-  }
-
-  Map<String, dynamic> toJson() => {
-    'ai_can_access_diary': aiCanAccessDiary,
-    'ai_memory_enabled': aiMemoryEnabled,
-  };
-
-  factory PrivacySettings.fromJson(Map<String, dynamic> json) {
-    return PrivacySettings(
-      aiCanAccessDiary: json['ai_can_access_diary'] as bool? ?? false,
-      aiMemoryEnabled: json['ai_memory_enabled'] as bool? ?? true,
+      sessionId: json['session_id'] as String?,
     );
   }
 }

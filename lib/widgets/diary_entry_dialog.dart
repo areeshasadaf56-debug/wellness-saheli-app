@@ -102,7 +102,7 @@ Future<void> showDiaryEntryDialog(
                           ),
                           decoration: BoxDecoration(
                             color: isSelected
-                                ? AppColors.primary.withOpacity(0.15)
+                                ? AppColors.primary.withValues(alpha: 0.15)
                                 : AppColors.background,
                             borderRadius: BorderRadius.circular(20),
                             border: Border.all(
@@ -146,7 +146,9 @@ Future<void> showDiaryEntryDialog(
                           ),
                           decoration: BoxDecoration(
                             color: isSelected
-                                ? AppColors.symptomOrange.withOpacity(0.15)
+                                ? AppColors.symptomOrange.withValues(
+                                    alpha: 0.15,
+                                  )
                                 : AppColors.background,
                             borderRadius: BorderRadius.circular(20),
                             border: Border.all(
@@ -191,7 +193,6 @@ Future<void> showDiaryEntryDialog(
   if (saved != true || text.isEmpty) return;
 
   final entry = DiaryEntry(
-    id: DateTime.now().millisecondsSinceEpoch.toString(),
     date: DateTime.now(),
     text: text,
     mood: selectedMood,

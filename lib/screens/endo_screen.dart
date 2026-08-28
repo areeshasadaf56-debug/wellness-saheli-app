@@ -109,11 +109,13 @@ class _EndoScreenState extends State<EndoScreen> {
         height: 46,
         alignment: Alignment.center,
         decoration: BoxDecoration(
-          color: isActive ? activeColor.withOpacity(0.18) : AppColors.surface,
+          color: isActive
+              ? activeColor.withValues(alpha: 0.18)
+              : AppColors.surface,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: isActive
-                ? activeColor.withOpacity(0.6)
+                ? activeColor.withValues(alpha: 0.6)
                 : AppColors.cardBorder,
           ),
         ),
@@ -276,7 +278,7 @@ class _EndoScreenState extends State<EndoScreen> {
             height: 56,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: AppColors.primary.withOpacity(0.15),
+              color: AppColors.primary.withValues(alpha: 0.15),
             ),
             child: const Center(
               child: Text('🩺', style: TextStyle(fontSize: 24)),
@@ -315,7 +317,9 @@ class _EndoScreenState extends State<EndoScreen> {
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: AppColors.ovulationTeal.withOpacity(0.3)),
+        border: Border.all(
+          color: AppColors.ovulationTeal.withValues(alpha: 0.3),
+        ),
       ),
       child: Column(
         children: [

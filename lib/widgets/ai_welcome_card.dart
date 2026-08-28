@@ -11,6 +11,9 @@ class AiWelcomeCard extends StatelessWidget {
   final VoidCallback onTap;
   final String? currentPhase;
   final int? currentCycleDay;
+  final DateTime? lastCheckIn;
+  final int? selfReportedStressLevel;
+  final String? latestDiaryMood;
 
   const AiWelcomeCard({
     super.key,
@@ -18,6 +21,9 @@ class AiWelcomeCard extends StatelessWidget {
     required this.onTap,
     this.currentPhase,
     this.currentCycleDay,
+    this.lastCheckIn,
+    this.selfReportedStressLevel,
+    this.latestDiaryMood,
   });
 
   String _getGreetingByTime() {
@@ -28,6 +34,35 @@ class AiWelcomeCard extends StatelessWidget {
   }
 
   String _getSaheliGreeting() {
+    // Personalize using what we actually know about her, most specific
+    // signal first -- falls back to a generic time-based line only when
+    // there's nothing to go on yet.
+    if (selfReportedStressLevel != null && selfReportedStressLevel! >= 4) {
+      return 'Things have seemed heavy lately -- want to talk? 💛';
+    }
+
+    if (lastCheckIn != null) {
+      final daysSince = DateTime.now().difference(lastCheckIn!).inDays;
+      if (daysSince >= 7) {
+        return 'It\'s been a while -- how have you really been? ✨';
+      }
+    } else {
+      return 'Haven\'t met yet -- I\'d love to get to know you 🌸';
+    }
+
+    if (latestDiaryMood != null) {
+      final moodWord = latestDiaryMood!
+          .split(' ')
+          .skip(1)
+          .join(' ')
+          .toLowerCase();
+      if (moodWord == 'sad' ||
+          moodWord == 'irritable' ||
+          moodWord == 'anxious') {
+        return 'Last time you mentioned feeling $moodWord -- how\'s that now?';
+      }
+    }
+
     final greeting = _getGreetingByTime();
     final time = greeting.replaceAll('Good ', '').toLowerCase();
 

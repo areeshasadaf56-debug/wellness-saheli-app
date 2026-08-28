@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../theme/app_theme.dart';
 import '../models/health_profile.dart';
 import '../services/health_profile_service.dart';
-import '../widgets/wellness_check_in_dialog.dart';
-import '../widgets/diary_entry_dialog.dart';
+import '../providers/cycle_provider.dart';
 
-/// Unified entry type so PCOS results, contraception changes, free-text
-/// diary entries, and AI conversation turns can all live in one sorted
-/// timeline.
-enum _EntryKind { pcos, contraception, diary, conversation }
+/// Unified entry type so PCOS results, contraception changes, AI
+/// conversation turns, and cycle logs (period flow, mood, symptoms) can
+/// all live in one sorted timeline.
+enum _EntryKind { pcos, contraception, conversation, cycle, eligibility }
 
 class _TimelineEntry {
   final DateTime date;
@@ -57,82 +57,122 @@ class _HealthDiaryScreenState extends State<HealthDiaryScreen> {
     });
   }
 
-  /// True when a contraceptionHistory entry came from the Eligibility tool
-  /// rather than a manual "I'm using this method" save on the Methods tab.
-  /// Both share the same ContraceptionLogEntry model -- this is the only
-  /// thing that tells them apart, set in protection_screen.dart.
-  bool _isEligibilityCheck(ContraceptionLogEntry c) =>
-      (c.note ?? '').startsWith('Eligibility check');
+  /// Parses the "yyyy-MM-dd" keys CycleProvider uses for _dailyLogs back
+  /// into a DateTime, so cycle log entries can be sorted alongside
+  /// PCOS/contraception/conversation entries on the same timeline.
+  DateTime? _parseDateKey(String key) {
+    final parts = key.split('-');
+    if (parts.length != 3) return null;
+    final year = int.tryParse(parts[0]);
+    final month = int.tryParse(parts[1]);
+    final day = int.tryParse(parts[2]);
+    if (year == null || month == null || day == null) return null;
+    return DateTime(year, month, day);
+  }
 
-  List<_TimelineEntry> _buildTimeline(HealthProfile p) {
+  List<_TimelineEntry> _buildTimeline(
+    HealthProfile p,
+    Map<String, dynamic> dailyLogs,
+  ) {
     final entries = <_TimelineEntry>[];
 
     for (final r in p.pcosHistory) {
-      final positive =
-          r.prediction.toLowerCase().contains('detected') &&
+      final positive = r.prediction.toLowerCase().contains('detected') &&
           !r.prediction.toLowerCase().contains('no pcos');
-      entries.add(
-        _TimelineEntry(
-          date: r.date,
-          kind: _EntryKind.pcos,
-          title: 'PCOS Check — ${r.prediction}',
-          subtitle:
-              'Likelihood: ${(r.pcosProbability * 100).clamp(0, 100).toStringAsFixed(1)}% · ${r.modelUsed}',
-          color: positive ? AppColors.periodRed : AppColors.ovulationTeal,
-          emoji: '🧪',
-        ),
-      );
+      entries.add(_TimelineEntry(
+        date: r.date,
+        kind: _EntryKind.pcos,
+        title: 'PCOS Check — ${r.prediction}',
+        subtitle:
+            'Likelihood: ${(r.pcosProbability * 100).clamp(0, 100).toStringAsFixed(1)}% · ${r.modelUsed}',
+        color: positive ? AppColors.periodRed : AppColors.ovulationTeal,
+        emoji: '🧪',
+      ));
     }
 
     for (final c in p.reproductiveHistory.contraceptionHistory) {
-      final isEligibilityCheck = _isEligibilityCheck(c);
-      entries.add(
-        _TimelineEntry(
-          date: c.date,
-          kind: _EntryKind.contraception,
-          title: isEligibilityCheck
-              ? 'Eligibility Check — ${c.method}'
-              : 'Protection Method — ${c.method}',
-          subtitle: isEligibilityCheck
-              ? (c.note ?? 'Checked eligible')
-              : (c.note ?? 'Method logged'),
-          color: isEligibilityCheck ? AppColors.moodYellow : AppColors.primary,
-          emoji: isEligibilityCheck ? '🔎' : '🛡️',
-        ),
-      );
+      entries.add(_TimelineEntry(
+        date: c.date,
+        kind: _EntryKind.contraception,
+        title: 'Protection Method — ${c.method}',
+        subtitle: c.note ?? 'Method logged',
+        color: AppColors.primary,
+        emoji: '🛡️',
+      ));
     }
 
-    for (final d in p.diaryEntries) {
-      final subtitleParts = <String>[];
-      if (d.mood != null) subtitleParts.add(d.mood!);
-      if (d.symptomTags.isNotEmpty) subtitleParts.add(d.symptomTags.join(', '));
-      subtitleParts.add(
-        d.text.length > 80 ? '${d.text.substring(0, 80)}…' : d.text,
-      );
-      entries.add(
-        _TimelineEntry(
-          date: d.date,
-          kind: _EntryKind.diary,
-          title: 'Diary Entry',
-          subtitle: subtitleParts.join(' · '),
-          color: AppColors.accent,
-          emoji: '📝',
-        ),
-      );
+    for (final ec in p.eligibilityHistory) {
+      final safeCount = ec.results.where((r) => r.category == 1).length;
+      entries.add(_TimelineEntry(
+        date: ec.date,
+        kind: _EntryKind.eligibility,
+        title: 'Eligibility Check — ${ec.conditions.length} condition(s)',
+        subtitle: ec.conditions.isEmpty
+            ? '$safeCount of ${ec.results.length} methods rated "safe to use"'
+            : '${ec.conditions.join(", ")} · $safeCount of ${ec.results.length} methods rated "safe to use"',
+        color: AppColors.moodYellow,
+        emoji: '📝',
+      ));
     }
 
     for (final e in p.conversationLog) {
-      entries.add(
-        _TimelineEntry(
-          date: e.timestamp,
-          kind: _EntryKind.conversation,
-          title: e.role == 'user' ? 'You said' : 'Saheli AI',
-          subtitle: e.message,
-          color: AppColors.accent,
-          emoji: e.role == 'user' ? '💬' : '🤖',
-        ),
-      );
+      entries.add(_TimelineEntry(
+        date: e.timestamp,
+        kind: _EntryKind.conversation,
+        title: e.role == 'user' ? 'You said' : 'Saheli AI',
+        subtitle: e.message,
+        color: AppColors.accent,
+        emoji: e.role == 'user' ? '💬' : '🤖',
+      ));
     }
+
+    // Cycle logs come from CycleProvider's dailyLogs map, keyed by date
+    // string. Each day's log can carry a period flag/intensity, a mood,
+    // and/or a list of symptoms -- each present field becomes its own
+    // timeline entry so the diary reads naturally (e.g. "Period Flow:
+    // Medium" on one line, "Mood: Anxious" on another, same day).
+    dailyLogs.forEach((key, log) {
+      final date = _parseDateKey(key);
+      if (date == null) return;
+
+      final isPeriodDay = log.isPeriodDay == true;
+      final flowIntensity = log.flowIntensity as String?;
+      final mood = log.mood as String?;
+      final symptoms = (log.symptoms as List?)?.cast<String>() ?? const [];
+
+      if (isPeriodDay || (flowIntensity != null && flowIntensity.isNotEmpty)) {
+        entries.add(_TimelineEntry(
+          date: date,
+          kind: _EntryKind.cycle,
+          title: 'Period Flow${flowIntensity != null ? ' — $flowIntensity' : ''}',
+          subtitle: isPeriodDay ? 'Logged as a period day' : 'Flow logged',
+          color: AppColors.periodRed,
+          emoji: '🩸',
+        ));
+      }
+
+      if (mood != null && mood.isNotEmpty) {
+        entries.add(_TimelineEntry(
+          date: date,
+          kind: _EntryKind.cycle,
+          title: 'Mood — $mood',
+          subtitle: 'Logged from your cycle calendar',
+          color: AppColors.moodYellow,
+          emoji: '🙂',
+        ));
+      }
+
+      if (symptoms.isNotEmpty) {
+        entries.add(_TimelineEntry(
+          date: date,
+          kind: _EntryKind.cycle,
+          title: 'Symptoms logged',
+          subtitle: symptoms.join(', '),
+          color: AppColors.symptomOrange,
+          emoji: '📋',
+        ));
+      }
+    });
 
     entries.sort((a, b) => b.date.compareTo(a.date));
     return entries;
@@ -140,6 +180,8 @@ class _HealthDiaryScreenState extends State<HealthDiaryScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final cycle = context.watch<CycleProvider>();
+
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
@@ -158,14 +200,12 @@ class _HealthDiaryScreenState extends State<HealthDiaryScreen> {
                     children: [
                       _buildHeader(context),
                       const SizedBox(height: 20),
-                      _buildStatsRow(_profile!),
-                      const SizedBox(height: 16),
-                      _buildWriteDiaryButton(),
+                      _buildStatsGrid(_profile!, cycle),
                       const SizedBox(height: 20),
                       _buildTabs(),
                       const SizedBox(height: 16),
                       if (_activeTab == 0)
-                        ..._buildTimelineTab(_profile!)
+                        ..._buildTimelineTab(_profile!, cycle)
                       else
                         ..._buildProfileTab(_profile!),
                       const SizedBox(height: 16),
@@ -230,107 +270,93 @@ class _HealthDiaryScreenState extends State<HealthDiaryScreen> {
     );
   }
 
-  // ---------------- Write diary entry ----------------
-
-  Widget _buildWriteDiaryButton() {
-    return SizedBox(
-      width: double.infinity,
-      child: ElevatedButton.icon(
-        onPressed: () => showDiaryEntryDialog(context, onSaved: _load),
-        icon: const Icon(Icons.edit_outlined, size: 18),
-        label: Text(
-          'Write in your diary',
-          style: AppTextStyles.sans(
-            size: 13.5,
-            weight: FontWeight.w600,
-            color: Colors.white,
-          ),
-        ),
-        style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.accent,
-          foregroundColor: Colors.white,
-          padding: const EdgeInsets.symmetric(vertical: 13),
-          elevation: 0,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-        ),
-      ),
-    );
-  }
-
   // ---------------- Stats ----------------
 
-  Widget _buildStatsRow(HealthProfile p) {
-    // Split contraceptionHistory into the two kinds it now holds, so this
-    // row doesn't lump "methods you're actually using" together with
-    // "methods a check said you're eligible for" under one misleading count.
-    final methodsSaved = p.reproductiveHistory.contraceptionHistory
-        .where((c) => !_isEligibilityCheck(c))
-        .length;
-    final eligibilityChecks = p.reproductiveHistory.contraceptionHistory
-        .where(_isEligibilityCheck)
-        .length;
-
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Row(
-        children: [
-          _statCard(
-            '${p.pcosHistory.length}',
-            'PCOS checks',
-            AppColors.ovulationTeal,
-          ),
-          const SizedBox(width: 10),
-          _statCard('$methodsSaved', 'Methods saved', AppColors.primary),
-          const SizedBox(width: 10),
-          _statCard(
-            '$eligibilityChecks',
-            'Eligibility checks',
-            AppColors.moodYellow,
-          ),
-          const SizedBox(width: 10),
-          _statCard(
-            '${p.diaryEntries.length}',
-            'Diary entries',
-            AppColors.accent,
-          ),
-          const SizedBox(width: 10),
-          _statCard(
-            '${p.conversationLog.length}',
-            'AI check-ins',
-            AppColors.textSecondary,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _statCard(String value, String label, Color color) {
-    return SizedBox(
-      width: 110,
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 8),
-        decoration: BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: color.withOpacity(0.3)),
-        ),
-        child: Column(
+  Widget _buildStatsGrid(HealthProfile p, CycleProvider cycle) {
+    return Column(
+      children: [
+        Row(
           children: [
-            Text(value, style: AppTextStyles.serif(size: 22, color: color)),
-            const SizedBox(height: 4),
-            Text(
-              label,
-              textAlign: TextAlign.center,
-              style: AppTextStyles.sans(
-                size: 10,
-                weight: FontWeight.w600,
-                color: AppColors.textSecondary,
+            Expanded(
+              child: _statCard(
+                '${p.pcosHistory.length}',
+                'PCOS checks',
+                AppColors.ovulationTeal,
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: _statCard(
+                '${p.reproductiveHistory.contraceptionHistory.length}',
+                'Methods logged',
+                AppColors.primary,
               ),
             ),
           ],
         ),
+        const SizedBox(height: 10),
+        Row(
+          children: [
+            Expanded(
+              child: _statCard(
+                '${cycle.dailyLogs.length}',
+                'Cycle entries',
+                AppColors.periodRed,
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: _statCard(
+                '${p.eligibilityHistory.length}',
+                'Eligibility checks',
+                AppColors.moodYellow,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 10),
+        Row(
+          children: [
+            Expanded(
+              child: _statCard(
+                '${p.conversationLog.length}',
+                'AI check-ins',
+                AppColors.accent,
+              ),
+            ),
+            const SizedBox(width: 10),
+            const Expanded(child: SizedBox()),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _statCard(String value, String label, Color color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 8),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: color.withOpacity(0.3)),
+      ),
+      child: Column(
+        children: [
+          Text(
+            value,
+            style: AppTextStyles.serif(size: 22, color: color),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            label,
+            textAlign: TextAlign.center,
+            style: AppTextStyles.sans(
+              size: 10,
+              weight: FontWeight.w600,
+              color: AppColors.textSecondary,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -386,8 +412,8 @@ class _HealthDiaryScreenState extends State<HealthDiaryScreen> {
 
   // ---------------- Timeline tab ----------------
 
-  List<Widget> _buildTimelineTab(HealthProfile p) {
-    final entries = _buildTimeline(p);
+  List<Widget> _buildTimelineTab(HealthProfile p, CycleProvider cycle) {
+    final entries = _buildTimeline(p, cycle.dailyLogs);
 
     if (entries.isEmpty) {
       return [_emptyState()];
@@ -402,19 +428,17 @@ class _HealthDiaryScreenState extends State<HealthDiaryScreen> {
 
     final widgets = <Widget>[];
     grouped.forEach((month, items) {
-      widgets.add(
-        Padding(
-          padding: const EdgeInsets.only(bottom: 8, top: 4),
-          child: Text(
-            month.toUpperCase(),
-            style: AppTextStyles.sans(
-              size: 11,
-              weight: FontWeight.w600,
-              color: AppColors.textSecondary,
-            ),
+      widgets.add(Padding(
+        padding: const EdgeInsets.only(bottom: 8, top: 4),
+        child: Text(
+          month.toUpperCase(),
+          style: AppTextStyles.sans(
+            size: 11,
+            weight: FontWeight.w600,
+            color: AppColors.textSecondary,
           ),
         ),
-      );
+      ));
       for (final item in items) {
         widgets.add(_timelineTile(item));
       }
@@ -498,7 +522,8 @@ class _HealthDiaryScreenState extends State<HealthDiaryScreen> {
           ),
           const SizedBox(height: 6),
           Text(
-            'PCOS checks, protection method changes, diary entries, and AI check-ins will show up here automatically as you use the app.',
+            'PCOS checks, protection method changes, cycle logs, and AI '
+            'check-ins will show up here automatically as you use the app.',
             textAlign: TextAlign.center,
             style: AppTextStyles.sans(
               size: 12,
@@ -516,18 +541,12 @@ class _HealthDiaryScreenState extends State<HealthDiaryScreen> {
     return [
       _profileSection('Demographics', '👤', AppColors.primary, [
         _kv('Age', p.demographics.ageYrs?.toString()),
-        _kv(
-          'Weight',
-          p.demographics.weightKg != null
-              ? '${p.demographics.weightKg} kg'
-              : null,
-        ),
-        _kv(
-          'Height',
-          p.demographics.heightCm != null
-              ? '${p.demographics.heightCm} cm'
-              : null,
-        ),
+        _kv('Weight', p.demographics.weightKg != null
+            ? '${p.demographics.weightKg} kg'
+            : null),
+        _kv('Height', p.demographics.heightCm != null
+            ? '${p.demographics.heightCm} cm'
+            : null),
         _kv('Marital Status', p.demographics.maritalStatus),
       ]),
       const SizedBox(height: 12),
@@ -536,58 +555,30 @@ class _HealthDiaryScreenState extends State<HealthDiaryScreen> {
         _kv('Exercise Frequency', p.lifestyle.exerciseFrequency),
         _kv('Diet Quality', p.lifestyle.dietQuality),
         _kv('Frequent Fast Food', _yesNo(p.lifestyle.fastFoodFrequent)),
-        _kv(
-          'Avg Sleep',
-          p.lifestyle.averageSleepHours != null
-              ? '${p.lifestyle.averageSleepHours} hrs'
-              : null,
-        ),
+        _kv('Avg Sleep', p.lifestyle.averageSleepHours != null
+            ? '${p.lifestyle.averageSleepHours} hrs'
+            : null),
         _kv('Notes', p.lifestyle.notes),
       ]),
       const SizedBox(height: 12),
       _profileSection('Reproductive Health', '🩷', AppColors.periodRed, [
         _kv('Cycle Regularity', p.reproductiveHistory.cycleRegularity),
-        _kv(
-          'Cycle Length',
-          p.reproductiveHistory.cycleLengthDays != null
-              ? '${p.reproductiveHistory.cycleLengthDays} days'
-              : null,
-        ),
-        _kv('Current Method', p.reproductiveHistory.currentContraceptionMethod),
+        _kv('Cycle Length', p.reproductiveHistory.cycleLengthDays != null
+            ? '${p.reproductiveHistory.cycleLengthDays} days'
+            : null),
+        _kv('Current Method',
+            p.reproductiveHistory.currentContraceptionMethod),
       ]),
       const SizedBox(height: 12),
       _profileSection('Wellbeing (self-reported)', '💛', AppColors.moodYellow, [
-        _kv(
-          'Stress Level (1-5)',
-          p.mentalHealth.selfReportedStressLevel?.toString(),
-        ),
+        _kv('Stress Level (1-5)',
+            p.mentalHealth.selfReportedStressLevel?.toString()),
         _kv('Notes', p.mentalHealth.notes),
         _kv(
           'Last Check-in',
           p.mentalHealth.lastCheckIn != null
               ? _formatDate(p.mentalHealth.lastCheckIn!)
               : null,
-        ),
-        const SizedBox(height: 10),
-        SizedBox(
-          width: double.infinity,
-          child: OutlinedButton.icon(
-            onPressed: () =>
-                showWellnessCheckInDialog(context, current: p, onSaved: _load),
-            icon: const Icon(Icons.favorite_outline, size: 16),
-            label: Text(
-              'Log how you\'re feeling',
-              style: AppTextStyles.sans(size: 12.5, weight: FontWeight.w600),
-            ),
-            style: OutlinedButton.styleFrom(
-              foregroundColor: AppColors.moodYellow,
-              side: BorderSide(color: AppColors.moodYellow.withOpacity(0.6)),
-              padding: const EdgeInsets.symmetric(vertical: 11),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-            ),
-          ),
         ),
       ]),
       const SizedBox(height: 16),
@@ -674,36 +665,16 @@ class _HealthDiaryScreenState extends State<HealthDiaryScreen> {
 
   String _monthYearLabel(DateTime d) {
     const months = [
-      'January',
-      'February',
-      'March',
-      'April',
-      'May',
-      'June',
-      'July',
-      'August',
-      'September',
-      'October',
-      'November',
-      'December',
+      'January', 'February', 'March', 'April', 'May', 'June',
+      'July', 'August', 'September', 'October', 'November', 'December',
     ];
     return '${months[d.month - 1]} ${d.year}';
   }
 
   String _formatDate(DateTime d) {
     const months = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec',
+      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
     ];
     final hour = d.hour % 12 == 0 ? 12 : d.hour % 12;
     final ampm = d.hour >= 12 ? 'PM' : 'AM';

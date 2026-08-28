@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 import '../services/pcos_api_service.dart';
+import '../services/health_profile_service.dart';
 
 /// A single bullet/paragraph line inside a card body.
 /// If [boldLead] is set, it's rendered bold and inline before [text].
@@ -59,6 +60,62 @@ class _PcosScreenState extends State<PcosScreen> {
   bool _isLoading = false;
   PcosResult? _result;
   String? _errorText;
+  bool _prefilled = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _prefillFromProfile();
+  }
+
+  /// Pre-fills whatever the AI check-in / diary already knows, so the
+  /// person doesn't retype data she's already given the app. Only fills
+  /// fields that are currently empty -- never overwrites something she's
+  /// already typed into the form.
+  Future<void> _prefillFromProfile() async {
+    final profile = await HealthProfileService().loadProfile();
+    if (!mounted) return;
+
+    bool filledSomething = false;
+
+    setState(() {
+      if (_ageController.text.isEmpty && profile.demographics.ageYrs != null) {
+        _ageController.text = profile.demographics.ageYrs.toString();
+        filledSomething = true;
+      }
+      if (_weightController.text.isEmpty &&
+          profile.demographics.weightKg != null) {
+        _weightController.text = profile.demographics.weightKg.toString();
+        filledSomething = true;
+      }
+      if (_heightController.text.isEmpty &&
+          profile.demographics.heightCm != null) {
+        _heightController.text = profile.demographics.heightCm.toString();
+        filledSomething = true;
+      }
+      if (profile.reproductiveHistory.cycleRegularity != null) {
+        _cycleRegularity = profile.reproductiveHistory.cycleRegularity!;
+        filledSomething = true;
+      }
+      if (_cycleLengthController.text.isEmpty &&
+          profile.reproductiveHistory.cycleLengthDays != null) {
+        _cycleLengthController.text = profile
+            .reproductiveHistory
+            .cycleLengthDays
+            .toString();
+        filledSomething = true;
+      }
+      if (profile.lifestyle.fastFoodFrequent != null) {
+        _fastFood = profile.lifestyle.fastFoodFrequent!;
+        filledSomething = true;
+      }
+      if (profile.lifestyle.regularExercise != null) {
+        _regularExercise = profile.lifestyle.regularExercise!;
+        filledSomething = true;
+      }
+      _prefilled = filledSomething;
+    });
+  }
 
   @override
   void dispose() {
@@ -177,11 +234,13 @@ class _PcosScreenState extends State<PcosScreen> {
         height: 46,
         alignment: Alignment.center,
         decoration: BoxDecoration(
-          color: isActive ? activeColor.withOpacity(0.18) : AppColors.surface,
+          color: isActive
+              ? activeColor.withValues(alpha: 0.18)
+              : AppColors.surface,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: isActive
-                ? activeColor.withOpacity(0.6)
+                ? activeColor.withValues(alpha: 0.6)
                 : AppColors.cardBorder,
           ),
         ),
@@ -431,10 +490,41 @@ class _PcosScreenState extends State<PcosScreen> {
   // =========================================================
   // DETECTION TAB — now a real, working form (no Coming Soon)
   // =========================================================
+  Widget _prefillBanner() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      decoration: BoxDecoration(
+        color: AppColors.ovulationTeal.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(
+          color: AppColors.ovulationTeal.withValues(alpha: 0.3),
+        ),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.auto_awesome, size: 15, color: AppColors.ovulationTeal),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              'Some fields were pre-filled from your profile. Review and edit as needed.',
+              style: AppTextStyles.sans(
+                size: 11.5,
+                color: AppColors.textSecondary,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   List<Widget> _buildDetectionTab() {
     return [
       _detectionHeroCard(),
-      const SizedBox(height: 24),
+      const SizedBox(height: 16),
+      if (_prefilled) _prefillBanner(),
+      const SizedBox(height: 8),
       Form(
         key: _formKey,
         child: Column(
@@ -592,7 +682,9 @@ class _PcosScreenState extends State<PcosScreen> {
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: AppColors.ovulationTeal.withOpacity(0.3)),
+        border: Border.all(
+          color: AppColors.ovulationTeal.withValues(alpha: 0.3),
+        ),
       ),
       child: Column(
         children: [
@@ -722,12 +814,12 @@ class _PcosScreenState extends State<PcosScreen> {
         alignment: Alignment.center,
         decoration: BoxDecoration(
           color: isActive
-              ? AppColors.ovulationTeal.withOpacity(0.18)
+              ? AppColors.ovulationTeal.withValues(alpha: 0.18)
               : AppColors.surface,
           borderRadius: BorderRadius.circular(10),
           border: Border.all(
             color: isActive
-                ? AppColors.ovulationTeal.withOpacity(0.6)
+                ? AppColors.ovulationTeal.withValues(alpha: 0.6)
                 : AppColors.cardBorder,
           ),
         ),
@@ -815,7 +907,7 @@ class _PcosScreenState extends State<PcosScreen> {
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: color.withOpacity(0.5)),
+        border: Border.all(color: color.withValues(alpha: 0.5)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -902,6 +994,15 @@ class _PcosScreenState extends State<PcosScreen> {
         _isLoading = false;
         _result = result;
       });
+
+      // Save into the diary/profile so history + future AI check-ins
+      // can reference it -- fire-and-forget, shouldn't block the result
+      // from showing.
+      HealthProfileService().appendPcosResult(
+        prediction: result.prediction,
+        pcosProbability: result.pcosProbability,
+        modelUsed: result.modelUsed,
+      );
     } catch (e) {
       setState(() {
         _isLoading = false;
@@ -927,7 +1028,7 @@ class _PcosScreenState extends State<PcosScreen> {
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: AppColors.primary.withOpacity(0.3)),
+        border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
       ),
       child: Column(
         children: [
@@ -1011,7 +1112,7 @@ class _PcosCardState extends State<PcosCard> {
                     width: 40,
                     height: 40,
                     decoration: BoxDecoration(
-                      color: widget.badgeColor.withOpacity(0.18),
+                      color: widget.badgeColor.withValues(alpha: 0.18),
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: Center(
@@ -1077,9 +1178,11 @@ class _PcosCardState extends State<PcosCard> {
                             vertical: 5,
                           ),
                           decoration: BoxDecoration(
-                            color: t.color.withOpacity(0.15),
+                            color: t.color.withValues(alpha: 0.15),
                             borderRadius: BorderRadius.circular(20),
-                            border: Border.all(color: t.color.withOpacity(0.4)),
+                            border: Border.all(
+                              color: t.color.withValues(alpha: 0.4),
+                            ),
                           ),
                           child: Text(
                             t.label,

@@ -151,10 +151,10 @@ class _CycleDataScreenState extends State<CycleDataScreen> {
               Container(
                 padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
-                  color: AppColors.ovulationTeal.withOpacity(0.1),
+                  color: AppColors.ovulationTeal.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                    color: AppColors.ovulationTeal.withOpacity(0.3),
+                    color: AppColors.ovulationTeal.withValues(alpha: 0.3),
                   ),
                 ),
                 child: Row(
@@ -278,8 +278,8 @@ class _CycleDataScreenState extends State<CycleDataScreen> {
         height: 32,
         decoration: BoxDecoration(
           color: enabled
-              ? AppColors.primary.withOpacity(0.15)
-              : AppColors.cardBorder.withOpacity(0.3),
+              ? AppColors.primary.withValues(alpha: 0.15)
+              : AppColors.cardBorder.withValues(alpha: 0.3),
           borderRadius: BorderRadius.circular(8),
         ),
         child: Icon(

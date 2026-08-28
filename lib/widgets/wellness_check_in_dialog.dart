@@ -71,7 +71,7 @@ Future<void> showWellnessCheckInDialog(
                     activeTrackColor: AppColors.moodYellow,
                     inactiveTrackColor: AppColors.cardBorder,
                     thumbColor: AppColors.moodYellow,
-                    overlayColor: AppColors.moodYellow.withOpacity(0.15),
+                    overlayColor: AppColors.moodYellow.withValues(alpha: 0.15),
                     trackHeight: 4,
                     thumbShape: const RoundSliderThumbShape(
                       enabledThumbRadius: 10,

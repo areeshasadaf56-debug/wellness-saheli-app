@@ -133,8 +133,8 @@ class _MonthCalendarState extends State<MonthCalendar> {
               Color borderColor = AppColors.cardBorder;
 
               if (isPeriodDay) {
-                bgColor = AppColors.periodRed.withOpacity(0.18);
-                borderColor = AppColors.periodRed.withOpacity(0.4);
+                bgColor = AppColors.periodRed.withValues(alpha: 0.18);
+                borderColor = AppColors.periodRed.withValues(alpha: 0.4);
               }
               if (isToday) {
                 borderColor = AppColors.periodRed;

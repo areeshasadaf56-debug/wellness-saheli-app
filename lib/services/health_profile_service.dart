@@ -183,7 +183,11 @@ class HealthProfileService {
   /// dedicated method since this will be called frequently once the AI
   /// chat screen exists, and callers shouldn't need to hand-roll the
   /// list-append logic every time.
-  Future<HealthProfile> appendConversationEntry(String role, String message) {
+  Future<HealthProfile> appendConversationEntry(
+    String role,
+    String message, {
+    String? sessionId,
+  }) {
     return updateProfile((p) {
       final updatedLog = List<ConversationEntry>.from(p.conversationLog)
         ..add(
@@ -191,6 +195,7 @@ class HealthProfileService {
             timestamp: DateTime.now(),
             role: role,
             message: message,
+            sessionId: sessionId,
           ),
         );
       return p.copyWith(conversationLog: updatedLog);
@@ -216,6 +221,28 @@ class HealthProfileService {
           ),
         );
       return p.copyWith(pcosHistory: updatedHistory);
+    });
+  }
+
+  /// Appends a new eligibility-check result -- the conditions the user
+  /// selected in Protection > My Plan > Eligibility tool, plus the
+  /// per-method category results the check returned -- to the diary.
+  /// Without this, running the eligibility tool never left a trace
+  /// anywhere once the user navigated away from that screen.
+  Future<HealthProfile> appendEligibilityCheck({
+    required List<String> conditions,
+    required List<EligibilityResultEntry> results,
+  }) {
+    return updateProfile((p) {
+      final updatedHistory =
+          List<EligibilityCheckResult>.from(p.eligibilityHistory)..add(
+            EligibilityCheckResult(
+              date: DateTime.now(),
+              conditions: conditions,
+              results: results,
+            ),
+          );
+      return p.copyWith(eligibilityHistory: updatedHistory);
     });
   }
 

@@ -301,10 +301,10 @@ class OvulationScreen extends StatelessWidget {
         isActive ? 14 : 0,
       ).copyWith(bottom: isActive ? 14 : 14),
       decoration: BoxDecoration(
-        color: isActive ? color.withOpacity(0.08) : null,
+        color: isActive ? color.withValues(alpha: 0.08) : null,
         borderRadius: BorderRadius.circular(12),
         border: isActive
-            ? Border.all(color: color.withOpacity(0.5), width: 1)
+            ? Border.all(color: color.withValues(alpha: 0.5), width: 1)
             : const Border(
                 bottom: BorderSide(color: AppColors.cardBorder, width: 1),
               ),
@@ -322,7 +322,7 @@ class OvulationScreen extends StatelessWidget {
               boxShadow: isActive
                   ? [
                       BoxShadow(
-                        color: color.withOpacity(0.6),
+                        color: color.withValues(alpha: 0.6),
                         blurRadius: 6,
                         spreadRadius: 1,
                       ),
@@ -353,7 +353,7 @@ class OvulationScreen extends StatelessWidget {
                           vertical: 3,
                         ),
                         decoration: BoxDecoration(
-                          color: color.withOpacity(0.2),
+                          color: color.withValues(alpha: 0.2),
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: Text(

@@ -1,8 +1,136 @@
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
+import '../models/health_profile.dart';
+import '../services/health_profile_service.dart';
 
-class DataPrivacyScreen extends StatelessWidget {
+class DataPrivacyScreen extends StatefulWidget {
   const DataPrivacyScreen({super.key});
+
+  @override
+  State<DataPrivacyScreen> createState() => _DataPrivacyScreenState();
+}
+
+class _DataPrivacyScreenState extends State<DataPrivacyScreen> {
+  final HealthProfileService _service = HealthProfileService();
+  HealthProfile? _profile;
+  bool _loading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  Future<void> _load() async {
+    final profile = await _service.loadProfile();
+    if (!mounted) return;
+    setState(() {
+      _profile = profile;
+      _loading = false;
+    });
+  }
+
+  Future<void> _setAiCanAccessDiary(bool value) async {
+    final updated = await _service.updateProfile(
+      (p) => p.copyWith(
+        privacySettings: p.privacySettings.copyWith(aiCanAccessDiary: value),
+      ),
+    );
+    if (!mounted) return;
+    setState(() => _profile = updated);
+  }
+
+  Future<void> _setAiMemoryEnabled(bool value) async {
+    final updated = await _service.updateProfile(
+      (p) => p.copyWith(
+        privacySettings: p.privacySettings.copyWith(aiMemoryEnabled: value),
+      ),
+    );
+    if (!mounted) return;
+    setState(() => _profile = updated);
+  }
+
+  Future<void> _confirmAndClearAiMemory() async {
+    final confirmed = await _showConfirmDialog(
+      title: 'Clear AI conversation memory?',
+      body:
+          'This deletes every past check-in conversation Saheli AI has '
+          'recorded. It does not affect your diary entries, PCOS checks, '
+          'or contraception history. This can\'t be undone.',
+      confirmLabel: 'Clear memory',
+    );
+    if (confirmed != true) return;
+
+    final updated = await _service.updateProfile(
+      (p) => p.copyWith(conversationLog: const []),
+    );
+    if (!mounted) return;
+    setState(() => _profile = updated);
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('AI conversation memory cleared')),
+    );
+  }
+
+  Future<void> _confirmAndDeleteDiaryEntries() async {
+    final confirmed = await _showConfirmDialog(
+      title: 'Delete all diary entries?',
+      body:
+          'This permanently deletes everything you\'ve written in your '
+          'diary. It does not affect your cycle logs, PCOS checks, or AI '
+          'conversation history. This can\'t be undone.',
+      confirmLabel: 'Delete entries',
+    );
+    if (confirmed != true) return;
+
+    final updated = await _service.updateProfile(
+      (p) => p.copyWith(diaryEntries: const []),
+    );
+    if (!mounted) return;
+    setState(() => _profile = updated);
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('All diary entries deleted')));
+  }
+
+  Future<bool?> _showConfirmDialog({
+    required String title,
+    required String body,
+    required String confirmLabel,
+  }) {
+    return showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        backgroundColor: AppColors.surface,
+        title: Text(
+          title,
+          style: AppTextStyles.sans(size: 16, weight: FontWeight.w600),
+        ),
+        content: Text(
+          body,
+          style: AppTextStyles.sans(
+            size: 13,
+            color: AppColors.textSecondary,
+          ).copyWith(height: 1.5),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: Text(
+              confirmLabel,
+              style: const TextStyle(
+                color: Color(0xFFE57373),
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -16,13 +144,17 @@ class DataPrivacyScreen extends StatelessWidget {
             children: [
               _backHeader(context, 'Data & Privacy'),
               const SizedBox(height: 20),
+              if (!_loading) ...[
+                _aiPrivacySection(),
+                const SizedBox(height: 24),
+              ],
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: AppColors.ovulationTeal.withOpacity(0.1),
+                  color: AppColors.ovulationTeal.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(14),
                   border: Border.all(
-                    color: AppColors.ovulationTeal.withOpacity(0.3),
+                    color: AppColors.ovulationTeal.withValues(alpha: 0.3),
                   ),
                 ),
                 child: Row(
@@ -100,6 +232,144 @@ class DataPrivacyScreen extends StatelessWidget {
         ),
         const SizedBox(width: 12),
         Text(title, style: AppTextStyles.serif(size: 20)),
+      ],
+    );
+  }
+
+  // ---------------- AI & Diary privacy controls ----------------
+
+  Widget _aiPrivacySection() {
+    final settings = _profile!.privacySettings;
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppColors.cardBorder),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'AI & Diary Privacy',
+            style: AppTextStyles.sans(size: 14, weight: FontWeight.w700),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            'Control what Saheli AI is allowed to remember and read about you.',
+            style: AppTextStyles.sans(
+              size: 12,
+              color: AppColors.textSecondary,
+            ).copyWith(height: 1.4),
+          ),
+          const SizedBox(height: 16),
+          _privacyToggleRow(
+            emoji: '📖',
+            title: 'AI can read my diary',
+            subtitle:
+                'When on, Saheli AI may reference your diary entries during '
+                'check-ins to give more relevant guidance. Off by default.',
+            value: settings.aiCanAccessDiary,
+            onChanged: _setAiCanAccessDiary,
+          ),
+          const SizedBox(height: 12),
+          _privacyToggleRow(
+            emoji: '🧠',
+            title: 'AI remembers past conversations',
+            subtitle:
+                'When off, every check-in starts fresh with no memory of '
+                'earlier conversations.',
+            value: settings.aiMemoryEnabled,
+            onChanged: _setAiMemoryEnabled,
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton(
+                  onPressed: _confirmAndClearAiMemory,
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: AppColors.textPrimary,
+                    side: BorderSide(color: AppColors.cardBorder),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  child: Text(
+                    'Clear AI memory',
+                    style: AppTextStyles.sans(
+                      size: 12,
+                      weight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: OutlinedButton(
+                  onPressed: _confirmAndDeleteDiaryEntries,
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: const Color(0xFFE57373),
+                    side: const BorderSide(color: Color(0xFFE57373)),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  child: Text(
+                    'Delete diary entries',
+                    style: AppTextStyles.sans(
+                      size: 12,
+                      weight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _privacyToggleRow({
+    required String emoji,
+    required String title,
+    required String subtitle,
+    required bool value,
+    required ValueChanged<bool> onChanged,
+  }) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(emoji, style: const TextStyle(fontSize: 16)),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: AppTextStyles.sans(size: 13, weight: FontWeight.w600),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                subtitle,
+                style: AppTextStyles.sans(
+                  size: 11,
+                  color: AppColors.textSecondary,
+                ).copyWith(height: 1.4),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(width: 8),
+        Switch(
+          value: value,
+          activeThumbColor: AppColors.primary,
+          onChanged: onChanged,
+        ),
       ],
     );
   }

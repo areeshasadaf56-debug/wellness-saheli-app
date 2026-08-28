@@ -21,7 +21,7 @@ class AboutScreen extends StatelessWidget {
                 height: 64,
                 decoration: BoxDecoration(
                   // ignore: deprecated_member_use
-                  color: AppColors.primary.withOpacity(0.15),
+                  color: AppColors.primary.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: const Center(
