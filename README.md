@@ -2,7 +2,7 @@
 
 > **Your personal women's health companion** — cycle tracking, PCOS detection, contraception guidance, and an AI check-in, all in one privacy-first app.
 
-*"Saheli" (سہیلی) means "girlfriend" or "companion" in Urdu — because every woman deserves a knowledgeable friend in her corner.*
+
 
 ---
 
