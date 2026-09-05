@@ -1,8 +1,17 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import '../config/api_config.dart';
 
-/// Base URL for the Flask backend hosting the eligibility endpoints.
-const String _baseUrl = 'https://areeshasadaf56.pythonanywhere.com';
+/// MODULE: services/eligibility_api_service.dart
+/// ROLE: Talks to the Flask backend's contraceptive-eligibility endpoints
+/// (GET /conditions, GET /methods_reference, GET /effectiveness,
+/// POST /eligibility). Used by screens/protection_screen.dart to power
+/// the Eligibility tool.
+/// FIX (was a bug): this file used to define its own hardcoded
+/// `_baseUrl` constant, separate from config/api_config.dart's
+/// `ApiConfig.baseUrl`. That meant changing the backend URL in one place
+/// silently missed this file's four endpoints. Now reads from
+/// ApiConfig.baseUrl like every other service in the app.
 
 /// A single selectable medical condition, as returned by GET /conditions.
 class Condition {
@@ -66,7 +75,9 @@ class EffectivenessEntry {
 
 class EligibilityApiService {
   Future<List<Condition>> fetchConditions() async {
-    final response = await http.get(Uri.parse('$_baseUrl/conditions'));
+    final response = await http.get(
+      Uri.parse('${ApiConfig.baseUrl}/conditions'),
+    );
     if (response.statusCode != 200) {
       throw Exception('Could not load conditions (${response.statusCode})');
     }
@@ -77,7 +88,9 @@ class EligibilityApiService {
   }
 
   Future<List<MethodInfo>> fetchMethodsReference() async {
-    final response = await http.get(Uri.parse('$_baseUrl/methods_reference'));
+    final response = await http.get(
+      Uri.parse('${ApiConfig.baseUrl}/methods_reference'),
+    );
     if (response.statusCode != 200) {
       throw Exception('Could not load methods (${response.statusCode})');
     }
@@ -88,7 +101,9 @@ class EligibilityApiService {
   }
 
   Future<List<EffectivenessEntry>> fetchEffectiveness() async {
-    final response = await http.get(Uri.parse('$_baseUrl/effectiveness'));
+    final response = await http.get(
+      Uri.parse('${ApiConfig.baseUrl}/effectiveness'),
+    );
     if (response.statusCode != 200) {
       throw Exception(
         'Could not load effectiveness data (${response.statusCode})',
@@ -102,7 +117,7 @@ class EligibilityApiService {
 
   Future<List<MethodResult>> checkEligibility(List<String> conditionIds) async {
     final response = await http.post(
-      Uri.parse('$_baseUrl/eligibility'),
+      Uri.parse('${ApiConfig.baseUrl}/eligibility'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({'condition_ids': conditionIds}),
     );

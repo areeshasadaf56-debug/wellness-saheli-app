@@ -1116,21 +1116,97 @@ class _ProtectionScreenState extends State<ProtectionScreen> {
     },
   ];
 
+  /// MODULE NOTE: Methods shown on the top-level "Contraception" tab
+  /// (see _buildContraceptionTab below). Deliberately a SEPARATE, shorter
+  /// list from `_methods` above -- `_methods` still powers "My Plan →
+  /// Methods" (the full 10-method browsable list) unchanged. This list
+  /// exists so the first thing a person sees is a quick, common-methods
+  /// overview (Condom, Combined Pill, IUCD, Implant, Emergency
+  /// Contraception) without duplicating or altering the full list used
+  /// elsewhere in the screen.
+  final List<Map<String, dynamic>> _contraceptionTabMethods = const [
+    {
+      'emoji': '🛡️',
+      'badgeColor': AppColors.ovulationTeal,
+      'name': 'Condom',
+      'effectiveness': '85–98% effective',
+      'detail':
+          'A physical barrier — male (external) or female (internal) — that blocks sperm from reaching an egg, used only at the time of sex. Condoms are the only method here that also reduces the risk of sexually transmitted infections, not just pregnancy. Effectiveness varies a lot with how consistently and correctly it\'s used: about 98% with perfect use, dropping to roughly 85% with typical use, mostly due to breakage, slipping, or not using one every single time. Use a new condom for every act of sex, check the expiry date, and use only water- or silicone-based lubricant with latex condoms (oil-based lubricants can weaken and break latex).',
+      'tags': [
+        {'label': 'STI protection', 'color': AppColors.ovulationTeal},
+        {'label': 'No hormones', 'color': AppColors.ovulationTeal},
+        {'label': 'User-dependent', 'color': AppColors.periodRed},
+      ],
+    },
+    {
+      'emoji': '💊',
+      'badgeColor': AppColors.periodRed,
+      'name': 'Combined Pill (OCP)',
+      'effectiveness': '91–99% effective',
+      'detail':
+          'The combined oral contraceptive pill releases estrogen and progestin together, which work to stop ovulation, thicken cervical mucus, and thin the uterine lining. Taken daily at roughly the same time. With perfect use effectiveness reaches 99%, but typical use (missed pills) brings real-world effectiveness down to around 91%. Offers no STI protection, so a barrier method is still worth using alongside it if that\'s a concern. Many people also use it to regulate irregular cycles, reduce heavy or painful periods, and manage hormonal acne. Usually not recommended for smokers over 35, or for anyone with a history of blood clots, certain migraines, or uncontrolled high blood pressure — worth flagging in the Eligibility tool if any of those apply.',
+      'tags': [
+        {'label': 'Highly effective', 'color': AppColors.ovulationTeal},
+        {'label': 'No STI protection', 'color': AppColors.periodRed},
+        {'label': 'Daily routine', 'color': AppColors.moodYellow},
+      ],
+    },
+    {
+      'emoji': '🔵',
+      'badgeColor': AppColors.textSecondary,
+      'name': 'IUCD',
+      'effectiveness': '>99% effective',
+      'detail':
+          'A small, T-shaped device placed inside the uterus by a healthcare provider. Hormonal versions (levonorgestrel IUD) release a low, steady dose of progestin and last 3–8 years depending on the brand; the copper IUD is hormone-free and lasts up to 10 years, working by releasing copper ions that are toxic to sperm. Because so little can go wrong once it\'s in place, IUCDs are consistently among the most effective methods available. The hormonal version often makes periods much lighter over time; the copper version can make periods heavier and crampier, especially in the first few months. Insertion can cause cramping for a day or two. Fertility returns quickly after removal for either type. No STI protection.',
+      'tags': [
+        {'label': 'Long-term', 'color': AppColors.ovulationTeal},
+        {'label': 'Most effective', 'color': AppColors.ovulationTeal},
+        {'label': 'No STI protection', 'color': AppColors.periodRed},
+      ],
+    },
+    {
+      'emoji': '📍',
+      'badgeColor': AppColors.periodRed,
+      'name': 'Implant',
+      'effectiveness': '>99% effective',
+      'detail':
+          'A small, flexible rod — about the size of a matchstick — inserted just under the skin of the upper arm by a trained provider, using a local anesthetic. It steadily releases progestin for up to 3 years (some brands are approved for longer), making it one of the most effective reversible methods that exists, with a failure rate under 0.1%. There\'s no daily or monthly routine to keep up with. Insertion and removal both take just a few minutes, though removal needs a provider. The most common side effect is a change in bleeding pattern — lighter periods or none at all for some, more irregular spotting for others, especially in the first few months. Fertility returns quickly, often within days of removal. No STI protection.',
+      'tags': [
+        {'label': 'Set and forget', 'color': AppColors.ovulationTeal},
+        {'label': '3 years', 'color': AppColors.primary},
+        {'label': 'No STI protection', 'color': AppColors.periodRed},
+      ],
+    },
+    {
+      'emoji': '⏱️',
+      'badgeColor': AppColors.moodYellow,
+      'name': 'Emergency Contraception',
+      'effectiveness': '75–99% effective',
+      'detail':
+          'Used after unprotected sex or contraceptive failure (e.g. a missed pill or broken condom) to reduce the chance of pregnancy — not meant as a regular, ongoing method. Options include emergency contraceptive pills (levonorgestrel or ulipristal acetate, most effective the sooner they\'re taken, generally within 3–5 days depending on the type) and the copper IUD, which is the single most effective form of emergency contraception if inserted within 5 days of unprotected sex — more effective than any emergency pill, and it then continues working as an ongoing method for years if left in place. Emergency contraception does not protect against STIs and does not end an existing pregnancy. If it\'s needed repeatedly, that\'s worth a conversation with a provider about switching to an ongoing method instead.',
+      'tags': [
+        {'label': 'After the fact', 'color': AppColors.moodYellow},
+        {'label': 'Time-sensitive', 'color': AppColors.periodRed},
+        {'label': 'Not a regular method', 'color': AppColors.periodRed},
+      ],
+    },
+  ];
+
   String _formattedDate() {
     const weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
     const months = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
+      'January',
+      'February',
+      'March',
+      'April',
       'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December',
     ];
     final now = DateTime.now();
     return '${weekdays[now.weekday - 1]}, ${months[now.month - 1]} ${now.day}';
@@ -1255,7 +1331,7 @@ class _ProtectionScreenState extends State<ProtectionScreen> {
         ),
       ),
       const SizedBox(height: 12),
-      ..._methods.map(
+      ..._contraceptionTabMethods.map(
         (m) => MethodCard(
           emoji: m['emoji'] as String,
           badgeColor: m['badgeColor'] as Color,

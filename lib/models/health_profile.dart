@@ -1,16 +1,26 @@
-/// health_profile.dart
-///
-/// The single source of truth for everything the app knows about a user
-/// over time -- their "health diary". Every tab (PCOS, Protection, and the
-/// AI check-in chat) reads from and writes to this same model, so the AI
-/// agent can reference past answers instead of re-asking, and so a PCOS
-/// result, a contraception choice, or an eligibility check made today is
-/// still visible next month.
+/// MODULE: models/health_profile.dart
+/// ROLE: The single source of truth for everything the app knows about a
+/// user over time -- their "health diary". Every tab (PCOS, Protection,
+/// Diary, and the AI check-in chat) reads from and writes to this same
+/// model, so the AI agent can reference past answers instead of
+/// re-asking, and so a PCOS result, a contraception choice, or an
+/// eligibility check made today is still visible next month.
 ///
 /// This is intentionally a loose, nested JSON-friendly structure (not a
 /// rigid SQL schema) because the fields here will keep growing as you add
 /// features -- adding a new field just means adding it to the map, no
 /// migration needed on the backend (see health_profile_api.py).
+///
+/// NOTE: This file defines the app's `PrivacySettings` class (below),
+/// used throughout the app (fields: aiCanAccessDiary, aiMemoryEnabled).
+/// (An earlier, unused duplicate class of the same name that lived in
+/// models/privacy_settings.dart has been removed — this is the only
+/// PrivacySettings class in the codebase now.)
+///
+/// USED BY: services/health_profile_service.dart (all reads/writes go
+/// through here), screens/pcos_screen.dart, screens/protection_screen.dart,
+/// screens/health_diary_screen.dart, screens/ai_checkin_screen.dart,
+/// widgets/wellness_check_in_dialog.dart, widgets/diary_entry_dialog.dart.
 library;
 
 class HealthProfile {
