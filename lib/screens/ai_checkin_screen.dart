@@ -339,7 +339,9 @@ class _AiCheckinScreenState extends State<AiCheckinScreen> {
       if (!mounted) return;
       setState(() {
         _sending = false;
-        _errorText = "Couldn't reach the check-in assistant. Please try again.";
+        _errorText = e is AuthRequiredException
+            ? e.message
+            : "Couldn't reach the check-in assistant. Please try again.";
       });
     }
   }
