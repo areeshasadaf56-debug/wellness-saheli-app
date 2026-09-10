@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../providers/cycle_provider.dart';
 import '../theme/app_theme.dart';
 import 'sign_up_screen.dart';
 import 'home_shell.dart';
@@ -15,6 +17,7 @@ class _SignInScreenState extends State<SignInScreen> {
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
   String? _errorText;
+  bool _isSubmitting = false;
 
   @override
   void dispose() {
@@ -23,7 +26,7 @@ class _SignInScreenState extends State<SignInScreen> {
     super.dispose();
   }
 
-  void _handleSignIn() {
+  Future<void> _handleSignIn() async {
     final email = _emailController.text.trim();
     final password = _passwordController.text;
 
@@ -36,11 +39,24 @@ class _SignInScreenState extends State<SignInScreen> {
       return;
     }
 
-    setState(() => _errorText = null);
+    setState(() {
+      _errorText = null;
+      _isSubmitting = true;
+    });
 
-    // NOTE: There is no backend/auth service wired up yet — this simply
-    // validates the fields and takes the user into the app. Hook this up
-    // to Firebase Auth, your own API, etc. when ready.
+    final cycle = context.read<CycleProvider>();
+    final error = await cycle.signIn(email: email, password: password);
+
+    if (!mounted) return;
+
+    if (error != null) {
+      setState(() {
+        _errorText = error;
+        _isSubmitting = false;
+      });
+      return;
+    }
+
     Navigator.pushAndRemoveUntil(
       context,
       MaterialPageRoute(builder: (context) => const HomeShell()),
@@ -174,15 +190,24 @@ class _SignInScreenState extends State<SignInScreen> {
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  onPressed: _handleSignIn,
-                  child: Text(
-                    'Sign In',
-                    style: AppTextStyles.sans(
-                      size: 14,
-                      weight: FontWeight.w700,
-                      color: Colors.white,
-                    ),
-                  ),
+                  onPressed: _isSubmitting ? null : _handleSignIn,
+                  child: _isSubmitting
+                      ? const SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
+                      : Text(
+                          'Sign In',
+                          style: AppTextStyles.sans(
+                            size: 14,
+                            weight: FontWeight.w700,
+                            color: Colors.white,
+                          ),
+                        ),
                 ),
               ),
               const SizedBox(height: 24),

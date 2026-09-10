@@ -298,9 +298,12 @@ class _AiCheckinScreenState extends State<AiCheckinScreen> {
     );
 
     try {
+      if (!mounted) return;
+      final authToken = context.read<CycleProvider>().authToken;
       final result = await _aiService.sendMessage(
         message: text,
         history: historyForRequest,
+        authToken: authToken,
         profileContext: profileContext,
       );
 
@@ -339,8 +342,8 @@ class _AiCheckinScreenState extends State<AiCheckinScreen> {
       if (!mounted) return;
       setState(() {
         _sending = false;
-        _errorText = e is AuthRequiredException
-            ? e.message
+        _errorText = e.toString().contains('not_signed_in')
+            ? 'Please sign in to use AI Check-in.'
             : "Couldn't reach the check-in assistant. Please try again.";
       });
     }

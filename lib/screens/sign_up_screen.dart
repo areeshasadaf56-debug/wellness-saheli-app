@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../providers/cycle_provider.dart';
 import '../theme/app_theme.dart';
 import 'home_shell.dart';
 
@@ -16,6 +18,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final _confirmController = TextEditingController();
   bool _obscurePassword = true;
   String? _errorText;
+  bool _isSubmitting = false;
 
   @override
   void dispose() {
@@ -26,7 +29,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
     super.dispose();
   }
 
-  void _handleSignUp() {
+  Future<void> _handleSignUp() async {
     final name = _nameController.text.trim();
     final email = _emailController.text.trim();
     final password = _passwordController.text;
@@ -49,11 +52,28 @@ class _SignUpScreenState extends State<SignUpScreen> {
       return;
     }
 
-    setState(() => _errorText = null);
+    setState(() {
+      _errorText = null;
+      _isSubmitting = true;
+    });
 
-    // NOTE: No backend/auth service is wired up yet — this just validates
-    // the fields and takes the user into the app. Hook this up to Firebase
-    // Auth, your own API, etc. when ready.
+    final cycle = context.read<CycleProvider>();
+    final error = await cycle.signUp(
+      name: name,
+      email: email,
+      password: password,
+    );
+
+    if (!mounted) return;
+
+    if (error != null) {
+      setState(() {
+        _errorText = error;
+        _isSubmitting = false;
+      });
+      return;
+    }
+
     Navigator.pushAndRemoveUntil(
       context,
       MaterialPageRoute(builder: (context) => const HomeShell()),
@@ -169,15 +189,24 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  onPressed: _handleSignUp,
-                  child: Text(
-                    'Sign Up',
-                    style: AppTextStyles.sans(
-                      size: 14,
-                      weight: FontWeight.w700,
-                      color: Colors.white,
-                    ),
-                  ),
+                  onPressed: _isSubmitting ? null : _handleSignUp,
+                  child: _isSubmitting
+                      ? const SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
+                      : Text(
+                          'Sign Up',
+                          style: AppTextStyles.sans(
+                            size: 14,
+                            weight: FontWeight.w700,
+                            color: Colors.white,
+                          ),
+                        ),
                 ),
               ),
               const SizedBox(height: 20),
