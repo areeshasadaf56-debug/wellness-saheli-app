@@ -15,11 +15,15 @@ class WellnessSaheliApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
       create: (_) => CycleProvider(),
-      child: MaterialApp(
-        title: 'Wellness Saheli',
-        debugShowCheckedModeBanner: false,
-        theme: buildAppTheme(),
-        home: const SplashScreen(),
+      child: Consumer<CycleProvider>(
+        builder: (context, cycle, _) => MaterialApp(
+          title: 'Wellness Saheli',
+          debugShowCheckedModeBanner: false,
+          theme: buildLightTheme(),
+          darkTheme: buildDarkTheme(),
+          themeMode: cycle.themeMode,
+          home: const SplashScreen(),
+        ),
       ),
     );
   }

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../theme/app_theme.dart';
+import '../providers/cycle_provider.dart';
 import 'home_screen.dart';
 import 'ovulation_screen.dart';
 import 'protection_screen.dart';
@@ -44,6 +46,7 @@ class _HomeShellState extends State<HomeShell> {
       icon: Icons.nightlight_round,
       label: 'Cycle',
       shortLabel: 'Cycle',
+      badgeCount: 1,
     ),
     const _NavItem(
       icon: Icons.egg_outlined,
@@ -79,11 +82,15 @@ class _HomeShellState extends State<HomeShell> {
       icon: Icons.favorite_rounded,
       label: 'Check-in',
       shortLabel: 'Chat',
+      badgeCount: 1,
     ),
   ];
 
   @override
   Widget build(BuildContext context) {
+    final cycle = context.watch<CycleProvider>();
+    final colors = Theme.of(context).colorScheme;
+
     // Build tabs here in build() so _navigateToTab is available
     final tabs = [
       HomeScreen(onNavigateToTab: _navigateToTab),
@@ -95,16 +102,28 @@ class _HomeShellState extends State<HomeShell> {
       const SettingsScreen(),
       AiCheckinScreen(onNavigateToTab: _navigateToTab),
     ];
+    final needsLogBadge =
+        cycle.getLogFor(DateTime.now()).mood == null &&
+        cycle.getLogFor(DateTime.now()).symptoms.isEmpty;
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: colors.surface,
       body: SafeArea(
-        child: IndexedStack(index: _tabIndex, children: tabs),
+        child: AnimatedSwitcher(
+          duration: const Duration(milliseconds: 200),
+          switchInCurve: Curves.easeInOutCubic,
+          switchOutCurve: Curves.easeInOutCubic,
+          transitionBuilder: (child, animation) => FadeTransition(
+            opacity: animation,
+            child: child,
+          ),
+          child: KeyedSubtree(key: ValueKey(_tabIndex), child: tabs[_tabIndex]),
+        ),
       ),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
-          color: AppColors.surface,
-          border: Border(top: BorderSide(color: AppColors.cardBorder)),
+          color: colors.surface,
+          border: Border(top: BorderSide(color: colors.outline)),
         ),
         padding: const EdgeInsets.symmetric(vertical: 6),
         child: SafeArea(
@@ -113,31 +132,61 @@ class _HomeShellState extends State<HomeShell> {
             children: List.generate(_navItems.length, (i) {
               final item = _navItems[i];
               final active = _tabIndex == i;
+              final badgeCount = i == 0 && needsLogBadge ? 1 : item.badgeCount;
               return Expanded(
-                child: GestureDetector(
+                child: InkWell(
                   onTap: () => setState(() => _tabIndex = i),
-                  behavior: HitTestBehavior.opaque,
+                  borderRadius: BorderRadius.circular(12),
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 2,
-                      vertical: 6,
-                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(
-                          item.icon,
-                          size: 18,
-                          color: active
-                              ? AppColors.primary
-                              : AppColors.textSecondary,
+                        Stack(
+                          clipBehavior: Clip.none,
+                          children: [
+                            Icon(
+                              item.icon,
+                              size: 20,
+                              color: active
+                                  ? AppColors.primary
+                                  : AppColors.textSecondary,
+                            ),
+                            if (badgeCount > 0)
+                              Positioned(
+                                right: -6,
+                                top: -6,
+                                child: Container(
+                                  constraints: const BoxConstraints(
+                                    minWidth: 16,
+                                    minHeight: 16,
+                                  ),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 4,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.periodRed,
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Text(
+                                    '$badgeCount',
+                                    style: AppTextStyles.sans(
+                                      size: 9,
+                                      weight: FontWeight.w700,
+                                      color: Colors.white,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                              ),
+                          ],
                         ),
-                        const SizedBox(height: 3),
+                        const SizedBox(height: 4),
                         Text(
                           item.shortLabel,
                           style: AppTextStyles.sans(
-                            size: 7.5,
+                            size: 9,
                             weight: active ? FontWeight.w600 : FontWeight.w500,
                             color: active
                                 ? AppColors.primary
@@ -164,9 +213,11 @@ class _NavItem {
   final IconData icon;
   final String label;
   final String shortLabel;
+  final int badgeCount;
   const _NavItem({
     required this.icon,
     required this.label,
     required this.shortLabel,
+    this.badgeCount = 0,
   });
 }

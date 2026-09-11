@@ -22,13 +22,26 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends State<HomeScreen>
+    with SingleTickerProviderStateMixin {
   HealthProfile? _profile;
+  bool _isFabExpanded = false;
+  late final AnimationController _dialRotationController;
 
   @override
   void initState() {
     super.initState();
+    _dialRotationController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 3),
+    )..repeat();
     _loadProfile();
+  }
+
+  @override
+  void dispose() {
+    _dialRotationController.dispose();
+    super.dispose();
   }
 
   Future<void> _loadProfile() async {
@@ -65,77 +78,110 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final cycle = context.watch<CycleProvider>();
+    final colors = Theme.of(context).colorScheme;
+    final nextPeriod = cycle.daysUntilNextPeriod;
+    final fertileIn = _daysUntilOvulation(cycle);
 
-    return SafeArea(
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Header with title and utility icons
-            _buildHeader(context),
-            const SizedBox(height: 20),
+    return Scaffold(
+      backgroundColor: colors.surface,
+      floatingActionButton: _buildQuickLogFab(context),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Header with title and utility icons
+              _buildHeader(context),
+              const SizedBox(height: 16),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  _statusChip(
+                    icon: Icons.calendar_today_outlined,
+                    label: '$nextPeriod d to next period',
+                    color: AppColors.periodRed,
+                  ),
+                  _statusChip(
+                    icon: Icons.wb_sunny_outlined,
+                    label: cycle.currentPhase == 'Ovulation'
+                        ? 'Fertility window now'
+                        : 'Fertility window in $fertileIn d',
+                    color: AppColors.accent,
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
 
-            // ===== PRIMARY FEATURE: AI Welcome Card =====
-            AiWelcomeCard(
-              userName: cycle.userName,
-              onTap: _openAiCheckin,
-              currentPhase: cycle.currentPhase,
-              currentCycleDay: cycle.currentCycleDay,
-              lastCheckIn: _profile?.mentalHealth.lastCheckIn,
-              selfReportedStressLevel:
-                  _profile?.mentalHealth.selfReportedStressLevel,
-              latestDiaryMood:
-                  _profile != null && _profile!.diaryEntries.isNotEmpty
-                  ? _profile!.diaryEntries.last.mood
-                  : null,
-            ),
-            const SizedBox(height: 24),
+              // ===== PRIMARY FEATURE: AI Welcome Card =====
+              AiWelcomeCard(
+                userName: cycle.userName,
+                onTap: _openAiCheckin,
+                currentPhase: cycle.currentPhase,
+                currentCycleDay: cycle.currentCycleDay,
+                lastCheckIn: _profile?.mentalHealth.lastCheckIn,
+                selfReportedStressLevel:
+                    _profile?.mentalHealth.selfReportedStressLevel,
+                latestDiaryMood:
+                    _profile != null && _profile!.diaryEntries.isNotEmpty
+                    ? _profile!.diaryEntries.last.mood
+                    : null,
+              ),
+              const SizedBox(height: 24),
 
-            // ===== CONTEXTUAL SUGGESTIONS =====
-            _buildContextualSuggestions(cycle),
-            const SizedBox(height: 28),
+              // ===== CONTEXTUAL SUGGESTIONS =====
+              _buildContextualSuggestions(cycle),
+              const SizedBox(height: 28),
 
-            // Cycle dial - moved down (secondary feature now)
-            _buildCycleDial(cycle),
-            const SizedBox(height: 24),
+              // Cycle dial - moved down (secondary feature now)
+              _buildCycleDial(cycle),
+              const SizedBox(height: 24),
 
-            // Status cards
-            _buildStatusCards(cycle),
-            const SizedBox(height: 24),
+              // Status cards
+              _buildStatusCards(cycle),
+              const SizedBox(height: 24),
 
-            // Today's mood + recent symptoms
-            _buildTodaySnapshot(cycle),
-            const SizedBox(height: 24),
+              // Today's mood + recent symptoms
+              _buildTodaySnapshot(cycle),
+              const SizedBox(height: 24),
 
-            // Symptom/mood trends from the last 30 days
-            _buildTrendsCard(cycle),
-            const SizedBox(height: 24),
+              // Symptom/mood trends from the last 30 days
+              _buildTrendsCard(cycle),
+              const SizedBox(height: 24),
 
-            // Calendar
-            _sectionLabel('THIS WEEK'),
-            const SizedBox(height: 10),
-            const MonthCalendar(),
-            const SizedBox(height: 24),
+              // Calendar
+              _sectionLabel('THIS WEEK', Icons.date_range_outlined),
+              const SizedBox(height: 12),
+              const MonthCalendar(),
+              const SizedBox(height: 24),
 
-            // Quick logging
-            _sectionLabel('LOG TODAY'),
-            const SizedBox(height: 10),
-            _buildLogButtons(context),
-            const SizedBox(height: 24),
+              // Quick logging
+              _sectionLabel('QUICK LOGGING', Icons.bolt_outlined),
+              const SizedBox(height: 8),
+              Text(
+                'Use the + button to log flow, mood, or symptoms quickly.',
+                style: AppTextStyles.sans(
+                  size: 12,
+                  color: colors.onTertiary,
+                ).copyWith(height: 1.8),
+              ),
+              const SizedBox(height: 24),
 
-            // Insight
-            _sectionLabel("TODAY'S INSIGHT"),
-            const SizedBox(height: 10),
-            _buildInsightCard(cycle),
-            const SizedBox(height: 16),
-          ],
+              // Insight
+              _sectionLabel("TODAY'S INSIGHT", Icons.auto_awesome_outlined),
+              const SizedBox(height: 12),
+              _buildInsightCard(cycle),
+              const SizedBox(height: 20),
+            ],
+          ),
         ),
       ),
     );
   }
 
   Widget _buildHeader(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -167,7 +213,7 @@ class _HomeScreenState extends State<HomeScreen> {
               _formattedDate(),
               style: AppTextStyles.sans(
                 size: 11,
-                color: AppColors.textSecondary,
+                color: colors.onTertiary,
               ),
             ),
             const SizedBox(width: 10),
@@ -237,18 +283,20 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildTodaySnapshot(CycleProvider cycle) {
+    final colors = Theme.of(context).colorScheme;
     final today = cycle.getLogFor(DateTime.now());
     final hasMood = today.mood != null;
     final hasSymptoms = today.symptoms.isNotEmpty;
 
     if (!hasMood && !hasSymptoms) return const SizedBox.shrink();
 
-    return Container(
-      padding: const EdgeInsets.all(14),
+    return _AnimatedPressable(
+      child: Container(
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: colors.surface,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.cardBorder),
+        border: Border.all(color: colors.outline),
       ),
       child: Row(
         children: [
@@ -260,7 +308,11 @@ class _HomeScreenState extends State<HomeScreen> {
             const SizedBox(width: 8),
             Text(
               today.mood!.split(' ').skip(1).join(' '),
-              style: AppTextStyles.sans(size: 12, weight: FontWeight.w600),
+              style: AppTextStyles.sans(
+                size: 12,
+                weight: FontWeight.w600,
+                color: colors.onSurface,
+              ),
             ),
           ],
           if (hasMood && hasSymptoms) ...[
@@ -272,19 +324,21 @@ class _HomeScreenState extends State<HomeScreen> {
             Expanded(
               child: Text(
                 today.symptoms.join(', '),
-                style: AppTextStyles.sans(
+              style: AppTextStyles.sans(
                   size: 12,
-                  color: AppColors.textSecondary,
+                  color: colors.onTertiary,
                 ),
                 overflow: TextOverflow.ellipsis,
               ),
             ),
         ],
       ),
+      ),
     );
   }
 
   Widget _buildTrendsCard(CycleProvider cycle) {
+    final colors = Theme.of(context).colorScheme;
     final now = DateTime.now();
     final logs = cycle.dailyLogs;
 
@@ -317,12 +371,13 @@ class _HomeScreenState extends State<HomeScreen> {
                 ..sort((a, b) => b.value.compareTo(a.value)))
               .first;
 
-    return Container(
+    return _AnimatedPressable(
+      child: Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: colors.surface,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.cardBorder),
+        border: Border.all(color: colors.outline),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -344,8 +399,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 '(${topMood.value} of $loggedDays logged days).',
                 style: AppTextStyles.sans(
                   size: 12.5,
-                  color: AppColors.textPrimary,
-                ).copyWith(height: 1.4),
+                  color: colors.onSurface,
+                ).copyWith(height: 1.8),
               ),
             ),
           if (topSymptoms.isNotEmpty)
@@ -353,8 +408,8 @@ class _HomeScreenState extends State<HomeScreen> {
               'Most reported: ${topSymptoms.take(3).map((e) => '${e.key} (${e.value}x)').join(', ')}.',
               style: AppTextStyles.sans(
                 size: 12.5,
-                color: AppColors.textPrimary,
-              ).copyWith(height: 1.4),
+                color: colors.onSurface,
+              ).copyWith(height: 1.8),
             ),
           const SizedBox(height: 8),
           Text(
@@ -363,26 +418,35 @@ class _HomeScreenState extends State<HomeScreen> {
             'healthcare professional.',
             style: AppTextStyles.sans(
               size: 10.5,
-              color: AppColors.textSecondary,
-            ).copyWith(fontStyle: FontStyle.italic, height: 1.4),
+              color: colors.onTertiary,
+            ).copyWith(fontStyle: FontStyle.italic, height: 1.8),
           ),
         ],
+      ),
       ),
     );
   }
 
-  Widget _sectionLabel(String text) {
-    return Text(
-      text,
-      style: AppTextStyles.sans(
-        size: 11,
-        weight: FontWeight.w600,
-        color: AppColors.textSecondary,
-      ),
+  Widget _sectionLabel(String text, IconData icon) {
+    return Row(
+      children: [
+        Icon(icon, size: 14, color: AppColors.textSecondary),
+        const SizedBox(width: 8),
+        Text(
+          text,
+          style: AppTextStyles.sans(
+            size: 12,
+            weight: FontWeight.w600,
+            color: AppColors.textSecondary,
+          ),
+        ),
+      ],
     );
   }
 
   Widget _buildCycleDial(CycleProvider cycle) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final colors = Theme.of(context).colorScheme;
     return Center(
       child: SizedBox(
         width: 200,
@@ -395,28 +459,48 @@ class _HomeScreenState extends State<HomeScreen> {
               height: 200,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                border: Border.all(color: AppColors.cardBorder, width: 3),
+                border: Border.all(color: colors.outline, width: 3),
               ),
             ),
-            Positioned(
-              top: -3,
-              child: Container(
-                width: 28,
-                height: 8,
-                decoration: BoxDecoration(
-                  color: AppColors.primary,
-                  borderRadius: BorderRadius.circular(6),
+            AnimatedBuilder(
+              animation: _dialRotationController,
+              builder: (context, child) {
+                return Transform.rotate(
+                  angle: _dialRotationController.value * 6.28318530718,
+                  child: child,
+                );
+              },
+              child: SizedBox(
+                width: 200,
+                height: 200,
+                child: Align(
+                  alignment: Alignment.topCenter,
+                  child: Container(
+                    margin: const EdgeInsets.only(top: -3),
+                    width: 28,
+                    height: 8,
+                    decoration: BoxDecoration(
+                      color: AppColors.primary,
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                  ),
                 ),
               ),
             ),
             Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text(
-                  '${cycle.currentCycleDay}',
-                  style: AppTextStyles.serif(
-                    size: 42,
-                    color: AppColors.periodRed,
+                AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 200),
+                  switchInCurve: Curves.easeInOutCubic,
+                  switchOutCurve: Curves.easeInOutCubic,
+                  child: Text(
+                    '${cycle.currentCycleDay}',
+                    key: ValueKey(cycle.currentCycleDay),
+                    style: AppTextStyles.serif(
+                      size: 42,
+                      color: AppColors.periodRed,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -425,25 +509,33 @@ class _HomeScreenState extends State<HomeScreen> {
                   style: AppTextStyles.sans(
                     size: 10,
                     weight: FontWeight.w600,
-                    color: AppColors.textSecondary,
+                    color: isDark
+                        ? AppColors.darkTextSecondary
+                        : AppColors.textSecondary,
                   ),
                 ),
                 const SizedBox(height: 10),
                 Container(
                   padding: const EdgeInsets.symmetric(
-                    horizontal: 14,
-                    vertical: 5,
+                    horizontal: 16,
+                    vertical: 8,
                   ),
                   decoration: BoxDecoration(
                     color: AppColors.periodRed.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(20),
                   ),
-                  child: Text(
-                    cycle.currentPhase,
-                    style: AppTextStyles.sans(
-                      size: 11,
-                      color: AppColors.periodRed,
-                      weight: FontWeight.w600,
+                  child: AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 200),
+                    switchInCurve: Curves.easeInOutCubic,
+                    switchOutCurve: Curves.easeInOutCubic,
+                    child: Text(
+                      cycle.currentPhase,
+                      key: ValueKey(cycle.currentPhase),
+                      style: AppTextStyles.sans(
+                        size: 12,
+                        color: AppColors.periodRed,
+                        weight: FontWeight.w600,
+                      ),
                     ),
                   ),
                 ),
@@ -481,6 +573,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final ovulationSubLabel = isOvulation
         ? 'Fertile window'
         : 'Ovulation in ${_daysUntilOvulation(cycle)}d';
+    final phaseColor = _phaseAccent(cycle.currentPhase);
 
     return Row(
       children: [
@@ -490,7 +583,7 @@ class _HomeScreenState extends State<HomeScreen> {
             value: '${cycle.daysUntilNextPeriod}d',
             subLabel: nextPeriodLabel,
             accentColor: AppColors.periodRed,
-            useAccent: true,
+            gradientBase: AppColors.periodRed,
           ),
         ),
         const SizedBox(width: 12),
@@ -499,8 +592,8 @@ class _HomeScreenState extends State<HomeScreen> {
             label: 'FERTILITY',
             value: fertilityLabel,
             subLabel: ovulationSubLabel,
-            accentColor: AppColors.textPrimary,
-            useAccent: false,
+            accentColor: phaseColor,
+            gradientBase: phaseColor,
           ),
         ),
       ],
@@ -518,18 +611,23 @@ class _HomeScreenState extends State<HomeScreen> {
     required String value,
     required String subLabel,
     required Color accentColor,
-    required bool useAccent,
+    required Color gradientBase,
   }) {
-    return Container(
+    final colors = Theme.of(context).colorScheme;
+    return _AnimatedPressable(
+      child: Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(
-          color: useAccent
-              ? accentColor.withValues(alpha: 0.35)
-              : AppColors.cardBorder,
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            gradientBase.withValues(alpha: 0.16),
+            colors.surface,
+          ],
         ),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: accentColor.withValues(alpha: 0.36)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -539,7 +637,7 @@ class _HomeScreenState extends State<HomeScreen> {
             style: AppTextStyles.sans(
               size: 10,
               weight: FontWeight.w600,
-              color: AppColors.textSecondary,
+              color: colors.onTertiary,
             ),
           ),
           const SizedBox(height: 6),
@@ -547,99 +645,121 @@ class _HomeScreenState extends State<HomeScreen> {
             value,
             style: AppTextStyles.serif(
               size: 22,
-              color: useAccent ? accentColor : AppColors.textPrimary,
+            color: accentColor,
             ),
           ),
           const SizedBox(height: 2),
           Text(
             subLabel,
-            style: AppTextStyles.sans(size: 11, color: AppColors.textSecondary),
+          style: AppTextStyles.sans(size: 11, color: colors.onTertiary),
           ),
         ],
+      ),
       ),
     );
   }
 
-  Widget _buildLogButtons(BuildContext context) {
-    return Row(
+  Widget _buildQuickLogFab(BuildContext context) {
+    final actions = [
+      (
+        label: 'Log Flow',
+        icon: Icons.water_drop_outlined,
+        color: AppColors.periodRed,
+        onTap: () => _showFlowInfoDialog(context),
+      ),
+      (
+        label: 'Log Mood',
+        icon: Icons.mood_outlined,
+        color: AppColors.moodYellow,
+        onTap: () => _showMoodPicker(context, DateTime.now()),
+      ),
+      (
+        label: 'Log Symptoms',
+        icon: Icons.assignment_outlined,
+        color: AppColors.symptomOrange,
+        onTap: () => _showSymptomPicker(context, DateTime.now()),
+      ),
+    ];
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.end,
       children: [
-        Expanded(
-          child: _logButton(
-            context,
-            Icons.water_drop,
-            'Period Flow',
-            AppColors.periodRed,
-            () => _showFlowInfoDialog(context),
-          ),
-        ),
-        const SizedBox(width: 10),
-        Expanded(
-          child: _logButton(
-            context,
-            Icons.nightlight_round,
-            'Mood',
-            AppColors.moodYellow,
-            () => _showMoodPicker(context, DateTime.now()),
-          ),
-        ),
-        const SizedBox(width: 10),
-        Expanded(
-          child: _logButton(
-            context,
-            Icons.assignment_outlined,
-            'Symptoms',
-            AppColors.symptomOrange,
-            () => _showSymptomPicker(context, DateTime.now()),
+        ...List.generate(actions.length, (index) {
+          final action = actions[index];
+          return AnimatedSlide(
+            duration: const Duration(milliseconds: 200),
+            curve: Curves.easeInOutCubic,
+            offset: _isFabExpanded ? Offset.zero : const Offset(0, 0.2),
+            child: AnimatedOpacity(
+              duration: const Duration(milliseconds: 200),
+              opacity: _isFabExpanded ? 1 : 0,
+              child: IgnorePointer(
+                ignoring: !_isFabExpanded,
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: FloatingActionButton.extended(
+                    heroTag: 'quick_log_$index',
+                    onPressed: () {
+                      setState(() => _isFabExpanded = false);
+                      action.onTap();
+                    },
+                    icon: Icon(action.icon, color: Colors.white),
+                    backgroundColor: action.color,
+                    label: Text(action.label),
+                  ),
+                ),
+              ),
+            ),
+          );
+        }),
+        FloatingActionButton(
+          heroTag: 'quick_log_toggle',
+          onPressed: () => setState(() => _isFabExpanded = !_isFabExpanded),
+          child: AnimatedRotation(
+            turns: _isFabExpanded ? 0.125 : 0,
+            duration: const Duration(milliseconds: 200),
+            curve: Curves.easeInOutCubic,
+            child: const Icon(Icons.add),
           ),
         ),
       ],
     );
   }
 
-  Widget _logButton(
-    BuildContext context,
-    IconData icon,
-    String label,
-    Color iconColor,
-    VoidCallback onTap,
-  ) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        height: 92,
-        decoration: BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: AppColors.cardBorder),
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              width: 36,
-              height: 36,
-              decoration: BoxDecoration(
-                color: iconColor.withValues(alpha: 0.18),
-                shape: BoxShape.circle,
-              ),
-              child: Center(child: Icon(icon, size: 18, color: iconColor)),
+  Widget _statusChip({
+    required IconData icon,
+    required String label,
+    required Color color,
+  }) {
+    return Container(
+      constraints: const BoxConstraints(minHeight: 48),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.14),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: color.withValues(alpha: 0.28)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 14, color: color),
+          const SizedBox(width: 8),
+          Text(
+            label,
+            style: AppTextStyles.sans(
+              size: 12,
+              weight: FontWeight.w600,
+              color: color,
             ),
-            const SizedBox(height: 8),
-            Text(
-              label,
-              style: AppTextStyles.sans(
-                size: 11,
-                color: AppColors.textSecondary,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 
   void _showFlowInfoDialog(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
     final options = [
       {'label': 'None', 'desc': 'No flow today'},
       {'label': 'Spotting', 'desc': 'Very light, occasional drops'},
@@ -650,7 +770,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     showModalBottomSheet(
       context: context,
-      backgroundColor: AppColors.surface,
+      backgroundColor: colors.surface,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
@@ -703,9 +823,9 @@ class _HomeScreenState extends State<HomeScreen> {
                           width: double.infinity,
                           padding: const EdgeInsets.all(14),
                           decoration: BoxDecoration(
-                            color: AppColors.background,
+                            color: colors.surface,
                             borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: AppColors.cardBorder),
+                            border: Border.all(color: colors.outline),
                           ),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -722,7 +842,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 opt['desc']!,
                                 style: AppTextStyles.sans(
                                   size: 11,
-                                  color: AppColors.textSecondary,
+                                  color: colors.onTertiary,
                                 ),
                               ),
                             ],
@@ -741,6 +861,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _showMoodPicker(BuildContext context, DateTime date) {
+    final colors = Theme.of(context).colorScheme;
     final moods = [
       '😊 Happy',
       '😐 Neutral',
@@ -751,7 +872,7 @@ class _HomeScreenState extends State<HomeScreen> {
     ];
     showModalBottomSheet(
       context: context,
-      backgroundColor: AppColors.surface,
+      backgroundColor: colors.surface,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
@@ -794,9 +915,9 @@ class _HomeScreenState extends State<HomeScreen> {
                             vertical: 10,
                           ),
                           decoration: BoxDecoration(
-                            color: AppColors.background,
+                            color: colors.surface,
                             borderRadius: BorderRadius.circular(20),
-                            border: Border.all(color: AppColors.cardBorder),
+                            border: Border.all(color: colors.outline),
                           ),
                           child: Text(m, style: AppTextStyles.sans(size: 13)),
                         ),
@@ -813,6 +934,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _showSymptomPicker(BuildContext context, DateTime date) {
+    final colors = Theme.of(context).colorScheme;
     final allSymptoms = [
       'Cramps',
       'Headache',
@@ -828,7 +950,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     showModalBottomSheet(
       context: context,
-      backgroundColor: AppColors.surface,
+      backgroundColor: colors.surface,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
@@ -878,12 +1000,12 @@ class _HomeScreenState extends State<HomeScreen> {
                               decoration: BoxDecoration(
                                 color: isSelected
                                     ? AppColors.primary.withValues(alpha: 0.2)
-                                    : AppColors.background,
+                                    : colors.surface,
                                 borderRadius: BorderRadius.circular(20),
                                 border: Border.all(
                                   color: isSelected
                                       ? AppColors.primary
-                                      : AppColors.cardBorder,
+                                     : colors.outline,
                                 ),
                               ),
                               child: Text(
@@ -892,7 +1014,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   size: 13,
                                   color: isSelected
                                       ? AppColors.primary
-                                      : AppColors.textPrimary,
+                                     : colors.onSurface,
                                 ),
                               ),
                             ),
@@ -957,19 +1079,42 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  Color _phaseAccent(String phase) {
+    switch (phase) {
+      case 'Menstrual':
+        return AppColors.periodRed;
+      case 'Ovulation':
+        return AppColors.accent;
+      case 'Luteal':
+        return AppColors.symptomOrange;
+      case 'Follicular':
+      default:
+        return AppColors.primary;
+    }
+  }
+
   Widget _buildInsightCard(CycleProvider cycle) {
+    final colors = Theme.of(context).colorScheme;
     final phase = cycle.currentPhase;
     final phaseInfo = _phaseDetails(phase);
     final iconData = _phaseIconData(phase);
     final IconData phaseIcon = iconData['icon'] as IconData;
     final Color phaseColor = iconData['color'] as Color;
 
-    return Container(
+    return _AnimatedPressable(
+      child: Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            phaseColor.withValues(alpha: 0.14),
+            colors.surface,
+          ],
+        ),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.cardBorder),
+        border: Border.all(color: phaseColor.withValues(alpha: 0.32)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -990,20 +1135,25 @@ class _HomeScreenState extends State<HomeScreen> {
               children: [
                 Text(
                   '$phase Phase',
-                  style: AppTextStyles.sans(size: 14, weight: FontWeight.w600),
+                  style: AppTextStyles.sans(
+                    size: 14,
+                    weight: FontWeight.w600,
+                    color: colors.onSurface,
+                  ),
                 ),
                 const SizedBox(height: 6),
                 Text(
                   phaseInfo,
                   style: AppTextStyles.sans(
                     size: 12,
-                    color: AppColors.textSecondary,
-                  ).copyWith(height: 1.5),
+                    color: colors.onTertiary,
+                  ).copyWith(height: 1.8),
                 ),
               ],
             ),
           ),
         ],
+      ),
       ),
     );
   }
@@ -1021,5 +1171,37 @@ class _HomeScreenState extends State<HomeScreen> {
       default:
         return 'Track your cycle regularly to get personalized insights about each phase.';
     }
+  }
+}
+
+class _AnimatedPressable extends StatefulWidget {
+  final Widget child;
+  const _AnimatedPressable({required this.child});
+
+  @override
+  State<_AnimatedPressable> createState() => _AnimatedPressableState();
+}
+
+class _AnimatedPressableState extends State<_AnimatedPressable> {
+  bool _pressed = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTapDown: (_) => setState(() => _pressed = true),
+      onTapUp: (_) => setState(() => _pressed = false),
+      onTapCancel: () => setState(() => _pressed = false),
+      child: AnimatedScale(
+        scale: _pressed ? 0.985 : 1,
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.easeInOutCubic,
+        child: AnimatedOpacity(
+          opacity: _pressed ? 0.94 : 1,
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeInOutCubic,
+          child: widget.child,
+        ),
+      ),
+    );
   }
 }

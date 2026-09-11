@@ -42,23 +42,28 @@ class _SettingsScreenState extends State<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
     final cycle = context.watch<CycleProvider>();
+    final colors = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: colors.surface,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Settings', style: AppTextStyles.serif(size: 22)),
+              Text(
+                'Settings',
+                style: AppTextStyles.serif(size: 22, color: colors.onSurface),
+              ),
               const SizedBox(height: 20),
-              _profileCard(),
+              _profileCard(colors),
 
               const SizedBox(height: 20),
-              _sectionHeading('HEALTH'),
-              const SizedBox(height: 10),
-              _settingsRow(context, '📖', 'My Health Diary', 'View', () {
+              _sectionHeading('HEALTH', Icons.favorite_outline),
+              const SizedBox(height: 12),
+              _settingsRow(context, colors, '📖', 'My Health Diary', 'View', () {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
@@ -68,9 +73,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
               }),
 
               const SizedBox(height: 20),
-              _sectionHeading('CYCLE SETTINGS'),
-              const SizedBox(height: 10),
-              _settingsRow(context, '🩸', 'Cycle Data', 'Edit', () {
+              _sectionHeading('CYCLE SETTINGS', Icons.water_drop_outlined),
+              const SizedBox(height: 12),
+              _settingsRow(context, colors, '🩸', 'Cycle Data', 'Edit', () {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
@@ -78,8 +83,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
                 );
               }),
-              _reminderToggleRow(context, cycle),
-              _settingsRow(context, '📊', 'Data & Privacy', 'Manage', () {
+              _reminderToggleRow(context, cycle, colors),
+              _settingsRow(context, colors, '📊', 'Data & Privacy', 'Manage', () {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
@@ -87,17 +92,21 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
                 );
               }),
+              const SizedBox(height: 20),
+              _sectionHeading('APPEARANCE', Icons.dark_mode_outlined),
+              const SizedBox(height: 12),
+              _appearanceCard(cycle, colors, isDark),
 
               const SizedBox(height: 20),
-              _sectionHeading('ABOUT'),
-              const SizedBox(height: 10),
-              _settingsRow(context, 'ℹ️', 'About Wellness Saheli', '', () {
+              _sectionHeading('ABOUT', Icons.info_outline),
+              const SizedBox(height: 12),
+              _settingsRow(context, colors, 'ℹ️', 'About Wellness Saheli', '', () {
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => const AboutScreen()),
                 );
               }),
-              _settingsRow(context, '📋', 'Terms & Privacy', '', () {
+              _settingsRow(context, colors, '📋', 'Terms & Privacy', '', () {
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => const TermsScreen()),
@@ -105,6 +114,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               }),
               _settingsRow(
                 context,
+                colors,
                 '⭐',
                 'Rate the App',
                 '',
@@ -112,7 +122,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
 
               const SizedBox(height: 20),
-              _logoutButton(context),
+              _logoutButton(context, colors),
               const SizedBox(height: 16),
             ],
           ),
@@ -121,26 +131,132 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  Widget _sectionHeading(String text) {
-    return Text(
-      text,
-      style: AppTextStyles.sans(
-        size: 11,
-        weight: FontWeight.w600,
-        color: AppColors.textSecondary,
+  Widget _sectionHeading(String text, IconData icon) {
+    return Row(
+      children: [
+        Icon(icon, size: 14, color: AppColors.textSecondary),
+        const SizedBox(width: 8),
+        Text(
+          text,
+          style: AppTextStyles.sans(
+            size: 12,
+            weight: FontWeight.w600,
+            color: AppColors.textSecondary,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _appearanceCard(
+    CycleProvider cycle,
+    ColorScheme colors,
+    bool isDark,
+  ) {
+    final platformBrightness = MediaQuery.of(context).platformBrightness;
+    final systemModeLabel = platformBrightness == Brightness.dark
+        ? 'System: Dark'
+        : 'System: Light';
+    return Container(
+      decoration: BoxDecoration(
+        color: colors.surface,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: colors.outline),
+      ),
+      child: Column(
+        children: [
+          ConstrainedBox(
+            constraints: const BoxConstraints(minHeight: 48),
+            child: RadioListTile<ThemeMode>(
+              value: ThemeMode.system,
+              groupValue: cycle.themeMode,
+              onChanged: (value) {
+                if (value != null) {
+                  context.read<CycleProvider>().setThemeMode(value);
+                }
+              },
+              title: Text(
+                'Follow system',
+                style: AppTextStyles.sans(
+                  size: 14,
+                  weight: FontWeight.w600,
+                  color: colors.onSurface,
+                ),
+              ),
+              subtitle: Text(
+                systemModeLabel,
+                style: AppTextStyles.sans(
+                  size: 12,
+                  color: isDark
+                      ? AppColors.darkTextSecondary
+                      : AppColors.textSecondary,
+                ),
+              ),
+              dense: true,
+              contentPadding: const EdgeInsets.symmetric(horizontal: 12),
+            ),
+          ),
+          Divider(height: 1, color: colors.outline),
+          ConstrainedBox(
+            constraints: const BoxConstraints(minHeight: 48),
+            child: RadioListTile<ThemeMode>(
+              value: ThemeMode.light,
+              groupValue: cycle.themeMode,
+              onChanged: (value) {
+                if (value != null) {
+                  context.read<CycleProvider>().setThemeMode(value);
+                }
+              },
+              title: Text(
+                'Light',
+                style: AppTextStyles.sans(
+                  size: 14,
+                  weight: FontWeight.w600,
+                  color: colors.onSurface,
+                ),
+              ),
+              dense: true,
+              contentPadding: const EdgeInsets.symmetric(horizontal: 12),
+            ),
+          ),
+          Divider(height: 1, color: colors.outline),
+          ConstrainedBox(
+            constraints: const BoxConstraints(minHeight: 48),
+            child: RadioListTile<ThemeMode>(
+              value: ThemeMode.dark,
+              groupValue: cycle.themeMode,
+              onChanged: (value) {
+                if (value != null) {
+                  context.read<CycleProvider>().setThemeMode(value);
+                }
+              },
+              title: Text(
+                'Dark',
+                style: AppTextStyles.sans(
+                  size: 14,
+                  weight: FontWeight.w600,
+                  color: colors.onSurface,
+                ),
+              ),
+              dense: true,
+              contentPadding: const EdgeInsets.symmetric(horizontal: 12),
+            ),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _profileCard() {
-    return GestureDetector(
+  Widget _profileCard(ColorScheme colors) {
+    return InkWell(
       onTap: () => _showEditNameDialog(context),
+      borderRadius: BorderRadius.circular(16),
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: AppColors.surface,
+          color: colors.surface,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppColors.cardBorder),
+          border: Border.all(color: colors.outline),
         ),
         child: Row(
           children: [
@@ -167,6 +283,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     style: AppTextStyles.sans(
                       size: 15,
                       weight: FontWeight.w600,
+                      color: colors.onSurface,
                     ),
                   ),
                   const SizedBox(height: 4),
@@ -174,7 +291,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     'Edit Profile',
                     style: AppTextStyles.sans(
                       size: 11,
-                      color: AppColors.textSecondary,
+                      color: colors.onTertiary,
                     ),
                   ),
                 ],
@@ -250,20 +367,23 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Widget _settingsRow(
     BuildContext context,
+    ColorScheme colors,
     String emoji,
     String title,
     String value,
     VoidCallback? onTap,
   ) {
-    return GestureDetector(
+    return InkWell(
       onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
       child: Container(
-        margin: const EdgeInsets.only(bottom: 10),
-        padding: const EdgeInsets.all(14),
+        margin: const EdgeInsets.only(bottom: 12),
+        constraints: const BoxConstraints(minHeight: 48),
+        padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: AppColors.surface,
+          color: colors.surface,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: AppColors.cardBorder),
+          border: Border.all(color: colors.outline),
         ),
         child: Row(
           children: [
@@ -272,7 +392,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
             Expanded(
               child: Text(
                 title,
-                style: AppTextStyles.sans(size: 14, weight: FontWeight.w600),
+                style: AppTextStyles.sans(
+                  size: 14,
+                  weight: FontWeight.w600,
+                  color: colors.onSurface,
+                ),
               ),
             ),
             if (value.isNotEmpty) ...[
@@ -280,10 +404,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 value,
                 style: AppTextStyles.sans(
                   size: 12,
-                  color: AppColors.textSecondary,
+                  color: colors.onTertiary,
                 ),
               ),
-              const SizedBox(width: 6),
+              const SizedBox(width: 8),
             ],
             const Icon(
               Icons.chevron_right,
@@ -296,18 +420,23 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  Widget _reminderToggleRow(BuildContext context, CycleProvider cycle) {
+  Widget _reminderToggleRow(
+    BuildContext context,
+    CycleProvider cycle,
+    ColorScheme colors,
+  ) {
     // NOTE: if this switch still doesn't visually turn on after tapping,
     // the bug is inside cycle_provider.dart — either `remindersEnabled`
     // isn't being updated, or `toggleReminders()` isn't calling
     // notifyListeners(). This widget itself reads/writes correctly.
     return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.all(14),
+      margin: const EdgeInsets.only(bottom: 12),
+      constraints: const BoxConstraints(minHeight: 48),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: colors.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.cardBorder),
+        border: Border.all(color: colors.outline),
       ),
       child: Row(
         children: [
@@ -316,7 +445,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
           Expanded(
             child: Text(
               'Reminders',
-              style: AppTextStyles.sans(size: 14, weight: FontWeight.w600),
+              style: AppTextStyles.sans(
+                size: 14,
+                weight: FontWeight.w600,
+                color: colors.onSurface,
+              ),
             ),
           ),
           Switch(
@@ -331,8 +464,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  Widget _logoutButton(BuildContext context) {
-    return GestureDetector(
+  Widget _logoutButton(BuildContext context, ColorScheme colors) {
+    return InkWell(
       onTap: () {
         showDialog(
           context: context,
@@ -379,6 +512,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       },
       child: Container(
         width: double.infinity,
+        constraints: const BoxConstraints(minHeight: 48),
         padding: const EdgeInsets.symmetric(vertical: 16),
         decoration: BoxDecoration(
           color: const Color(0xFFFFEBEE),
