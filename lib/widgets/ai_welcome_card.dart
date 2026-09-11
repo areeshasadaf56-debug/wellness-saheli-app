@@ -83,204 +83,206 @@ class AiWelcomeCard extends StatelessWidget {
     final displayName = userName.isNotEmpty ? userName : 'there';
     final greeting = _getGreetingByTime();
     final saheliMsg = _getSaheliGreeting();
+    final colors = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              AppColors.primary.withValues(alpha: 0.85),
-              AppColors.accent.withValues(alpha: 0.7),
-            ],
-          ),
-          borderRadius: BorderRadius.circular(18),
-          boxShadow: [
-            BoxShadow(
-              color: AppColors.primary.withValues(alpha: 0.2),
-              blurRadius: 16,
-              offset: const Offset(0, 8),
-            ),
-          ],
-        ),
-        child: Stack(
-          children: [
-            // Decorative background circles
-            Positioned(
-              top: -40,
-              right: -40,
-              child: Container(
-                width: 140,
-                height: 140,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Colors.white.withValues(alpha: 0.08),
-                ),
+    return Hero(
+      tag: 'ai_welcome_card',
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(20),
+          child: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  AppColors.primary.withValues(alpha: isDark ? 0.88 : 0.92),
+                  AppColors.accent.withValues(alpha: isDark ? 0.78 : 0.82),
+                ],
               ),
-            ),
-            Positioned(
-              bottom: -30,
-              left: -30,
-              child: Container(
-                width: 120,
-                height: 120,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Colors.white.withValues(alpha: 0.06),
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.primary.withValues(alpha: isDark ? 0.32 : 0.2),
+                  blurRadius: 16,
+                  offset: const Offset(0, 8),
                 ),
-              ),
+              ],
             ),
-            // Content
-            Padding(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Header: greeting + Saheli info
-                  Row(
+            child: Stack(
+              children: [
+                // Decorative background circles
+                Positioned(
+                  top: -40,
+                  right: -40,
+                  child: Container(
+                    width: 140,
+                    height: 140,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.white.withValues(alpha: 0.08),
+                    ),
+                  ),
+                ),
+                Positioned(
+                  bottom: -30,
+                  left: -30,
+                  child: Container(
+                    width: 120,
+                    height: 120,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.white.withValues(alpha: 0.06),
+                    ),
+                  ),
+                ),
+                // Content
+                Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              '$greeting, $displayName 👋',
-                              style: AppTextStyles.serif(
-                                size: 18,
-                                weight: FontWeight.w600,
+                      // Header: greeting + Saheli info
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  '$greeting, $displayName 👋',
+                                  style: AppTextStyles.serif(
+                                    size: 20,
+                                    weight: FontWeight.w600,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                                const SizedBox(height: 12),
+                                Text(
+                                  'Your personal health companion',
+                                  style: AppTextStyles.sans(
+                                    size: 12,
+                                    weight: FontWeight.w500,
+                                    color: Colors.white.withValues(alpha: 0.9),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          // AI icon/avatar
+                          Container(
+                            width: 56,
+                            height: 56,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Colors.white.withValues(alpha: 0.25),
+                              border: Border.all(
+                                color: Colors.white.withValues(alpha: 0.4),
+                                width: 2,
+                              ),
+                            ),
+                            child: const Center(
+                              child: Icon(
+                                Icons.favorite_rounded,
+                                size: 28,
                                 color: Colors.white,
                               ),
                             ),
-                            const SizedBox(height: 10),
-                            Text(
-                              'Your personal health companion',
-                              style: AppTextStyles.sans(
-                                size: 12,
-                                weight: FontWeight.w500,
-                                color: Colors.white.withValues(alpha: 0.85),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 20),
+                      // Conversation starter
+                      Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: Colors.white.withValues(alpha: 0.25),
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.chat_bubble_outline_rounded,
+                              size: 18,
+                              color: Colors.white.withValues(alpha: 0.9),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Text(
+                                saheliMsg,
+                                style: AppTextStyles.sans(
+                                  size: 14,
+                                  weight: FontWeight.w500,
+                                  color: Colors.white.withValues(alpha: 0.9),
+                                ).copyWith(height: 1.8),
                               ),
                             ),
                           ],
                         ),
                       ),
-                      // AI icon/avatar
-                      Container(
-                        width: 56,
-                        height: 56,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Colors.white.withValues(alpha: 0.25),
-                          border: Border.all(
-                            color: Colors.white.withValues(alpha: 0.4),
-                            width: 2,
+                      const SizedBox(height: 16),
+                      // CTA Button
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: onTap,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.white,
+                            foregroundColor: AppColors.primary,
+                            minimumSize: const Size.fromHeight(48),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            elevation: 0,
                           ),
-                        ),
-                        child: Center(
-                          child: Icon(
-                            Icons.favorite_rounded,
-                            size: 28,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 20),
-                  // Conversation starter
-                  Container(
-                    padding: const EdgeInsets.all(14),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.15),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: Colors.white.withValues(alpha: 0.25),
-                      ),
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.chat_bubble_outline_rounded,
-                          size: 18,
-                          color: Colors.white.withValues(alpha: 0.9),
-                        ),
-                        const SizedBox(width: 10),
-                        Expanded(
                           child: Text(
-                            saheliMsg,
+                            'Talk to Saheli',
                             style: AppTextStyles.sans(
                               size: 14,
-                              weight: FontWeight.w500,
-                              color: Colors.white.withValues(alpha: 0.9),
+                              weight: FontWeight.w600,
+                              color: AppColors.primary,
                             ),
                           ),
                         ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  // CTA Button
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: onTap,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.white,
-                        foregroundColor: AppColors.primary,
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        elevation: 0,
                       ),
-                      child: Text(
-                        'Talk to Saheli',
-                        style: AppTextStyles.sans(
-                          size: 14,
-                          weight: FontWeight.w600,
-                          color: AppColors.primary,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  // Cycle phase indicator (if available)
-                  if (currentPhase != null && currentCycleDay != null)
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 8,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.12),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
+                      const SizedBox(height: 12),
+                      // Cycle phase indicator (if available)
+                      if (currentPhase != null && currentCycleDay != null)
+                        Chip(
+                          avatar: Icon(
                             _getPhaseIcon(currentPhase!),
-                            size: 14,
-                            color: Colors.white.withValues(alpha: 0.9),
+                            size: 16,
+                            color: Colors.white.withValues(alpha: 0.95),
                           ),
-                          const SizedBox(width: 6),
-                          Text(
+                          child: Text(
                             'Day $currentCycleDay • $currentPhase',
                             style: AppTextStyles.sans(
-                              size: 11,
+                              size: 12,
                               weight: FontWeight.w500,
-                              color: Colors.white.withValues(alpha: 0.85),
+                              color: Colors.white,
                             ),
                           ),
-                        ],
-                      ),
-                    ),
-                ],
-              ),
+                          backgroundColor: colors.primary.withValues(alpha: 0.36),
+                          side: BorderSide(
+                            color: Colors.white.withValues(alpha: 0.22),
+                          ),
+                          visualDensity: VisualDensity.standard,
+                          materialTapTargetSize:
+                              MaterialTapTargetSize.padded,
+                        ),
+                    ],
+                  ),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );

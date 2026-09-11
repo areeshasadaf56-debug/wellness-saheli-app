@@ -486,7 +486,7 @@ class _HealthDiaryScreenState extends State<HealthDiaryScreen> {
                   style: AppTextStyles.sans(
                     size: 11,
                     color: AppColors.textSecondary,
-                  ).copyWith(height: 1.4),
+                  ).copyWith(height: 1.8),
                 ),
                 const SizedBox(height: 6),
                 Text(
@@ -528,7 +528,7 @@ class _HealthDiaryScreenState extends State<HealthDiaryScreen> {
             style: AppTextStyles.sans(
               size: 12,
               color: AppColors.textSecondary,
-            ).copyWith(height: 1.5),
+            ).copyWith(height: 1.8),
           ),
         ],
       ),

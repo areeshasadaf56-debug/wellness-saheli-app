@@ -120,7 +120,9 @@ class _MonthCalendarState extends State<MonthCalendar> {
           child: ListView.builder(
             controller: _scrollController,
             scrollDirection: Axis.horizontal,
-            physics: const BouncingScrollPhysics(),
+            physics: const BouncingScrollPhysics(
+              parent: AlwaysScrollableScrollPhysics(),
+            ),
             itemCount: totalDays,
             itemBuilder: (context, index) {
               final date = todayNormalized.add(

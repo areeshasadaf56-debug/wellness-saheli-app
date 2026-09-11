@@ -12,6 +12,7 @@ class CycleProvider extends ChangeNotifier {
 
   bool _isLoaded = false;
   bool _remindersEnabled = true;
+  ThemeMode _themeMode = ThemeMode.system;
 
   // --- Auth / profile state ---
   bool _isLoggedIn = false;
@@ -40,6 +41,7 @@ class CycleProvider extends ChangeNotifier {
   int get periodDuration => _cycleData.periodDuration;
 
   bool get remindersEnabled => _remindersEnabled;
+  ThemeMode get themeMode => _themeMode;
 
   bool get isLoggedIn => _isLoggedIn;
   String get userName => _userName;
@@ -94,6 +96,12 @@ class CycleProvider extends ChangeNotifier {
     }
 
     _remindersEnabled = prefs.getBool('remindersEnabled') ?? true;
+    final savedTheme = prefs.getString('themeMode') ?? 'system';
+    _themeMode = switch (savedTheme) {
+      'light' => ThemeMode.light,
+      'dark' => ThemeMode.dark,
+      _ => ThemeMode.system,
+    };
 
     // Restore auth/profile state so a returning user skips sign-in.
     _isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
@@ -108,6 +116,18 @@ class CycleProvider extends ChangeNotifier {
     notifyListeners();
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('remindersEnabled', value);
+  }
+
+  Future<void> setThemeMode(ThemeMode mode) async {
+    _themeMode = mode;
+    notifyListeners();
+    final prefs = await SharedPreferences.getInstance();
+    final encoded = switch (mode) {
+      ThemeMode.light => 'light',
+      ThemeMode.dark => 'dark',
+      ThemeMode.system => 'system',
+    };
+    await prefs.setString('themeMode', encoded);
   }
 
   /// Call on successful sign in / sign up. Persists both the logged-in
