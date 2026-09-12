@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/cycle_data.dart';
 import '../models/daily_log.dart';
+import '../services/auth_session.dart';
 
 class CycleProvider extends ChangeNotifier {
   CycleData _cycleData = CycleData(
@@ -12,13 +13,20 @@ class CycleProvider extends ChangeNotifier {
 
   bool _isLoaded = false;
   bool _remindersEnabled = true;
+  ThemeMode _themeMode = ThemeMode.system;
 
   // --- Auth / profile state ---
   bool _isLoggedIn = false;
   String _userName = '';
-  String? _userId;
+
+  // The server now issues a real session token + account user_id on
+  // signup/signin (see auth_utils.py / main_flask.py). These are what
+  // HealthProfileService and AiService need to send as `Authorization:
+  // Bearer <token>` and to key /profile requests by the account's
+  // user_id instead of the old anonymous device id -- kept in sync
+  // with AuthSession (see auth_session.dart) on every change below.
   String? _authToken;
-  DateTime? _tokenExpiresAt;
+  String? _accountUserId;
 
   // Accounts now live on the backend server (see /signup, /signin,
   // /reset_password) so they survive app reinstalls and work across
@@ -43,18 +51,12 @@ class CycleProvider extends ChangeNotifier {
   int get periodDuration => _cycleData.periodDuration;
 
   bool get remindersEnabled => _remindersEnabled;
+  ThemeMode get themeMode => _themeMode;
 
   bool get isLoggedIn => _isLoggedIn;
   String get userName => _userName;
-  String? get userId => _userId;
   String? get authToken => _authToken;
-
-  /// True once we have a token that isn't (as far as we know) expired
-  /// yet. Callers that hit authenticated endpoints should check this
-  /// before bothering to attach the Authorization header.
-  bool get hasValidSession =>
-      _authToken != null &&
-      (_tokenExpiresAt == null || _tokenExpiresAt!.isAfter(DateTime.now()));
+  String? get accountUserId => _accountUserId;
 
   CycleProvider() {
     _loadData();
@@ -107,23 +109,26 @@ class CycleProvider extends ChangeNotifier {
 
     _remindersEnabled = prefs.getBool('remindersEnabled') ?? true;
 
+    final themeModeName = prefs.getString('themeMode');
+    _themeMode = ThemeMode.values.firstWhere(
+      (m) => m.name == themeModeName,
+      orElse: () => ThemeMode.system,
+    );
+
     // Restore auth/profile state so a returning user skips sign-in.
     _isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
     _userName = prefs.getString('userName') ?? '';
-    _userId = prefs.getString('authUserId');
     _authToken = prefs.getString('authToken');
-    final expiresMillis = prefs.getInt('authTokenExpiresAt');
-    _tokenExpiresAt = expiresMillis != null
-        ? DateTime.fromMillisecondsSinceEpoch(expiresMillis)
-        : null;
+    _accountUserId = prefs.getString('accountUserId');
 
-    // A token that has already expired is useless -- clear it so the
-    // rest of the app correctly treats this as "no session" rather than
-    // attaching a dead Authorization header to every request.
-    if (_authToken != null && !hasValidSession) {
-      _authToken = null;
-      _userId = null;
-      _tokenExpiresAt = null;
+    // Keep AuthSession in sync as soon as we know it, so any screen
+    // that hits HealthProfileService/AiService right after splash
+    // already has the token/user_id available.
+    if (_isLoggedIn) {
+      AuthSession.token = _authToken;
+      AuthSession.userId = _accountUserId;
+    } else {
+      AuthSession.clear();
     }
 
     _isLoaded = true;
@@ -137,33 +142,33 @@ class CycleProvider extends ChangeNotifier {
     await prefs.setBool('remindersEnabled', value);
   }
 
+  void setThemeMode(ThemeMode mode) async {
+    _themeMode = mode;
+    notifyListeners();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('themeMode', mode.name);
+  }
+
   /// Call on successful sign in / sign up. Persists the logged-in flag,
-  /// the name, and -- when the server returned one -- the account's
-  /// opaque user id + session token, so authenticated endpoints
-  /// (profile sync, AI chat) can attach a valid Authorization header.
-  Future<void> login(
-    String name, {
-    String? userId,
-    String? token,
-    DateTime? tokenExpiresAt,
-  }) async {
+  /// name, session token, and account user_id so "Hello, {name}"
+  /// survives an app restart AND HealthProfileService/AiService keep
+  /// working after relaunch (both read from AuthSession, synced here).
+  Future<void> login(String name, {String? userId, String? token}) async {
     _isLoggedIn = true;
     _userName = name;
-    if (userId != null) _userId = userId;
-    if (token != null) _authToken = token;
-    if (tokenExpiresAt != null) _tokenExpiresAt = tokenExpiresAt;
+    _accountUserId = userId;
+    _authToken = token;
+    AuthSession.userId = userId;
+    AuthSession.token = token;
     notifyListeners();
-
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('isLoggedIn', true);
     await prefs.setString('userName', name);
-    if (userId != null) await prefs.setString('authUserId', userId);
-    if (token != null) await prefs.setString('authToken', token);
-    if (tokenExpiresAt != null) {
-      await prefs.setInt(
-        'authTokenExpiresAt',
-        tokenExpiresAt.millisecondsSinceEpoch,
-      );
+    if (userId != null) {
+      await prefs.setString('accountUserId', userId);
+    }
+    if (token != null) {
+      await prefs.setString('authToken', token);
     }
   }
 
@@ -198,11 +203,8 @@ class CycleProvider extends ChangeNotifier {
 
       await login(
         body['name'] ?? name,
-        userId: body['user_id'] as String?,
-        token: body['token'] as String?,
-        tokenExpiresAt: body['expires_at'] != null
-            ? DateTime.tryParse(body['expires_at'] as String)
-            : null,
+        userId: body['user_id']?.toString(),
+        token: body['token']?.toString(),
       );
       return null;
     } catch (_) {
@@ -236,11 +238,8 @@ class CycleProvider extends ChangeNotifier {
 
       await login(
         body['name'] ?? '',
-        userId: body['user_id'] as String?,
-        token: body['token'] as String?,
-        tokenExpiresAt: body['expires_at'] != null
-            ? DateTime.tryParse(body['expires_at'] as String)
-            : null,
+        userId: body['user_id']?.toString(),
+        token: body['token']?.toString(),
       );
       return null;
     } catch (_) {
@@ -279,36 +278,16 @@ class CycleProvider extends ChangeNotifier {
 
   /// Call from the Settings logout button. Clears the flag so Splash
   /// routes back to Sign In next launch, but keeps cycle/log data intact.
-  /// Also best-effort invalidates the session token server-side and
-  /// clears it locally so no stale Authorization header lingers around.
   Future<void> logout() async {
-    final tokenToInvalidate = _authToken;
-
     _isLoggedIn = false;
-    _userId = null;
     _authToken = null;
-    _tokenExpiresAt = null;
+    _accountUserId = null;
+    AuthSession.clear();
     notifyListeners();
-
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('isLoggedIn', false);
-    await prefs.remove('authUserId');
     await prefs.remove('authToken');
-    await prefs.remove('authTokenExpiresAt');
-
-    if (tokenToInvalidate != null) {
-      try {
-        await http
-            .post(
-              Uri.parse('$_authBaseUrl/logout'),
-              headers: {'Authorization': 'Bearer $tokenToInvalidate'},
-            )
-            .timeout(const Duration(seconds: 8));
-      } catch (_) {
-        // Best-effort only -- the local session is already cleared
-        // above regardless of whether this network call succeeds.
-      }
-    }
+    await prefs.remove('accountUserId');
   }
 
   void updateUserName(String name) async {

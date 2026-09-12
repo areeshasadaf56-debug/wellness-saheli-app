@@ -362,6 +362,74 @@ class _PcosScreenState extends State<PcosScreen> {
         ],
       ),
       const SizedBox(height: 20),
+      _sectionLabel('WHO IS AFFECTED'),
+      const SizedBox(height: 12),
+      PcosCard(
+        emoji: '📊',
+        badgeColor: AppColors.clay,
+        title: 'How Common Is It?',
+        subtitle: 'Prevalence and family patterns',
+        initiallyExpanded: false,
+        lines: const [
+          PcosLine(
+            text:
+                'PCOS is the most common hormonal disorder in people with ovaries, affecting roughly 15–20% of women overall.',
+          ),
+          PcosLine(
+            boldLead: 'Runs in families',
+            text:
+                'affecting around 50% of first-degree relatives (mother, sister) of someone with PCOS.',
+          ),
+          PcosLine(
+            boldLead: 'Most common cause of secondary amenorrhea',
+            text:
+                'accounting for roughly 37% of cases where periods stop, ahead of premature ovarian insufficiency, high prolactin, and weight-related causes.',
+          ),
+          PcosLine(
+            boldLead: 'Leading cause of anovulatory infertility',
+            text:
+                'meaning difficulty conceiving because ovulation isn\'t happening regularly.',
+          ),
+        ],
+      ),
+      const SizedBox(height: 12),
+      PcosCard(
+        emoji: '🧭',
+        badgeColor: AppColors.sage,
+        title: 'Conditions That Look Similar',
+        subtitle: 'What a provider rules out first',
+        initiallyExpanded: false,
+        lines: const [
+          PcosLine(
+            text:
+                'Because several conditions share symptoms with PCOS, providers typically rule these out before confirming a diagnosis:',
+          ),
+          PcosLine(
+            boldLead: 'Thyroid disease',
+            text: 'checked with a TSH blood test.',
+          ),
+          PcosLine(
+            boldLead: 'High prolactin (hyperprolactinemia)',
+            text: 'checked with a prolactin blood test.',
+          ),
+          PcosLine(
+            boldLead: 'Cushing\'s syndrome',
+            text:
+                'suggested by central weight gain, a rounded face, thin skin that bruises easily, and purple stretch marks.',
+          ),
+          PcosLine(
+            boldLead: 'Hypothalamic causes',
+            text:
+                'periods stopping due to significant weight loss, heavy exercise, or chronic stress.',
+          ),
+          PcosLine(
+            boldLead: 'Uterine causes',
+            text:
+                'scarring or narrowing inside the uterus that can also stop periods.',
+          ),
+        ],
+      ),
+      const SizedBox(height: 20),
       _sectionLabel('HORMONES & CAUSES'),
       const SizedBox(height: 12),
       PcosCard(
@@ -391,6 +459,32 @@ class _PcosScreenState extends State<PcosScreen> {
           PcosTag('High androgens', AppColors.periodRed),
           PcosTag('Low SHBG', AppColors.moodYellow),
           PcosTag('Insulin resistance', AppColors.primary),
+        ],
+      ),
+      const SizedBox(height: 12),
+      PcosCard(
+        emoji: '📏',
+        badgeColor: AppColors.symptomOrange,
+        title: 'Measuring Excess Hair Growth',
+        subtitle: 'The Ferriman–Gallwey score',
+        initiallyExpanded: false,
+        lines: const [
+          PcosLine(
+            text:
+                'Providers can track hirsutism using the Ferriman–Gallwey score, which rates hair growth across several body areas (upper lip, chin, chest, back, abdomen, arms, thighs) on a scale of 0 to 4.',
+          ),
+          PcosLine(
+            boldLead: '0',
+            text: 'no visible terminal (coarse, dark) hair growth.',
+          ),
+          PcosLine(
+            boldLead: '4',
+            text: 'full male-pattern terminal hair growth in that area.',
+          ),
+          PcosLine(
+            text:
+                'The scores across all areas are added up into a total, which is useful for tracking whether treatment is working over time — not just for diagnosis.',
+          ),
         ],
       ),
       const SizedBox(height: 20),
@@ -461,6 +555,62 @@ class _PcosScreenState extends State<PcosScreen> {
       ),
       const SizedBox(height: 12),
       PcosCard(
+        emoji: '⚖️',
+        badgeColor: AppColors.clay,
+        title: 'What Your BMI Suggests',
+        subtitle: 'A rough guide, not a diagnosis',
+        initiallyExpanded: false,
+        lines: const [
+          PcosLine(
+            boldLead: 'Under 25 kg/m²',
+            text:
+                'irregular periods are more likely to come from other causes — restrictive eating, excessive exercise, or being significantly underweight.',
+          ),
+          PcosLine(
+            boldLead: '25–30 kg/m²',
+            text: 'irregular periods in this range are most often due to PCOS.',
+          ),
+          PcosLine(
+            boldLead: 'Over 30 kg/m²',
+            text:
+                'PCOS and obesity commonly occur together, with a higher long-term risk of diabetes and cardiovascular disease.',
+          ),
+          PcosLine(
+            text:
+                'Weight loss where applicable tends to reduce PCOS symptoms, but BMI is only ever one piece of the picture alongside symptoms and labs.',
+          ),
+        ],
+      ),
+      const SizedBox(height: 12),
+      PcosCard(
+        emoji: '🤰',
+        badgeColor: AppColors.periodRed,
+        title: 'Fertility & Pregnancy Risk',
+        subtitle: 'What to know when trying to conceive',
+        initiallyExpanded: false,
+        lines: const [
+          PcosLine(
+            text:
+                'Difficulty conceiving with PCOS usually comes from irregular or absent ovulation, not the ovaries or eggs themselves — which is why ovulation induction is often effective.',
+          ),
+          PcosLine(
+            boldLead: 'Ovarian hyperstimulation syndrome (OHSS)',
+            text:
+                'a risk of fertility treatment where the ovaries over-respond, causing bloating, nausea, and in more serious cases fluid retention around the lungs or heart. Careful monitoring during treatment reduces this risk.',
+          ),
+          PcosLine(
+            boldLead: 'Multiple pregnancy',
+            text: 'ovulation induction slightly raises the chance of twins.',
+          ),
+          PcosLine(
+            boldLead: 'Pregnancy complications',
+            text:
+                'gestational diabetes, pre-eclampsia, and obesity-related complications are all somewhat more common with PCOS, which is why early antenatal care matters.',
+          ),
+        ],
+      ),
+      const SizedBox(height: 12),
+      PcosCard(
         emoji: '⏳',
         badgeColor: AppColors.moodYellow,
         title: 'Long-Term Health Risks',
@@ -481,6 +631,56 @@ class _PcosScreenState extends State<PcosScreen> {
             boldLead: 'Endometrial health',
             text:
                 'Infrequent periods can let the uterine lining build up, raising long-term risk if untreated.',
+          ),
+        ],
+        tags: const [
+          PcosTag('Diabetes', AppColors.periodRed),
+          PcosTag('Heart health', AppColors.accent),
+          PcosTag('Endometrial cancer', AppColors.moodYellow),
+          PcosTag('Slight breast cancer risk', AppColors.clay),
+        ],
+      ),
+      const SizedBox(height: 12),
+      PcosCard(
+        emoji: '🗓️',
+        badgeColor: AppColors.sage,
+        title: 'A Typical Monitoring Plan',
+        subtitle: 'What ongoing care can look like',
+        initiallyExpanded: false,
+        lines: const [
+          PcosLine(
+            number: '1',
+            boldLead: 'Track BMI',
+            text:
+                'and get diet and exercise support; diabetes screening is usually advised once BMI passes 30 kg/m².',
+          ),
+          PcosLine(
+            number: '2',
+            boldLead: 'Keep periods regular',
+            text:
+                'with a cyclical combined pill or progestogen — aim for a period at least every 3 months to protect the uterine lining.',
+          ),
+          PcosLine(
+            number: '3',
+            boldLead: 'If skipping hormonal treatment',
+            text:
+                'an ultrasound to check endometrial thickness every 6–12 months is a reasonable alternative.',
+          ),
+          PcosLine(
+            number: '4',
+            boldLead: 'Self-check breasts monthly',
+            text: 'for any new lumps or changes.',
+          ),
+          PcosLine(
+            number: '5',
+            boldLead: 'Treat hyperandrogenism',
+            text:
+                'with medication or dermatological options (electrolysis, waxing, bleaching) — whichever fits your goals.',
+          ),
+          PcosLine(
+            number: '6',
+            boldLead: 'Check blood pressure and cholesterol',
+            text: 'at every visit to catch cardiovascular risk early.',
           ),
         ],
       ),

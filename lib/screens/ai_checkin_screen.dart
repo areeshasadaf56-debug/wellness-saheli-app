@@ -264,6 +264,7 @@ class _AiCheckinScreenState extends State<AiCheckinScreen> {
     return '${months[d.month - 1]} ${d.day}, ${d.year}';
   }
 
+  // ignore: unused_local_variable
   Future<void> _sendMessage() async {
     final text = _inputController.text.trim();
     if (text.isEmpty || _sending) return;
@@ -299,11 +300,9 @@ class _AiCheckinScreenState extends State<AiCheckinScreen> {
 
     try {
       if (!mounted) return;
-      final authToken = context.read<CycleProvider>().authToken;
       final result = await _aiService.sendMessage(
         message: text,
         history: historyForRequest,
-        authToken: authToken,
         profileContext: profileContext,
       );
 

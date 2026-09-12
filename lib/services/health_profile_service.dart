@@ -19,26 +19,20 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../config/api_config.dart';
 import '../models/health_profile.dart';
+import 'auth_session.dart';
 
 class HealthProfileService {
   static const _deviceIdKey = 'health_profile_device_id';
-  static const _localProfileKeyPrefix = 'health_profile_cache_';
-
-  // Written by CycleProvider on sign-in/out -- read directly here so
-  // every screen that already constructs `HealthProfileService()` picks
-  // up authenticated sync automatically, with no call-site changes.
-  static const _authUserIdKey = 'authUserId';
-  static const _authTokenKey = 'authToken';
-  static const _authTokenExpiresAtKey = 'authTokenExpiresAt';
+  static const _localProfileKey = 'health_profile_cache';
 
   String? _cachedUserId;
   HealthProfile? _cachedProfile;
 
   /// Returns the anonymous device id, generating and persisting one on
-  /// first ever call. Used as a fallback identity for local-only usage
-  /// before the user signs in; once signed in, [_effectiveUserId] uses
-  /// the real account id instead so profile data actually reaches the
-  /// backend under an identity the server will authorize.
+  /// first ever call. This id is what ties a user's data together
+  /// across app sessions without requiring a login system -- if you
+  /// add real accounts later, swap this for the logged-in user's id
+  /// and everything else in this file keeps working unchanged.
   Future<String> getDeviceId() async {
     if (_cachedUserId != null) return _cachedUserId!;
 
@@ -52,34 +46,14 @@ class HealthProfileService {
     return id;
   }
 
-  /// The id to use for talking to the backend: the signed-in account's
-  /// real user id when available (required -- the backend now rejects
-  /// `/profile/<id>` calls whose id doesn't match the authenticated
-  /// token), falling back to the anonymous per-device id otherwise.
+  /// The id to key /profile requests by: the signed-in account's
+  /// user_id (from AuthSession, set by CycleProvider on signIn/signUp)
+  /// when logged in, or the anonymous per-device id as a fallback.
+  /// The server now requires the Authorization token's account to
+  /// match this id (see auth_utils.require_auth), so once logged in
+  /// this MUST be the account id, not the device id.
   Future<String> _effectiveUserId() async {
-    final prefs = await SharedPreferences.getInstance();
-    final accountId = prefs.getString(_authUserIdKey);
-    if (accountId != null && accountId.isNotEmpty) return accountId;
-    return getDeviceId();
-  }
-
-  /// `Authorization: Bearer <token>` header when a still-valid session
-  /// exists, or an empty map when signed out / expired -- in which case
-  /// backend calls will simply 401 and the existing try/catch fallbacks
-  /// keep the UI on local-only data, same as being offline.
-  Future<Map<String, String>> _authHeaders() async {
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString(_authTokenKey);
-    if (token == null || token.isEmpty) return {};
-
-    final expiresMillis = prefs.getInt(_authTokenExpiresAtKey);
-    if (expiresMillis != null &&
-        DateTime.fromMillisecondsSinceEpoch(
-          expiresMillis,
-        ).isBefore(DateTime.now())) {
-      return {};
-    }
-    return {'Authorization': 'Bearer $token'};
+    return AuthSession.userId ?? await getDeviceId();
   }
 
   String _generateId() {
@@ -114,7 +88,16 @@ class HealthProfileService {
   Future<HealthProfile> loadProfile() async {
     final userId = await _effectiveUserId();
 
-    final local = await _loadFromCache(userId);
+    var local = await _loadFromCache(userId);
+
+    // If the cached profile was saved under a different id (e.g. it
+    // was created anonymously before this device signed in, or a
+    // different account just signed in on this device), re-key it to
+    // the current id so it syncs to the right place going forward.
+    if (local != null && local.userId != userId) {
+      local = local.copyWith(userId: userId);
+      await _cacheLocally(local);
+    }
 
     // Fire-and-forget: sync from backend if it turns out to be newer.
     // Intentionally not awaited -- the UI should never block on this,
@@ -131,20 +114,19 @@ class HealthProfileService {
     // nothing better to show yet.
     try {
       final uri = Uri.parse('${ApiConfig.baseUrl}/profile/$userId');
-      final headers = await _authHeaders();
       final response = await http
-          .get(uri, headers: headers)
+          .get(uri, headers: AuthSession.authHeaders)
           .timeout(const Duration(seconds: 8));
 
       if (response.statusCode == 200) {
         final json = jsonDecode(response.body) as Map<String, dynamic>;
         final profile = HealthProfile.fromJson(json);
-        await _cacheLocally(userId, profile);
+        await _cacheLocally(profile);
         _cachedProfile = profile;
         return profile;
       }
     } catch (_) {
-      // Network unavailable / server down / not authenticated yet --
+      // Network unavailable / server down / endpoint not live yet --
       // fall through to a blank profile below.
     }
 
@@ -163,9 +145,8 @@ class HealthProfileService {
   ) async {
     try {
       final uri = Uri.parse('${ApiConfig.baseUrl}/profile/$userId');
-      final headers = await _authHeaders();
       final response = await http
-          .get(uri, headers: headers)
+          .get(uri, headers: AuthSession.authHeaders)
           .timeout(const Duration(seconds: 8));
       if (response.statusCode != 200) return;
 
@@ -173,7 +154,7 @@ class HealthProfileService {
       final remote = HealthProfile.fromJson(json);
 
       if (local == null || remote.lastUpdated.isAfter(local.lastUpdated)) {
-        await _cacheLocally(userId, remote);
+        await _cacheLocally(remote);
         _cachedProfile = remote;
       }
     } catch (_) {
@@ -189,16 +170,19 @@ class HealthProfileService {
   /// will resync.
   Future<void> saveProfile(HealthProfile profile) async {
     _cachedProfile = profile;
-    await _cacheLocally(profile.userId, profile);
+    await _cacheLocally(profile);
 
     try {
       final uri = Uri.parse('${ApiConfig.baseUrl}/profile/${profile.userId}');
-      final headers = {
-        'Content-Type': 'application/json',
-        ...await _authHeaders(),
-      };
       await http
-          .put(uri, headers: headers, body: jsonEncode(profile.toJson()))
+          .put(
+            uri,
+            headers: {
+              'Content-Type': 'application/json',
+              ...AuthSession.authHeaders,
+            },
+            body: jsonEncode(profile.toJson()),
+          )
           .timeout(const Duration(seconds: 8));
     } catch (_) {
       // Background sync failed silently -- local cache is still correct,
@@ -289,17 +273,14 @@ class HealthProfileService {
     });
   }
 
-  Future<void> _cacheLocally(String userId, HealthProfile profile) async {
+  Future<void> _cacheLocally(HealthProfile profile) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(
-      '$_localProfileKeyPrefix$userId',
-      jsonEncode(profile.toJson()),
-    );
+    await prefs.setString(_localProfileKey, jsonEncode(profile.toJson()));
   }
 
   Future<HealthProfile?> _loadFromCache(String userId) async {
     final prefs = await SharedPreferences.getInstance();
-    final raw = prefs.getString('$_localProfileKeyPrefix$userId');
+    final raw = prefs.getString(_localProfileKey);
     if (raw == null) return null;
     try {
       return HealthProfile.fromJson(jsonDecode(raw) as Map<String, dynamic>);
