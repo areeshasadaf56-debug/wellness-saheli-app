@@ -64,10 +64,7 @@ class _SignInScreenState extends State<SignInScreen> {
         child: LayoutBuilder(
           builder: (context, constraints) {
             return SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 24,
-                vertical: 32,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
               child: ConstrainedBox(
                 constraints: BoxConstraints(minHeight: constraints.maxHeight),
                 child: Center(
@@ -190,9 +187,7 @@ class _SignInScreenState extends State<SignInScreen> {
                               foregroundColor: Colors.white,
                               disabledBackgroundColor: AppColors.primary
                                   .withValues(alpha: 0.6),
-                              padding: const EdgeInsets.symmetric(
-                                vertical: 16,
-                              ),
+                              padding: const EdgeInsets.symmetric(vertical: 16),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12),
                               ),
