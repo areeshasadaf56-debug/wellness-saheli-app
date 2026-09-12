@@ -4,7 +4,6 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/cycle_data.dart';
 import '../models/daily_log.dart';
-import '../services/auth_session.dart';
 
 class CycleProvider extends ChangeNotifier {
   CycleData _cycleData = CycleData(
@@ -13,25 +12,24 @@ class CycleProvider extends ChangeNotifier {
 
   bool _isLoaded = false;
   bool _remindersEnabled = true;
-  ThemeMode _themeMode = ThemeMode.system;
 
   // --- Auth / profile state ---
   bool _isLoggedIn = false;
   String _userName = '';
 
-  // The server now issues a real session token + account user_id on
-  // signup/signin (see auth_utils.py / main_flask.py). These are what
-  // HealthProfileService and AiService need to send as `Authorization:
-  // Bearer <token>` and to key /profile requests by the account's
-  // user_id instead of the old anonymous device id -- kept in sync
-  // with AuthSession (see auth_session.dart) on every change below.
+  // The server-issued account id + session token. These are what
+  // /profile and /chat now require (Authorization: Bearer <token>) --
+  // see HealthProfileService and AiService, which read these same
+  // SharedPreferences keys directly. Previously the app used a
+  // random per-device UUID for profile sync and never sent any auth
+  // header at all, so /profile could be read/written by anyone who
+  // knew or guessed a user_id. This is what fixes that.
   String? _authToken;
   String? _accountUserId;
 
-  // Accounts now live on the backend server (see /signup, /signin,
+  // Accounts live on the backend server (see /signup, /signin,
   // /reset_password) so they survive app reinstalls and work across
-  // devices. Only the "remember me" flag + name are cached locally
-  // below, purely so the splash screen can skip sign-in on relaunch.
+  // devices.
   static const String _authBaseUrl =
       'https://areeshasadaf56.pythonanywhere.com';
 
@@ -51,7 +49,6 @@ class CycleProvider extends ChangeNotifier {
   int get periodDuration => _cycleData.periodDuration;
 
   bool get remindersEnabled => _remindersEnabled;
-  ThemeMode get themeMode => _themeMode;
 
   bool get isLoggedIn => _isLoggedIn;
   String get userName => _userName;
@@ -61,6 +58,8 @@ class CycleProvider extends ChangeNotifier {
   CycleProvider() {
     _loadData();
   }
+
+  ThemeMode? get themeMode => null;
 
   String _keyFor(DateTime date) {
     return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
@@ -109,27 +108,11 @@ class CycleProvider extends ChangeNotifier {
 
     _remindersEnabled = prefs.getBool('remindersEnabled') ?? true;
 
-    final themeModeName = prefs.getString('themeMode');
-    _themeMode = ThemeMode.values.firstWhere(
-      (m) => m.name == themeModeName,
-      orElse: () => ThemeMode.system,
-    );
-
     // Restore auth/profile state so a returning user skips sign-in.
     _isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
     _userName = prefs.getString('userName') ?? '';
     _authToken = prefs.getString('authToken');
     _accountUserId = prefs.getString('accountUserId');
-
-    // Keep AuthSession in sync as soon as we know it, so any screen
-    // that hits HealthProfileService/AiService right after splash
-    // already has the token/user_id available.
-    if (_isLoggedIn) {
-      AuthSession.token = _authToken;
-      AuthSession.userId = _accountUserId;
-    } else {
-      AuthSession.clear();
-    }
 
     _isLoaded = true;
     notifyListeners();
@@ -142,34 +125,21 @@ class CycleProvider extends ChangeNotifier {
     await prefs.setBool('remindersEnabled', value);
   }
 
-  void setThemeMode(ThemeMode mode) async {
-    _themeMode = mode;
-    notifyListeners();
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('themeMode', mode.name);
-  }
-
-  /// Call on successful sign in / sign up. Persists the logged-in flag,
-  /// name, session token, and account user_id so "Hello, {name}"
-  /// survives an app restart AND HealthProfileService/AiService keep
-  /// working after relaunch (both read from AuthSession, synced here).
+  /// Call on successful sign in / sign up. Persists the logged-in
+  /// flag, name, and (when provided) the session token + account id
+  /// that every authenticated request now needs.
   Future<void> login(String name, {String? userId, String? token}) async {
     _isLoggedIn = true;
     _userName = name;
-    _accountUserId = userId;
-    _authToken = token;
-    AuthSession.userId = userId;
-    AuthSession.token = token;
+    if (userId != null) _accountUserId = userId;
+    if (token != null) _authToken = token;
     notifyListeners();
+
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('isLoggedIn', true);
     await prefs.setString('userName', name);
-    if (userId != null) {
-      await prefs.setString('accountUserId', userId);
-    }
-    if (token != null) {
-      await prefs.setString('authToken', token);
-    }
+    if (userId != null) await prefs.setString('accountUserId', userId);
+    if (token != null) await prefs.setString('authToken', token);
   }
 
   String _normalizeEmail(String email) => email.trim().toLowerCase();
@@ -204,7 +174,7 @@ class CycleProvider extends ChangeNotifier {
       await login(
         body['name'] ?? name,
         userId: body['user_id']?.toString(),
-        token: body['token']?.toString(),
+        token: body['token'] as String?,
       );
       return null;
     } catch (_) {
@@ -239,7 +209,7 @@ class CycleProvider extends ChangeNotifier {
       await login(
         body['name'] ?? '',
         userId: body['user_id']?.toString(),
-        token: body['token']?.toString(),
+        token: body['token'] as String?,
       );
       return null;
     } catch (_) {
@@ -248,7 +218,10 @@ class CycleProvider extends ChangeNotifier {
   }
 
   /// Resets the password for an existing account on the server. Returns
-  /// null on success, or an error message string on failure.
+  /// null on success, or an error message string on failure. Note: the
+  /// server always responds the same way whether or not the email
+  /// exists (so this can't be used to check which emails are
+  /// registered) -- a null return does not guarantee the email existed.
   Future<String?> resetPassword({
     required String email,
     required String newPassword,
@@ -276,18 +249,36 @@ class CycleProvider extends ChangeNotifier {
     }
   }
 
-  /// Call from the Settings logout button. Clears the flag so Splash
-  /// routes back to Sign In next launch, but keeps cycle/log data intact.
+  /// Call from the Settings logout button. Clears the flag + session
+  /// so Splash routes back to Sign In next launch, but keeps cycle/log
+  /// data intact. Best-effort tells the server to invalidate the
+  /// token too -- if that call fails (offline, etc.) local logout
+  /// still proceeds.
   Future<void> logout() async {
+    final tokenToInvalidate = _authToken;
+
     _isLoggedIn = false;
     _authToken = null;
     _accountUserId = null;
-    AuthSession.clear();
     notifyListeners();
+
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('isLoggedIn', false);
     await prefs.remove('authToken');
     await prefs.remove('accountUserId');
+
+    if (tokenToInvalidate != null) {
+      try {
+        await http
+            .post(
+              Uri.parse('$_authBaseUrl/logout'),
+              headers: {'Authorization': 'Bearer $tokenToInvalidate'},
+            )
+            .timeout(const Duration(seconds: 8));
+      } catch (_) {
+        // Best-effort only -- local logout already happened above.
+      }
+    }
   }
 
   void updateUserName(String name) async {

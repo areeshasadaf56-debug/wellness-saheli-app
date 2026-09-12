@@ -264,7 +264,6 @@ class _AiCheckinScreenState extends State<AiCheckinScreen> {
     return '${months[d.month - 1]} ${d.day}, ${d.year}';
   }
 
-  // ignore: unused_local_variable
   Future<void> _sendMessage() async {
     final text = _inputController.text.trim();
     if (text.isEmpty || _sending) return;
@@ -299,7 +298,6 @@ class _AiCheckinScreenState extends State<AiCheckinScreen> {
     );
 
     try {
-      if (!mounted) return;
       final result = await _aiService.sendMessage(
         message: text,
         history: historyForRequest,
@@ -341,8 +339,8 @@ class _AiCheckinScreenState extends State<AiCheckinScreen> {
       if (!mounted) return;
       setState(() {
         _sending = false;
-        _errorText = e.toString().contains('not_signed_in')
-            ? 'Please sign in to use AI Check-in.'
+        _errorText = e is AuthRequiredException
+            ? e.message
             : "Couldn't reach the check-in assistant. Please try again.";
       });
     }
