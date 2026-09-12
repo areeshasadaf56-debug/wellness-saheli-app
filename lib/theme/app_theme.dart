@@ -1,28 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-/// Palette grounded in the earthy, clinical-botanical tones of the app's
-/// PCOS education material — terracotta, olive and warm parchment instead
-/// of a generic lavender "period app" look. Every value below is a named
-/// role, not a one-off, so the same six colors carry the whole app.
 class AppColors {
-  static const Color background = Color(0xFFF6F1E2);
-  static const Color surface = Color(0xFFFFFCF5);
-  static const Color primary = Color(0xFFA6462A);
-  static const Color accent = Color(0xFF6B7A4C);
-  static const Color textPrimary = Color(0xFF2C2417);
-  static const Color textSecondary = Color(0xFF6E6248);
-  static const Color cardBorder = Color(0xFFE6DAC0);
+  static const Color background = Color(0xFFF4ECFA);
+  static const Color surface = Color(0xFFFFFFFF);
+  static const Color primary = Color(0xFF8B5FBF);
+  static const Color accent = Color(0xFFD988AC);
+  static const Color textPrimary = Color(0xFF2A1D3A);
+  static const Color textSecondary = Color(0xFF6B5C7A);
+  static const Color cardBorder = Color(0xFFE0D3EC);
 
   // Accent colors for Home screen redesign
-  static const Color periodRed = Color(0xFFC1503A);
-  static const Color moodYellow = Color(0xFFD69A3C);
-  static const Color symptomOrange = Color(0xFFDD7F2E);
+  static const Color periodRed = Color(0xFFE05C6E);
+  static const Color moodYellow = Color(0xFFE8B84B);
+  static const Color symptomOrange = Color(0xFFE8935A);
 
   // Accent color for Ovulation screen
-  static const Color ovulationTeal = Color(0xFF4F8C78);
+  static const Color ovulationTeal = Color(0xFF5DCFA0);
 
-  // Extra earthy tones for category tags (contraception, PCOS chips, etc.)
+  // Extra tones for category tags (contraception, PCOS chips, etc.)
   static const Color sage = Color(0xFF8A9A5B);
   static const Color clay = Color(0xFFB08968);
 }
@@ -33,7 +29,7 @@ class AppTextStyles {
     FontWeight weight = FontWeight.w600,
     Color color = AppColors.textPrimary,
   }) {
-    return GoogleFonts.fraunces(
+    return GoogleFonts.playfairDisplay(
       fontSize: size,
       fontWeight: weight,
       color: color,
@@ -46,12 +42,13 @@ class AppTextStyles {
     FontWeight weight = FontWeight.normal,
     Color color = AppColors.textPrimary,
   }) {
-    return GoogleFonts.jost(fontSize: size, fontWeight: weight, color: color);
+    return GoogleFonts.dmSans(fontSize: size, fontWeight: weight, color: color);
   }
 }
 
-ThemeData buildAppTheme() {
+ThemeData buildLightTheme() {
   return ThemeData(
+    brightness: Brightness.light,
     scaffoldBackgroundColor: AppColors.background,
     primaryColor: AppColors.primary,
     colorScheme: ColorScheme.light(
@@ -61,7 +58,39 @@ ThemeData buildAppTheme() {
       onSurface: AppColors.textPrimary,
       onPrimary: Colors.white,
     ),
-    fontFamily: GoogleFonts.jost().fontFamily,
+    fontFamily: GoogleFonts.dmSans().fontFamily,
     useMaterial3: true,
   );
 }
+
+/// Dark palette in the same lavender/pink family as [AppColors], lightened
+/// and desaturated just enough to sit on a dark background without glowing.
+class AppColorsDark {
+  static const Color background = Color(0xFF1E1A26);
+  static const Color surface = Color(0xFF2A2433);
+  static const Color primary = Color(0xFFB893E0);
+  static const Color accent = Color(0xFFE8AFC7);
+  static const Color textPrimary = Color(0xFFF2ECFA);
+  static const Color textSecondary = Color(0xFFC2B8D1);
+  static const Color cardBorder = Color(0xFF3D3548);
+}
+
+ThemeData buildDarkTheme() {
+  return ThemeData(
+    brightness: Brightness.dark,
+    scaffoldBackgroundColor: AppColorsDark.background,
+    primaryColor: AppColorsDark.primary,
+    colorScheme: ColorScheme.dark(
+      primary: AppColorsDark.primary,
+      secondary: AppColorsDark.accent,
+      surface: AppColorsDark.surface,
+      onSurface: AppColorsDark.textPrimary,
+      onPrimary: Colors.black,
+    ),
+    fontFamily: GoogleFonts.dmSans().fontFamily,
+    useMaterial3: true,
+  );
+}
+
+/// Kept as an alias so anything still calling the old name compiles.
+ThemeData buildAppTheme() => buildLightTheme();
