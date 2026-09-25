@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -356,10 +358,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
               TextButton(
                 onPressed: () {
-                  // Close the confirmation dialog first, then navigate to
-                  // Sign In and clear the entire navigation stack behind
-                  // it, so the back button can't return into the app.
+                  final cycle = context.read<CycleProvider>();
                   Navigator.pop(dialogContext);
+                  unawaited(cycle.logout());
                   Navigator.pushAndRemoveUntil(
                     context,
                     MaterialPageRoute(

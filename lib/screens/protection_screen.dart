@@ -1289,11 +1289,11 @@ class _ProtectionScreenState extends State<ProtectionScreen> {
         height: 46,
         alignment: Alignment.center,
         decoration: BoxDecoration(
-          color: isActive ? activeColor.withOpacity(0.15) : AppColors.surface,
+          color: isActive ? activeColor.withValues(alpha: 0.15) : AppColors.surface,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: isActive
-                ? activeColor.withOpacity(0.6)
+                ? activeColor.withValues(alpha: 0.6)
                 : AppColors.cardBorder,
           ),
         ),
@@ -1463,7 +1463,7 @@ class _ProtectionScreenState extends State<ProtectionScreen> {
               width: 44,
               height: 44,
               decoration: BoxDecoration(
-                color: AppColors.periodRed.withOpacity(0.12),
+                color: AppColors.periodRed.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(icon, color: AppColors.periodRed, size: 22),
@@ -1493,7 +1493,7 @@ class _ProtectionScreenState extends State<ProtectionScreen> {
             ),
             Icon(
               Icons.chevron_right,
-              color: AppColors.textSecondary.withOpacity(0.6),
+              color: AppColors.textSecondary.withValues(alpha: 0.6),
             ),
           ],
         ),
@@ -1594,7 +1594,7 @@ class _ProtectionScreenState extends State<ProtectionScreen> {
             child: ElevatedButton(
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
-                disabledBackgroundColor: AppColors.primary.withOpacity(0.4),
+                disabledBackgroundColor: AppColors.primary.withValues(alpha: 0.4),
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 14),
                 elevation: 0,
@@ -1628,9 +1628,9 @@ class _ProtectionScreenState extends State<ProtectionScreen> {
               width: double.infinity,
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: AppColors.periodRed.withOpacity(0.08),
+                color: AppColors.periodRed.withValues(alpha: 0.08),
                 borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: AppColors.periodRed.withOpacity(0.3)),
+                border: Border.all(color: AppColors.periodRed.withValues(alpha: 0.3)),
               ),
               child: Text(
                 _eligibilityError!,
@@ -1687,7 +1687,7 @@ class _ProtectionScreenState extends State<ProtectionScreen> {
                         (_eligibilitySaved
                                 ? AppColors.ovulationTeal
                                 : AppColors.primary)
-                            .withOpacity(0.6),
+                            .withValues(alpha: 0.6),
                   ),
                   padding: const EdgeInsets.symmetric(vertical: 13),
                   shape: RoundedRectangleBorder(
@@ -1732,7 +1732,7 @@ class _ProtectionScreenState extends State<ProtectionScreen> {
           boxShadow: active
               ? [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.06),
+                    color: Colors.black.withValues(alpha: 0.06),
                     blurRadius: 6,
                     offset: const Offset(0, 1),
                   ),
@@ -1777,7 +1777,7 @@ class _ProtectionScreenState extends State<ProtectionScreen> {
                   vertical: 5,
                 ),
                 decoration: BoxDecoration(
-                  color: AppColors.primary.withOpacity(0.12),
+                  color: AppColors.primary.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
@@ -1797,7 +1797,7 @@ class _ProtectionScreenState extends State<ProtectionScreen> {
               activeTrackColor: AppColors.primary,
               inactiveTrackColor: AppColors.cardBorder,
               thumbColor: AppColors.primary,
-              overlayColor: AppColors.primary.withOpacity(0.15),
+              overlayColor: AppColors.primary.withValues(alpha: 0.15),
               trackHeight: 4,
               thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 11),
             ),
@@ -1948,9 +1948,9 @@ class _ProtectionScreenState extends State<ProtectionScreen> {
                         vertical: 6,
                       ),
                       decoration: BoxDecoration(
-                        color: color.withOpacity(0.12),
+                        color: color.withValues(alpha: 0.12),
                         borderRadius: BorderRadius.circular(20),
-                        border: Border.all(color: color.withOpacity(0.35)),
+                        border: Border.all(color: color.withValues(alpha: 0.35)),
                       ),
                       child: Text(
                         m,
@@ -2227,7 +2227,7 @@ class _ProtectionScreenState extends State<ProtectionScreen> {
                               vertical: 2,
                             ),
                             decoration: BoxDecoration(
-                              color: AppColors.textSecondary.withOpacity(0.12),
+                              color: AppColors.textSecondary.withValues(alpha: 0.12),
                               borderRadius: BorderRadius.circular(6),
                             ),
                             child: Text(
@@ -2275,7 +2275,7 @@ class _ProtectionScreenState extends State<ProtectionScreen> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                 decoration: BoxDecoration(
-                  color: AppColors.textSecondary.withOpacity(0.12),
+                  color: AppColors.textSecondary.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Text(
@@ -2321,7 +2321,7 @@ class _ProtectionScreenState extends State<ProtectionScreen> {
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-              color: color.withOpacity(0.18),
+              color: color.withValues(alpha: 0.18),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Center(
@@ -2429,7 +2429,7 @@ class _ProtectionScreenState extends State<ProtectionScreen> {
             ),
             Icon(
               Icons.chevron_right,
-              color: AppColors.textSecondary.withOpacity(0.6),
+              color: AppColors.textSecondary.withValues(alpha: 0.6),
             ),
           ],
         ),
@@ -2498,9 +2498,9 @@ class _ProtectionScreenState extends State<ProtectionScreen> {
                   vertical: 5,
                 ),
                 decoration: BoxDecoration(
-                  color: color.withOpacity(0.15),
+                  color: color.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: color.withOpacity(0.4)),
+                  border: Border.all(color: color.withValues(alpha: 0.4)),
                 ),
                 child: Text(
                   label,
@@ -2643,7 +2643,7 @@ class _ProtectionScreenState extends State<ProtectionScreen> {
           border: Border(left: BorderSide(color: AppColors.primary, width: 3)),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.04),
+              color: Colors.black.withValues(alpha: 0.04),
               blurRadius: 6,
               offset: const Offset(0, 2),
             ),
@@ -2702,7 +2702,7 @@ class _ProtectionScreenState extends State<ProtectionScreen> {
         border: Border(left: BorderSide(color: AppColors.primary, width: 3)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 6,
             offset: const Offset(0, 2),
           ),
@@ -2840,7 +2840,7 @@ class _ProtectionScreenState extends State<ProtectionScreen> {
         border: Border(left: BorderSide(color: AppColors.primary, width: 3)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 6,
             offset: const Offset(0, 2),
           ),
@@ -2969,7 +2969,7 @@ class _ProtectionScreenState extends State<ProtectionScreen> {
                     height: 20,
                     margin: const EdgeInsets.only(top: 1),
                     decoration: BoxDecoration(
-                      color: row.$2.withOpacity(0.2),
+                      color: row.$2.withValues(alpha: 0.2),
                       shape: BoxShape.circle,
                     ),
                     child: Center(
@@ -3123,10 +3123,10 @@ class _ProtectionScreenState extends State<ProtectionScreen> {
                           vertical: 6,
                         ),
                         decoration: BoxDecoration(
-                          color: tier.color.withOpacity(0.12),
+                          color: tier.color.withValues(alpha: 0.12),
                           borderRadius: BorderRadius.circular(10),
                           border: Border.all(
-                            color: tier.color.withOpacity(0.35),
+                            color: tier.color.withValues(alpha: 0.35),
                           ),
                         ),
                         child: Row(
@@ -3258,7 +3258,7 @@ class _ProtectionScreenState extends State<ProtectionScreen> {
                           width: 22,
                           height: 22,
                           decoration: BoxDecoration(
-                            color: AppColors.periodRed.withOpacity(0.15),
+                            color: AppColors.periodRed.withValues(alpha: 0.15),
                             shape: BoxShape.circle,
                           ),
                           child: Center(
@@ -3312,7 +3312,7 @@ class _ProtectionScreenState extends State<ProtectionScreen> {
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: AppColors.ovulationTeal.withOpacity(0.3)),
+        border: Border.all(color: AppColors.ovulationTeal.withValues(alpha: 0.3)),
       ),
       child: Column(
         children: [
@@ -3390,7 +3390,7 @@ class MethodCard extends StatelessWidget {
                 width: 40,
                 height: 40,
                 decoration: BoxDecoration(
-                  color: badgeColor.withOpacity(0.18),
+                  color: badgeColor.withValues(alpha: 0.18),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Center(child: emojiText(emoji, size: 18)),
@@ -3438,9 +3438,9 @@ class MethodCard extends StatelessWidget {
                   vertical: 5,
                 ),
                 decoration: BoxDecoration(
-                  color: color.withOpacity(0.15),
+                  color: color.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: color.withOpacity(0.4)),
+                  border: Border.all(color: color.withValues(alpha: 0.4)),
                 ),
                 child: Text(
                   label,

@@ -42,19 +42,24 @@ shape — new fields, renamed fields — **do a full restart, not hot reload**:
   in a broken state when a `const` class's fields have changed.
 
 ### 1.2 Backend Dependencies
-This app talks to external backends over HTTP — it is **not** fully
-self-contained. You'll need network access to:
-| Backend | Used for | Base URL (as coded) |
-|---|---|---|
-| Auth backend | Sign up / sign in / password reset | `https://areeshasadaf56.pythonanywhere.com` (see `cycle_provider.dart`) |
-| PCOS Prediction API | PCOS Detection tab | configured inside `pcos_api_service.dart` **(not yet reviewed — open this file to confirm the base URL)** |
-| Eligibility API | Protection → Eligibility tool | configured inside `eligibility_api_service.dart` **(not yet reviewed — open this file to confirm the base URL)** |
+This app talks to one FastAPI service over HTTP — it is **not** fully
+self-contained. The service is maintained in the sibling `pcos_ml_project`
+directory and supplies authentication, profiles, chat, PCOS prediction, and
+contraceptive-eligibility endpoints.
 
-If these backends are down or the base URLs change, the PCOS/Protection
-screens will show inline error text (`_errorText` / `_eligibilityError`)
-rather than crash — this is intentional, but it means "nothing happens when
-I press the button" during development usually means "the backend is
-unreachable," not a bug in the Flutter code.
+| Service | Used for | Base URL |
+|---|---|---|
+| FastAPI backend | Auth, profile sync, AI chat, PCOS prediction, eligibility | `ApiConfig.baseUrl` / `API_BASE_URL` |
+
+`ApiConfig.baseUrl` defaults to `http://10.0.2.2:8000` for the Android
+emulator. Override it at build or run time, for example:
+
+```bash
+flutter run --dart-define=API_BASE_URL=https://your-api.example
+```
+
+If the API is down or the URL is unreachable, the screens show an error
+message rather than crashing.
 
 ---
 
@@ -78,8 +83,9 @@ lib/
 │   └── cycle_provider.dart         ✅ documented below
 ├── services/
 │   ├── health_profile_service.dart ✅ documented below
-│   ├── pcos_api_service.dart       (not yet reviewed — PCOS prediction HTTP call)
-│   └── eligibility_api_service.dart(not yet reviewed — eligibility HTTP calls)
+│   ├── pcos_api_service.dart       ✅ documented below — POST /predict
+│   ├── eligibility_api_service.dart ✅ documented below — WHO MEC endpoints
+│   └── ai_service.dart             ✅ documented below — authenticated POST /chat
 ├── widgets/
 │   ├── month_calendar.dart         (not yet reviewed — calendar used on Home)
 │   ├── wellness_check_in_dialog.dart ✅ documented below
@@ -148,9 +154,10 @@ A `ChangeNotifier` (Provider pattern) that is **separate storage** from
   `daysUntilNextPeriod`).
 - Per-day logs (`Map<String, DailyLog>`, keyed by `"yyyy-M-d"` string) for
   mood, symptoms, flow intensity, and whether a day was a period day.
-- **Authentication** — `signUp`, `signIn`, `resetPassword` all call a
-  PythonAnywhere REST backend; `login`/`logout` persist the logged-in flag
-  and display name locally so returning users skip sign-in.
+- **Authentication** — `signUp`, `signIn`, `logout`, and the two-step
+  password-reset flow call the FastAPI service through `ApiConfig.baseUrl`.
+  The session token is stored locally in `SharedPreferences` for now;
+  migrate to platform secure storage before production health-data rollout.
 
 > ⚠️ **Architectural note for new developers:** cycle/mood/symptom data and
 > the `HealthProfile` data (PCOS/contraception/diary/mental health) live in
@@ -187,12 +194,12 @@ The banner does **not** open a separate screen — it calls
 `AiCheckinScreen` tab instance.
 
 ### `lib/screens/ai_checkin_screen.dart`
-A quick, tappable "what's on your mind?" concern-chip selector (**not** a
-free-form chat yet — see §5 Known Gaps). Selecting chips and tapping
-"See what's useful for me" runs `_computeSuggestion()`, which scores
-selections into `pcos | protection | mood | none` and shows a suggestion
-card whose action button either switches tabs (`onNavigateToTab`) or opens
-the wellness check-in dialog.
+The conversational AI check-in screen. It supports English/Urdu replies,
+session-based conversation history, voice-to-text input, removable file
+attachments, and structured suggestions that can switch to the PCOS or
+Protection tab. The backend is the safety and grounding layer: it handles
+crisis/medical-emergency short-circuiting, validates attachment content,
+and calls Groq when a key is configured.
 
 ### `lib/screens/pcos_screen.dart`
 Two tabs: **Information** (static educational `PcosCard` accordions covering
@@ -270,26 +277,22 @@ defer; see §5.
 
 ## 5. Known Gaps / Next Phases (for the next developer to pick up)
 
-1. **Real AI conversation.** `ai_checkin_screen.dart` is currently a
-   rule-based chip selector, not a conversational LLM. `ConversationEntry`
-   already supports `sessionId`, and `HealthProfileService
-   .appendConversationEntry()` already accepts one — the actual chat UI
-   and LLM backend call are not yet built.
-2. **Privacy settings UI.** `PrivacySettings` (`aiCanAccessDiary`,
-   `aiMemoryEnabled`) exists on the model but no Settings screen exposes
-   toggles for it yet, and no "clear AI memory" / "delete diary entries"
-   actions exist.
-3. **AI context-assembly layer.** Nothing yet reads from both
-   `CycleProvider` and `HealthProfileService` to build a compact context
-   bundle for an AI call — this needs designing before real chat is built.
-4. **Safety/escalation layer.** No red-flag detection (severe pain,
-   fainting, heavy bleeding, etc.) exists yet — should be designed
-   alongside the AI context layer, before any chat ships.
+1. **Secure local token storage.** The current session token is in
+   `SharedPreferences`; move it to platform secure storage before
+   production rollout.
+2. **Provider and privacy review.** Configure and verify Groq and SMTP
+   credentials, review provider data handling, and retain the existing
+   non-diagnostic and user-controlled AI-context safeguards.
+3. **Full WHO MEC dataset.** The backend currently exposes 12 curated
+   conditions; the complete dataset is future work.
+4. **Shared production infrastructure.** SQLite and in-process rate limits
+   are appropriate for the current single-instance target only; use a
+   managed database and shared rate limiting before scaling out.
 5. **Endometriosis Detection tab** — intentionally left as a placeholder;
    revisit using the same pattern as PCOS Detection, but as a
    symptom-based questionnaire (no lab/ultrasound values) producing a
    non-diagnostic risk/concern level.
 6. **Unreviewed files** — `main.dart`, `app_theme.dart`, `cycle_data.dart`,
-   `daily_log.dart`, `pcos_api_service.dart`, `eligibility_api_service.dart`,
-   `month_calendar.dart`, `ovulation_screen.dart`, `learn_screen.dart`,
-   `settings_screen.dart` should each get an entry in §3 once inspected.
+   `daily_log.dart`, `month_calendar.dart`, `ovulation_screen.dart`,
+   `learn_screen.dart`, and `settings_screen.dart` should each get an
+   entry in §3 once inspected.

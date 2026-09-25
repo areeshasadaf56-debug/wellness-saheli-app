@@ -137,7 +137,7 @@ class _HomeShellState extends State<HomeShell> {
                         Text(
                           item.shortLabel,
                           style: AppTextStyles.sans(
-                            size: 7.5,
+                            size: 9,
                             weight: active ? FontWeight.w600 : FontWeight.w500,
                             color: active
                                 ? AppColors.primary

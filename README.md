@@ -16,7 +16,7 @@
 - [Getting Started](#getting-started)
   - [Prerequisites](#prerequisites)
   - [Frontend Setup (Flutter)](#frontend-setup-flutter)
-  - [Backend Setup (Python)](#backend-setup-python)
+  - [Backend Setup (FastAPI)](#backend-setup-fastapi)
   - [Environment Variables](#environment-variables)
 - [API Reference](#api-reference)
 - [Architecture](#architecture)
@@ -70,7 +70,8 @@ The app is designed with South Asian users in mind, offering culturally sensitiv
 ### 🔒 Privacy Controls
 - Toggle AI memory on/off
 - Toggle diary access for AI on/off
-- All data stored locally + your own backend — no third-party data sharing
+- Local cache and authenticated FastAPI profile storage
+- AI requests send only the message/history/context included by the client to the configured provider; the provider and its data handling must be reviewed before production use
 
 ---
 
@@ -83,10 +84,10 @@ The app is designed with South Asian users in mind, offering culturally sensitiv
 | Fonts | Google Fonts (Playfair Display + DM Sans) |
 | HTTP Client | `package:http` |
 | Local Storage | SharedPreferences |
-| Backend | Python (Flask / FastAPI) |
-| ML Model | Scikit-learn (PCOS prediction) |
-| Auth | Custom Python backend (PythonAnywhere) |
-| Hosting | PythonAnywhere |
+| Backend | Python / FastAPI with Uvicorn |
+| ML Model | Scikit-learn calibrated Gaussian NaiveBayes |
+| Auth | FastAPI bearer sessions with bcrypt password hashing |
+| Hosting | Railway/Render deployment target; local development supported |
 
 ---
 
@@ -120,11 +121,16 @@ wellness_saheli/                  ← Flutter frontend
 │   └── theme/
 │       └── app_theme.dart        ← Colors, text styles, theme
 
-wellness-saheli-server/           ← Python backend
-├── app.py / server.py            ← Main server file
-├── pcos_model/                   ← ML model files
+pcos_ml_project/                 ← sibling FastAPI backend project
+├── app_backend/
+│   ├── main.py                   ← FastAPI application and routes
+│   ├── auth.py                   ← accounts, sessions, password reset
+│   ├── database.py               ← SQLite persistence
+│   ├── chat.py                   ← Groq chat and attachment handling
+│   └── eligibility_data.py       ← WHO MEC reference data
+├── app_deployment/                ← serialized model and metadata
 ├── requirements.txt
-└── .env                          ← API keys and config
+└── .env                           ← local environment settings; never commit secrets
 ```
 
 ---
@@ -137,7 +143,7 @@ wellness-saheli-server/           ← Python backend
 - Dart ≥ 3.0.0
 - Python ≥ 3.9
 - An Android emulator / iOS simulator, or a physical device
-- (Optional) A [PythonAnywhere](https://www.pythonanywhere.com/) account for hosting the backend
+- (Optional) A Railway or Render account for deploying the FastAPI backend
 
 ---
 
@@ -156,12 +162,11 @@ wellness-saheli-server/           ← Python backend
 
 3. **Configure the API base URL**
 
-   Open `lib/config/api_config.dart` and set your backend URL:
-   ```dart
-   class ApiConfig {
-     static const String baseUrl = 'https://your-backend.pythonanywhere.com';
-   }
+   The app reads one build-time value for the FastAPI service:
+   ```bash
+   flutter run --dart-define=API_BASE_URL=http://10.0.2.2:8000
    ```
+   For a physical Android device, use a reachable host or the deployment URL. For production, pass the HTTPS Railway/Render URL through `--dart-define=API_BASE_URL=...`.
 
 4. **Run the app**
    ```bash
@@ -170,39 +175,35 @@ wellness-saheli-server/           ← Python backend
 
 ---
 
-### Backend Setup (Python)
+### Backend Setup (FastAPI)
 
-1. **Clone the backend repository**
-   ```bash
-   git clone https://github.com/areeshasadaf56-debug/wellness-saheli-server.git
-   cd wellness-saheli-server
-   ```
+The backend is maintained in the sibling `pcos_ml_project` directory.
 
-2. **Create a virtual environment**
+1. **Create a virtual environment**
    ```bash
+   cd ../pcos_ml_project
    python -m venv venv
    source venv/bin/activate       # macOS/Linux
    venv\Scripts\activate          # Windows
    ```
 
-3. **Install dependencies**
+2. **Install dependencies**
    ```bash
    pip install -r requirements.txt
    ```
 
-4. **Set up environment variables**
-
-   Create a `.env` file in the root:
-   ```env
-   OPENAI_API_KEY=your_openai_key_here
-   SECRET_KEY=your_secret_key_here
-   ```
-
-5. **Run the server locally**
+3. **Create local configuration**
    ```bash
-   python app.py
+   copy .env.example .env          # Windows
+   cp .env.example .env            # macOS/Linux
    ```
-   The server will start at `http://localhost:5000`.
+   Set `GROQ_API_KEY` for live AI chat and the `SMTP_*` values for password-reset email delivery. Keep `RESET_DEBUG_MODE=false` outside local development.
+
+4. **Run the server locally**
+   ```bash
+   uvicorn app_backend.main:app --reload --host 0.0.0.0 --port 8000
+   ```
+   The API is available at `http://localhost:8000`; Flutter Android emulators use `http://10.0.2.2:8000` by default.
 
 ---
 
@@ -210,8 +211,14 @@ wellness-saheli-server/           ← Python backend
 
 | Variable | Description | Required |
 |---|---|---|
-| `OPENAI_API_KEY` | OpenAI API key for the AI companion | ✅ |
-| `SECRET_KEY` | Flask secret key for session signing | ✅ |
+| `APP_ENV` | Runtime mode; use `production` on a deployed service | Production |
+| `CORS_ORIGINS` | Comma-separated explicit frontend origins | Production |
+| `FORCE_HTTPS` | Redirect HTTP requests to HTTPS | Production |
+| `GROQ_API_KEY` | Groq key for live AI chat; omitted keys use a safe fallback | Optional for local operation |
+| `SMTP_HOST`, `SMTP_PORT` | SMTP server for reset-code delivery | Required for email reset |
+| `SMTP_USER`, `SMTP_PASSWORD`, `SMTP_FROM` | SMTP credentials and sender | Required for email reset |
+| `RESET_DEBUG_MODE` | Exposes development-only reset codes; never enable in production | Development only |
+| `DATABASE_PATH` | Optional SQLite path override | Optional |
 
 ---
 
@@ -222,8 +229,10 @@ wellness-saheli-server/           ← Python backend
 | Method | Endpoint | Description |
 |---|---|---|
 | `POST` | `/signup` | Register a new user |
-| `POST` | `/signin` | Sign in, returns `{ name }` |
-| `POST` | `/reset-password` | Request password reset |
+| `POST` | `/signin` | Sign in and receive a bearer session |
+| `POST` | `/logout` | Revoke the current session |
+| `POST` | `/reset_password/request` | Request a generic password-reset response |
+| `POST` | `/reset_password/confirm` | Confirm an 8-digit reset code and revoke sessions |
 
 **Sign In Request:**
 ```json
@@ -234,7 +243,12 @@ wellness-saheli-server/           ← Python backend
 ```
 **Sign In Response (200):**
 ```json
-{ "name": "Areesha" }
+{
+  "name": "Areesha",
+  "user_id": 1,
+  "token": "<opaque-bearer-token>",
+  "expires_at": "2026-10-25T12:00:00+00:00"
+}
 ```
 
 ---
@@ -243,24 +257,25 @@ wellness-saheli-server/           ← Python backend
 
 | Method | Endpoint | Description |
 |---|---|---|
-| `POST` | `/predict-pcos` | Run PCOS risk prediction |
+| `POST` | `/predict` | Run the 22-field PCOS risk screening model |
 
-**Request:**
+**Request (abbreviated for readability; all 22 model fields are required):**
 ```json
 {
-  "age": 25,
+  "age_yrs": 25,
   "weight_kg": 65,
   "height_cm": 162,
   "cycle_regularity": "Irregular",
-  "regular_exercise": false
+  "regular_exercise": "No"
 }
 ```
+
 **Response:**
 ```json
 {
   "prediction": "PCOS Detected",
   "pcos_probability": 0.73,
-  "model_used": "RandomForest_v2"
+  "model_used": "NaiveBayes"
 }
 ```
 
@@ -341,8 +356,8 @@ Flutter Widget (Screen)
     ├── Service Layer
     │     ├── HealthProfileService — local profile persistence
     │     ├── AiService           — POST /chat
-    │     ├── PcosApiService      — POST /predict-pcos
-    │     └── EligibilityService  — POST /eligibility
+    │     ├── PcosApiService      — POST /predict
+    │     └── EligibilityApiService — POST /eligibility
     │
     └── Python Backend
           ├── Auth endpoints

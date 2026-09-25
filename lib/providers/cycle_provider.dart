@@ -2,8 +2,15 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import '../config/api_config.dart';
 import '../models/cycle_data.dart';
 import '../models/daily_log.dart';
+
+class PasswordResetRequestResult {
+  final String? error;
+  final String? debugCode;
+  const PasswordResetRequestResult({this.error, this.debugCode});
+}
 
 class CycleProvider extends ChangeNotifier {
   CycleData _cycleData = CycleData(
@@ -24,8 +31,6 @@ class CycleProvider extends ChangeNotifier {
   // /reset_password) so they survive app reinstalls and work across
   // devices. Only the "remember me" flag + name are cached locally
   // below, purely so the splash screen can skip sign-in on relaunch.
-  static const String _authBaseUrl =
-      'https://areeshasadaf56.pythonanywhere.com';
 
   Map<String, DailyLog> _dailyLogs = {};
 
@@ -117,13 +122,16 @@ class CycleProvider extends ChangeNotifier {
         ? DateTime.fromMillisecondsSinceEpoch(expiresMillis)
         : null;
 
-    // A token that has already expired is useless -- clear it so the
-    // rest of the app correctly treats this as "no session" rather than
-    // attaching a dead Authorization header to every request.
-    if (_authToken != null && !hasValidSession) {
+    if (hasValidSession) {
+      _isLoggedIn = true;
+    } else {
+      _isLoggedIn = false;
       _authToken = null;
       _userId = null;
       _tokenExpiresAt = null;
+      await prefs.remove('authUserId');
+      await prefs.remove('authToken');
+      await prefs.remove('authTokenExpiresAt');
     }
 
     _isLoaded = true;
@@ -169,6 +177,32 @@ class CycleProvider extends ChangeNotifier {
 
   String _normalizeEmail(String email) => email.trim().toLowerCase();
 
+  /// Safely decodes a JSON response body. Returns an empty map instead
+  /// of throwing when the body is empty or not valid JSON (e.g. a
+  /// proxy error page, a crashed-server HTML response, or a timeout
+  /// page) so callers can still build a sensible error message instead
+  /// of the whole request falling through to a generic "could not
+  /// reach the server" message that hides the real problem.
+  Map<String, dynamic> _safeDecode(String rawBody) {
+    if (rawBody.trim().isEmpty) return {};
+    try {
+      final decoded = jsonDecode(rawBody);
+      if (decoded is Map<String, dynamic>) return decoded;
+      return {};
+    } catch (_) {
+      return {};
+    }
+  }
+
+  String _errorMessageFor(http.Response response) {
+    final body = _safeDecode(response.body);
+    final detail = body['detail'];
+    if (detail is String && detail.isNotEmpty) return detail;
+    // Fall back to something that at least tells you a real server
+    // response came back, rather than pretending it's a network issue.
+    return 'Server returned an error (status ${response.statusCode}). Please try again.';
+  }
+
   /// Creates a new account on the server. Returns null on success, or
   /// an error message string on failure (e.g. email already taken, or
   /// no internet connection).
@@ -180,7 +214,7 @@ class CycleProvider extends ChangeNotifier {
     try {
       final response = await http
           .post(
-            Uri.parse('$_authBaseUrl/signup'),
+            Uri.parse('${ApiConfig.baseUrl}/signup'),
             headers: {'Content-Type': 'application/json'},
             body: jsonEncode({
               'name': name,
@@ -190,21 +224,22 @@ class CycleProvider extends ChangeNotifier {
           )
           .timeout(const Duration(seconds: 30));
 
-      final body = jsonDecode(response.body);
-
       if (response.statusCode != 200) {
-        return body['detail'] ?? 'Something went wrong. Please try again.';
+        return _errorMessageFor(response);
       }
 
+      final body = _safeDecode(response.body);
       await login(
         body['name'] ?? name,
-        userId: body['user_id'] as String?,
+        userId: body['user_id']?.toString(),
         token: body['token'] as String?,
         tokenExpiresAt: body['expires_at'] != null
             ? DateTime.tryParse(body['expires_at'] as String)
             : null,
       );
       return null;
+    } on http.ClientException {
+      return 'Could not reach the server. Please check your internet connection and try again.';
     } catch (_) {
       return 'Could not reach the server. Please check your internet connection and try again.';
     }
@@ -219,7 +254,7 @@ class CycleProvider extends ChangeNotifier {
     try {
       final response = await http
           .post(
-            Uri.parse('$_authBaseUrl/signin'),
+            Uri.parse('${ApiConfig.baseUrl}/signin'),
             headers: {'Content-Type': 'application/json'},
             body: jsonEncode({
               'email': _normalizeEmail(email),
@@ -228,47 +263,75 @@ class CycleProvider extends ChangeNotifier {
           )
           .timeout(const Duration(seconds: 30));
 
-      final body = jsonDecode(response.body);
-
       if (response.statusCode != 200) {
-        return body['detail'] ?? 'Something went wrong. Please try again.';
+        return _errorMessageFor(response);
       }
 
+      final body = _safeDecode(response.body);
       await login(
         body['name'] ?? '',
-        userId: body['user_id'] as String?,
+        userId: body['user_id']?.toString(),
         token: body['token'] as String?,
         tokenExpiresAt: body['expires_at'] != null
             ? DateTime.tryParse(body['expires_at'] as String)
             : null,
       );
       return null;
+    } on http.ClientException {
+      return 'Could not reach the server. Please check your internet connection and try again.';
     } catch (_) {
       return 'Could not reach the server. Please check your internet connection and try again.';
     }
   }
 
-  /// Resets the password for an existing account on the server. Returns
-  /// null on success, or an error message string on failure.
-  Future<String?> resetPassword({
+  Future<PasswordResetRequestResult> requestPasswordReset({
     required String email,
+  }) async {
+    try {
+      final response = await http
+          .post(
+            Uri.parse('${ApiConfig.baseUrl}/reset_password/request'),
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode({'email': _normalizeEmail(email)}),
+          )
+          .timeout(const Duration(seconds: 30));
+
+      if (response.statusCode != 200) {
+        return PasswordResetRequestResult(error: _errorMessageFor(response));
+      }
+
+      final body = _safeDecode(response.body);
+      return PasswordResetRequestResult(
+        debugCode: body['debug_code'] as String?,
+      );
+    } catch (_) {
+      return const PasswordResetRequestResult(
+        error:
+            'Could not reach the server. Please check your internet connection and try again.',
+      );
+    }
+  }
+
+  Future<String?> confirmPasswordReset({
+    required String email,
+    required String code,
     required String newPassword,
   }) async {
     try {
       final response = await http
           .post(
-            Uri.parse('$_authBaseUrl/reset_password'),
+            Uri.parse('${ApiConfig.baseUrl}/reset_password/confirm'),
             headers: {'Content-Type': 'application/json'},
             body: jsonEncode({
               'email': _normalizeEmail(email),
+              'code': code.trim(),
               'new_password': newPassword,
             }),
           )
           .timeout(const Duration(seconds: 30));
 
       if (response.statusCode != 200) {
-        final body = jsonDecode(response.body);
-        return body['detail'] ?? 'Something went wrong. Please try again.';
+        return _errorMessageFor(response);
       }
 
       return null;
@@ -300,7 +363,7 @@ class CycleProvider extends ChangeNotifier {
       try {
         await http
             .post(
-              Uri.parse('$_authBaseUrl/logout'),
+              Uri.parse('${ApiConfig.baseUrl}/logout'),
               headers: {'Authorization': 'Bearer $tokenToInvalidate'},
             )
             .timeout(const Duration(seconds: 8));

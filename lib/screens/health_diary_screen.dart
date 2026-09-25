@@ -338,7 +338,7 @@ class _HealthDiaryScreenState extends State<HealthDiaryScreen> {
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: color.withOpacity(0.3)),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Column(
         children: [
@@ -381,11 +381,11 @@ class _HealthDiaryScreenState extends State<HealthDiaryScreen> {
         height: 46,
         alignment: Alignment.center,
         decoration: BoxDecoration(
-          color: isActive ? activeColor.withOpacity(0.18) : AppColors.surface,
+          color: isActive ? activeColor.withValues(alpha: 0.18) : AppColors.surface,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: isActive
-                ? activeColor.withOpacity(0.6)
+                ? activeColor.withValues(alpha: 0.6)
                 : AppColors.cardBorder,
           ),
         ),
@@ -455,7 +455,7 @@ class _HealthDiaryScreenState extends State<HealthDiaryScreen> {
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: e.color.withOpacity(0.3)),
+        border: Border.all(color: e.color.withValues(alpha: 0.3)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -464,7 +464,7 @@ class _HealthDiaryScreenState extends State<HealthDiaryScreen> {
             width: 36,
             height: 36,
             decoration: BoxDecoration(
-              color: e.color.withOpacity(0.18),
+              color: e.color.withValues(alpha: 0.18),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Center(
@@ -602,7 +602,7 @@ class _HealthDiaryScreenState extends State<HealthDiaryScreen> {
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: color.withOpacity(0.3)),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

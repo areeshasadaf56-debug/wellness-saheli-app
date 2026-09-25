@@ -3,15 +3,12 @@ import 'package:http/http.dart' as http;
 import '../config/api_config.dart';
 
 /// MODULE: services/eligibility_api_service.dart
-/// ROLE: Talks to the Flask backend's contraceptive-eligibility endpoints
+/// ROLE: Talks to the FastAPI backend's contraceptive-eligibility endpoints
 /// (GET /conditions, GET /methods_reference, GET /effectiveness,
 /// POST /eligibility). Used by screens/protection_screen.dart to power
 /// the Eligibility tool.
-/// FIX (was a bug): this file used to define its own hardcoded
-/// `_baseUrl` constant, separate from config/api_config.dart's
-/// `ApiConfig.baseUrl`. That meant changing the backend URL in one place
-/// silently missed this file's four endpoints. Now reads from
-/// ApiConfig.baseUrl like every other service in the app.
+/// The service reads the shared ApiConfig.baseUrl value so all API
+/// clients use the same environment-specific backend.
 
 /// A single selectable medical condition, as returned by GET /conditions.
 class Condition {

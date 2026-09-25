@@ -31,7 +31,6 @@ dependencies:
   flutter:
     sdk: flutter
   http: ^1.2.0
-  crypto: ^3.0.3
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
@@ -39,6 +38,12 @@ dependencies:
   provider: ^6.1.5+1
   shared_preferences: ^2.5.5
   google_fonts: ^8.1.0
+
+  # AI Check-in: voice-to-text input (uses the browser's Web Speech API
+  # on Flutter web, native speech recognition on mobile).
+  speech_to_text: ^7.0.0
+  # AI Check-in: attaching documents/images to a chat message.
+  file_picker: ^8.1.2
 
  
 dev_dependencies:

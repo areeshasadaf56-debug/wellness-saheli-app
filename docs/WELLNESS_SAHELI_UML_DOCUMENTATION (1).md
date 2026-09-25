@@ -1,15 +1,10 @@
 # Wellness Saheli — System Design Documentation
 ### Use Cases, Class (UML) Diagram, and Sequence Diagrams
 
-> **Scope note:** This document is built from the parts of the codebase reviewed and
-> built during development so far — the health profile data model, the PCOS,
-> Protection, Diary, Home, Home Shell, and AI Check-in screens, the wellness
-> check-in and diary-entry dialogs, and the Cycle provider. Screens/services not
-> yet reviewed in detail (e.g. `ovulation_screen.dart`, `learn_screen.dart`,
-> `settings_screen.dart` / `data_privacy_screen.dart`, `eligibility_api_service.dart`
-> internals, `pcos_api_service.dart` internals) are represented at the level of
-> detail currently known and marked accordingly. Update this document as those
-> files are finalized.
+> **Scope note:** This document is built from the current codebase. The backend
+> is the consolidated FastAPI service; the diagrams cover the reviewed Flutter
+> screens and services. Files still awaiting a detailed review are called out
+> in §6.
 
 ---
 
@@ -20,8 +15,8 @@
 | **User** | The primary actor — a person using the app to track her cycle, check symptoms, manage contraception, journal, and talk to the AI companion. |
 | **PCOS Prediction API** | External backend service (`PcosApiService`) that scores a set of clinical inputs and returns a PCOS likelihood. |
 | **Eligibility API** | External backend service (`EligibilityApiService`) that returns WHO-MEC-style contraceptive eligibility categories (1–4) for a set of selected medical conditions. |
-| **Auth/Account Backend** | External REST backend (PythonAnywhere) handling sign up, sign in, and password reset. |
-| **AI / LLM Backend** | *(Planned / in progress)* — the conversational layer behind the AI Check-in screen; assembles context and returns companion responses. |
+| **Auth/Account Backend** | FastAPI REST service handling sign-up, sign-in, sessions, password reset, and owner-only profile access. |
+| **AI / LLM Backend** | FastAPI chat service with Groq tool-calling, deterministic safety short-circuits, and attachment validation/extraction. |
 
 ---
 
@@ -69,12 +64,12 @@ flowchart TB
     subgraph AICompanion
         UC21[Quick Check-in — select concerns]
         UC22[Receive tab suggestion PCOS/Protection/Mood]
-        UC23[Converse with AI Companion - planned]
+        UC23[Converse with AI Companion]
     end
 
     subgraph Privacy
-        UC24[Toggle AI Memory / Diary Access - planned]
-        UC25[Clear AI Memory / Delete Diary - planned]
+        UC24[Toggle AI Memory / Diary Access]
+        UC25[Clear AI Memory / Delete Diary]
     end
 
     User --> UC1
@@ -108,7 +103,7 @@ flowchart TB
     UC1 -.uses.-> AUTHAPI[(Auth Backend)]
     UC2 -.uses.-> AUTHAPI
     UC3 -.uses.-> AUTHAPI
-    UC23 -.uses.-> AIAPI[(AI/LLM Backend - planned)]
+     UC23 -.uses.-> AIAPI[(AI/LLM Backend)]
 ```
 
 ### 2.1 Use Case Descriptions (selected, high-value flows)
@@ -161,7 +156,11 @@ flowchart TB
      - None → informational card only, no action button.
   5. User may tap "Start over" to reset and re-answer.
 
-> **Note:** This is currently a **rule-based chip selector**, not a free-form conversational AI. UC23 (true LLM conversation with memory) is the planned next phase and is not yet implemented — see the companion setup guide's "Known Gaps / Next Phases" section.
+> **Note:** The screen supports both the original rule-based quick check-in and
+> authenticated free-form AI conversation. Chat history is session-tagged and
+> privacy controls control whether prior messages and diary context are sent.
+> Longitudinal pattern summaries and true image understanding remain future
+> work.
 
 ---
 
@@ -344,10 +343,11 @@ classDiagram
 > unbroken log). `HealthProfileService.appendConversationEntry()` now accepts
 > an optional `sessionId` to tag entries accordingly.
 
-> **Note on `PrivacySettings`:** governs *permission*, not deletion. Turning
-> `aiCanAccessDiary` off does not erase `diaryEntries` — it only instructs the
-> (planned) AI context-assembly layer to skip them. Actual deletion is a
-> separate, explicit user action to be wired in Settings / Data Privacy.
+> **Note on `PrivacySettings`:** these flags govern what is sent to the AI
+> service, not the existence of local data. `aiMemoryEnabled` controls whether
+> prior conversation entries are sent, and `aiCanAccessDiary` controls whether
+> diary content is included in context. Settings also provide explicit,
+> confirmed actions to clear AI memory or delete diary entries.
 
 ---
 
@@ -532,18 +532,18 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
     actor User
-    participant SignInScreen as "Sign-in UI (unreviewed)"
+    participant SignInScreen as "Sign-in UI"
     participant CycleProvider
-    participant AuthBackend as "Auth Backend (PythonAnywhere)"
+    participant AuthBackend as "FastAPI backend"
     participant SharedPreferences
 
     User->>SignInScreen: Enter email, password, submit
     SignInScreen->>CycleProvider: signIn(email, password)
     CycleProvider->>AuthBackend: POST /signin {email, password}
     alt success
-        AuthBackend-->>CycleProvider: 200 {name}
-        CycleProvider->>CycleProvider: login(name)
-        CycleProvider->>SharedPreferences: setBool(isLoggedIn, true), setString(userName, name)
+        AuthBackend-->>CycleProvider: 200 {name, user_id, token, expires_at}
+        CycleProvider->>CycleProvider: login(name, userId, token)
+        CycleProvider->>SharedPreferences: set session fields
         CycleProvider-->>SignInScreen: null (no error)
         SignInScreen-->>User: Navigate to HomeShell
     else failure
@@ -559,22 +559,17 @@ sequenceDiagram
 
 ## 6. Known Gaps to Reflect in Future Revisions of This Document
 
-- **`ai_checkin_screen.dart`** as currently documented (§2 UC21/22) is the
-  chip-based version. A referenced later iteration adds `sessionId`-tagged
-  conversation entries (see `ConversationEntry.sessionId` in §3), implying a
-  richer chat UI is being built — once that lands, §2 UC23 and §5.4 should be
-  rewritten as a full conversational sequence diagram (user message → context
-  assembly → LLM call → safety check → response → persisted turn).
-- **`data_privacy_screen.dart`** (Settings) was referenced as the presumed
-  consumer of `PrivacySettings` but not yet reviewed — once available, add a
-  use case + sequence diagram for toggling AI memory / diary access and for
-  "clear AI memory" / "delete diary entries" actions.
-- **`endo_screen.dart` Detection tab** is currently a placeholder (no form, no
-  persistence) — intentionally deferred per product decision. Add its use
-  case and sequence diagram once built, modeled after §5.1 but with symptom
-  questions instead of lab values, per product-brief guidance for
-  Endometriosis (non-diagnostic risk/concern level only).
-- **`ovulation_screen.dart`**, **`learn_screen.dart`** — not yet reviewed;
-  add to §2 and §4 once inspected.
-- **AI/LLM backend** — not yet implemented; §1 and the sequence diagrams mark
-  it as "planned."
+- **Production hardening.** The current token storage uses
+  `SharedPreferences`; migrate to platform secure storage before handling
+  real health data.
+- **Provider and email validation.** Live Groq responses and SMTP
+  password-reset delivery still require environment-specific validation.
+- **Shared infrastructure.** The current SQLite database and in-process
+  rate limits assume one backend instance; use shared storage/limiting
+  before horizontal scaling.
+- **Full WHO MEC dataset.** The backend currently exposes a curated 12
+  conditions; expand and validate the dataset in a later phase.
+- **`endo_screen.dart` Detection tab** is currently a placeholder (no form,
+  no persistence) — intentionally deferred per product decision.
+- **`ovulation_screen.dart`** and **`learn_screen.dart`** still need a
+  detailed review for this document.

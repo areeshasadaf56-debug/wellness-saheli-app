@@ -51,12 +51,12 @@ flowchart TB
     subgraph AICompanion
         UC21[Quick Check-in — select concerns]
         UC22[Receive tab suggestion PCOS/Protection/Mood]
-        UC23[Converse with AI Companion - planned]
+        UC23[Converse with AI Companion]
     end
 
     subgraph Privacy
-        UC24[Toggle AI Memory / Diary Access - planned]
-        UC25[Clear AI Memory / Delete Diary - planned]
+        UC24[Toggle AI Memory / Diary Access]
+        UC25[Clear AI Memory / Delete Diary]
     end
 
     User --> UC1
@@ -90,7 +90,7 @@ flowchart TB
     UC1 -.uses.-> AUTHAPI[(Auth Backend)]
     UC2 -.uses.-> AUTHAPI
     UC3 -.uses.-> AUTHAPI
-    UC23 -.uses.-> AIAPI[(AI/LLM Backend - planned)]
+     UC23 -.uses.-> AIAPI[(AI/LLM Backend)]
 ```
 
 ---
@@ -454,18 +454,18 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
     actor User
-    participant SignInScreen as "Sign-in UI (unreviewed)"
+    participant SignInScreen as "Sign-in UI"
     participant CycleProvider
-    participant AuthBackend as "Auth Backend (PythonAnywhere)"
+    participant AuthBackend as "FastAPI backend"
     participant SharedPreferences
 
     User->>SignInScreen: Enter email, password, submit
     SignInScreen->>CycleProvider: signIn(email, password)
     CycleProvider->>AuthBackend: POST /signin {email, password}
     alt success
-        AuthBackend-->>CycleProvider: 200 {name}
-        CycleProvider->>CycleProvider: login(name)
-        CycleProvider->>SharedPreferences: setBool(isLoggedIn, true), setString(userName, name)
+        AuthBackend-->>CycleProvider: 200 {name, user_id, token, expires_at}
+        CycleProvider->>CycleProvider: login(name, userId, token)
+        CycleProvider->>SharedPreferences: set session fields
         CycleProvider-->>SignInScreen: null (no error)
         SignInScreen-->>User: Navigate to HomeShell
     else failure
