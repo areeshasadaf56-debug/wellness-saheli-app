@@ -20,26 +20,6 @@ class AuthRequiredException implements Exception {
   String toString() => message;
 }
 
-/// A file/image the user attached to a chat message, sent to the
-/// backend as a base64 blob alongside the text. The FastAPI `/chat`
-/// endpoint validates the attachment before processing it.
-class ChatAttachment {
-  final String fileName;
-  final String mimeType;
-  final String base64Data;
-  const ChatAttachment({
-    required this.fileName,
-    required this.mimeType,
-    required this.base64Data,
-  });
-
-  Map<String, dynamic> toJson() => {
-    'file_name': fileName,
-    'mime_type': mimeType,
-    'data_base64': base64Data,
-  };
-}
-
 class AiService {
   Future<AiResponse> sendMessage({
     required String message,

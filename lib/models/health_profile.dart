@@ -80,6 +80,7 @@ class HealthProfile {
   }
 
   HealthProfile copyWith({
+    String? userId,
     Demographics? demographics,
     Lifestyle? lifestyle,
     ReproductiveHistory? reproductiveHistory,
@@ -91,7 +92,7 @@ class HealthProfile {
     List<DiaryEntry>? diaryEntries,
   }) {
     return HealthProfile(
-      userId: userId,
+      userId: userId ?? this.userId,
       demographics: demographics ?? this.demographics,
       lifestyle: lifestyle ?? this.lifestyle,
       reproductiveHistory: reproductiveHistory ?? this.reproductiveHistory,

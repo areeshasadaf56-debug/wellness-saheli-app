@@ -357,8 +357,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 child: const Text('Cancel'),
               ),
               TextButton(
-                onPressed: () {
-                  final cycle = context.read<CycleProvider>();
+                onPressed: () async {
+                  // Clear the session (flag, cached name, auth token +
+                  // account id) before navigating -- previously this
+                  // only navigated, so the old session stayed saved and
+                  // HealthProfileService/AiService kept using it.
+                  await context.read<CycleProvider>().logout();
+                  if (!context.mounted) return;
+                  // Close the confirmation dialog first, then navigate to
+                  // Sign In and clear the entire navigation stack behind
+                  // it, so the back button can't return into the app.
                   Navigator.pop(dialogContext);
                   unawaited(cycle.logout());
                   Navigator.pushAndRemoveUntil(

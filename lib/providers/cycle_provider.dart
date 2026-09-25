@@ -23,14 +23,20 @@ class CycleProvider extends ChangeNotifier {
   // --- Auth / profile state ---
   bool _isLoggedIn = false;
   String _userName = '';
-  String? _userId;
-  String? _authToken;
-  DateTime? _tokenExpiresAt;
 
-  // Accounts now live on the backend server (see /signup, /signin,
+  // The server-issued account id + session token. These are what
+  // /profile and /chat now require (Authorization: Bearer <token>) --
+  // see HealthProfileService and AiService, which read these same
+  // SharedPreferences keys directly. Previously the app used a
+  // random per-device UUID for profile sync and never sent any auth
+  // header at all, so /profile could be read/written by anyone who
+  // knew or guessed a user_id. This is what fixes that.
+  String? _authToken;
+  String? _accountUserId;
+
+  // Accounts live on the backend server (see /signup, /signin,
   // /reset_password) so they survive app reinstalls and work across
-  // devices. Only the "remember me" flag + name are cached locally
-  // below, purely so the splash screen can skip sign-in on relaunch.
+  // devices.
 
   Map<String, DailyLog> _dailyLogs = {};
 
@@ -51,19 +57,14 @@ class CycleProvider extends ChangeNotifier {
 
   bool get isLoggedIn => _isLoggedIn;
   String get userName => _userName;
-  String? get userId => _userId;
   String? get authToken => _authToken;
-
-  /// True once we have a token that isn't (as far as we know) expired
-  /// yet. Callers that hit authenticated endpoints should check this
-  /// before bothering to attach the Authorization header.
-  bool get hasValidSession =>
-      _authToken != null &&
-      (_tokenExpiresAt == null || _tokenExpiresAt!.isAfter(DateTime.now()));
+  String? get accountUserId => _accountUserId;
 
   CycleProvider() {
     _loadData();
   }
+
+  ThemeMode? get themeMode => null;
 
   String _keyFor(DateTime date) {
     return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
@@ -115,23 +116,19 @@ class CycleProvider extends ChangeNotifier {
     // Restore auth/profile state so a returning user skips sign-in.
     _isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
     _userName = prefs.getString('userName') ?? '';
-    _userId = prefs.getString('authUserId');
     _authToken = prefs.getString('authToken');
     final expiresMillis = prefs.getInt('authTokenExpiresAt');
     _tokenExpiresAt = expiresMillis != null
         ? DateTime.fromMillisecondsSinceEpoch(expiresMillis)
         : null;
 
-    if (hasValidSession) {
-      _isLoggedIn = true;
-    } else {
-      _isLoggedIn = false;
+    // A token that has already expired is useless -- clear it so the
+    // rest of the app correctly treats this as "no session" rather than
+    // attaching a dead Authorization header to every request.
+    if (_authToken != null && !hasValidSession) {
       _authToken = null;
       _userId = null;
       _tokenExpiresAt = null;
-      await prefs.remove('authUserId');
-      await prefs.remove('authToken');
-      await prefs.remove('authTokenExpiresAt');
     }
 
     _isLoaded = true;
@@ -145,34 +142,21 @@ class CycleProvider extends ChangeNotifier {
     await prefs.setBool('remindersEnabled', value);
   }
 
-  /// Call on successful sign in / sign up. Persists the logged-in flag,
-  /// the name, and -- when the server returned one -- the account's
-  /// opaque user id + session token, so authenticated endpoints
-  /// (profile sync, AI chat) can attach a valid Authorization header.
-  Future<void> login(
-    String name, {
-    String? userId,
-    String? token,
-    DateTime? tokenExpiresAt,
-  }) async {
+  /// Call on successful sign in / sign up. Persists the logged-in
+  /// flag, name, and (when provided) the session token + account id
+  /// that every authenticated request now needs.
+  Future<void> login(String name, {String? userId, String? token}) async {
     _isLoggedIn = true;
     _userName = name;
-    if (userId != null) _userId = userId;
+    if (userId != null) _accountUserId = userId;
     if (token != null) _authToken = token;
-    if (tokenExpiresAt != null) _tokenExpiresAt = tokenExpiresAt;
     notifyListeners();
 
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('isLoggedIn', true);
     await prefs.setString('userName', name);
-    if (userId != null) await prefs.setString('authUserId', userId);
+    if (userId != null) await prefs.setString('accountUserId', userId);
     if (token != null) await prefs.setString('authToken', token);
-    if (tokenExpiresAt != null) {
-      await prefs.setInt(
-        'authTokenExpiresAt',
-        tokenExpiresAt.millisecondsSinceEpoch,
-      );
-    }
   }
 
   String _normalizeEmail(String email) => email.trim().toLowerCase();
@@ -233,9 +217,6 @@ class CycleProvider extends ChangeNotifier {
         body['name'] ?? name,
         userId: body['user_id']?.toString(),
         token: body['token'] as String?,
-        tokenExpiresAt: body['expires_at'] != null
-            ? DateTime.tryParse(body['expires_at'] as String)
-            : null,
       );
       return null;
     } on http.ClientException {
@@ -272,9 +253,6 @@ class CycleProvider extends ChangeNotifier {
         body['name'] ?? '',
         userId: body['user_id']?.toString(),
         token: body['token'] as String?,
-        tokenExpiresAt: body['expires_at'] != null
-            ? DateTime.tryParse(body['expires_at'] as String)
-            : null,
       );
       return null;
     } on http.ClientException {
@@ -284,35 +262,9 @@ class CycleProvider extends ChangeNotifier {
     }
   }
 
-  Future<PasswordResetRequestResult> requestPasswordReset({
-    required String email,
-  }) async {
-    try {
-      final response = await http
-          .post(
-            Uri.parse('${ApiConfig.baseUrl}/reset_password/request'),
-            headers: {'Content-Type': 'application/json'},
-            body: jsonEncode({'email': _normalizeEmail(email)}),
-          )
-          .timeout(const Duration(seconds: 30));
-
-      if (response.statusCode != 200) {
-        return PasswordResetRequestResult(error: _errorMessageFor(response));
-      }
-
-      final body = _safeDecode(response.body);
-      return PasswordResetRequestResult(
-        debugCode: body['debug_code'] as String?,
-      );
-    } catch (_) {
-      return const PasswordResetRequestResult(
-        error:
-            'Could not reach the server. Please check your internet connection and try again.',
-      );
-    }
-  }
-
-  Future<String?> confirmPasswordReset({
+  /// Resets the password for an existing account on the server. Returns
+  /// null on success, or an error message string on failure.
+  Future<String?> resetPassword({
     required String email,
     required String code,
     required String newPassword,
@@ -340,24 +292,23 @@ class CycleProvider extends ChangeNotifier {
     }
   }
 
-  /// Call from the Settings logout button. Clears the flag so Splash
-  /// routes back to Sign In next launch, but keeps cycle/log data intact.
-  /// Also best-effort invalidates the session token server-side and
-  /// clears it locally so no stale Authorization header lingers around.
+  /// Call from the Settings logout button. Clears the flag + session
+  /// so Splash routes back to Sign In next launch, but keeps cycle/log
+  /// data intact. Best-effort tells the server to invalidate the
+  /// token too -- if that call fails (offline, etc.) local logout
+  /// still proceeds.
   Future<void> logout() async {
     final tokenToInvalidate = _authToken;
 
     _isLoggedIn = false;
-    _userId = null;
     _authToken = null;
-    _tokenExpiresAt = null;
+    _accountUserId = null;
     notifyListeners();
 
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('isLoggedIn', false);
-    await prefs.remove('authUserId');
     await prefs.remove('authToken');
-    await prefs.remove('authTokenExpiresAt');
+    await prefs.remove('accountUserId');
 
     if (tokenToInvalidate != null) {
       try {
@@ -368,8 +319,7 @@ class CycleProvider extends ChangeNotifier {
             )
             .timeout(const Duration(seconds: 8));
       } catch (_) {
-        // Best-effort only -- the local session is already cleared
-        // above regardless of whether this network call succeeds.
+        // Best-effort only -- local logout already happened above.
       }
     }
   }
