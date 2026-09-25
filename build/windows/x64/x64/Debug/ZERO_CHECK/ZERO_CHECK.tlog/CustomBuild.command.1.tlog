@@ -1,0 +1,10 @@
+^C:\USERS\AREESHA\REPRODUCTIVE-HEALTH APP\WELLNESS_SAHELI\BUILD\WINDOWS\X64\CMAKEFILES\740538DD110514FF46B03FC6F0211FBC\GENERATE.STAMP.RULE
+setlocal
+"C:\Program Files\Microsoft Visual Studio\18\Insiders\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" "-SC:/Users/Areesha/reproductive-health app/wellness_saheli/windows" "-BC:/Users/Areesha/reproductive-health app/wellness_saheli/build/windows/x64" --check-stamp-list CMakeFiles/generate.stamp.list --vs-solution-file "C:/Users/Areesha/reproductive-health app/wellness_saheli/build/windows/x64/wellness_saheli.slnx"
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd

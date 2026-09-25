@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="18.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\Areesha\reproductive-health app\wellness_saheli\build\windows\x64\CMakeFiles\8bd20ef1dfd7f54836fb90b1e9cd3281\INSTALL_force.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{AE90B367-129F-3EBD-A878-8DE3363063AF}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

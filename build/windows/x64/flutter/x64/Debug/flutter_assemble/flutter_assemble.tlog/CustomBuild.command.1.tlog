@@ -1,0 +1,28 @@
+^C:\USERS\AREESHA\REPRODUCTIVE-HEALTH APP\WELLNESS_SAHELI\BUILD\WINDOWS\X64\CMAKEFILES\32571FC8ED93385E5564968515492333\FLUTTER_WINDOWS.DLL.RULE
+setlocal
+"C:\Program Files\Microsoft Visual Studio\18\Insiders\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -E env FLUTTER_ROOT=C:\Users\Areesha\src\flutter "PROJECT_DIR=C:\Users\Areesha\reproductive-health app\wellness_saheli" FLUTTER_ROOT=C:\Users\Areesha\src\flutter "FLUTTER_EPHEMERAL_DIR=C:\Users\Areesha\reproductive-health app\wellness_saheli\windows\flutter\ephemeral" "PROJECT_DIR=C:\Users\Areesha\reproductive-health app\wellness_saheli" FLUTTER_TARGET=lib\main.dart DART_DEFINES=RkxVVFRFUl9WRVJTSU9OPTMuNDEuNw==,RkxVVFRFUl9DSEFOTkVMPXN0YWJsZQ==,RkxVVFRFUl9HSVRfVVJMPWh0dHBzOi8vZ2l0aHViLmNvbS9mbHV0dGVyL2ZsdXR0ZXIuZ2l0,RkxVVFRFUl9GUkFNRVdPUktfUkVWSVNJT049Y2MwNzM0YWM3MQ==,RkxVVFRFUl9FTkdJTkVfUkVWSVNJT049NTlhYTU4NGZkZg==,RkxVVFRFUl9EQVJUX1ZFUlNJT049My4xMS41 DART_OBFUSCATION=false TRACK_WIDGET_CREATION=true TREE_SHAKE_ICONS=false "PACKAGE_CONFIG=C:\Users\Areesha\reproductive-health app\wellness_saheli\.dart_tool\package_config.json" C:/Users/Areesha/src/flutter/packages/flutter_tools/bin/tool_backend.bat windows-x64 Debug
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^C:\USERS\AREESHA\REPRODUCTIVE-HEALTH APP\WELLNESS_SAHELI\BUILD\WINDOWS\X64\CMAKEFILES\8BD20EF1DFD7F54836FB90B1E9CD3281\FLUTTER_ASSEMBLE.RULE
+setlocal
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^C:\USERS\AREESHA\REPRODUCTIVE-HEALTH APP\WELLNESS_SAHELI\WINDOWS\FLUTTER\CMAKELISTS.TXT
+setlocal
+"C:\Program Files\Microsoft Visual Studio\18\Insiders\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" "-SC:/Users/Areesha/reproductive-health app/wellness_saheli/windows" "-BC:/Users/Areesha/reproductive-health app/wellness_saheli/build/windows/x64" --check-stamp-file "C:/Users/Areesha/reproductive-health app/wellness_saheli/build/windows/x64/flutter/CMakeFiles/generate.stamp"
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd

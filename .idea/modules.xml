@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/wellness_saheli.iml" filepath="$PROJECT_DIR$/wellness_saheli.iml" />
+      <module fileurl="file://$PROJECT_DIR$/android/wellness_saheli_android.iml" filepath="$PROJECT_DIR$/android/wellness_saheli_android.iml" />
+    </modules>
+  </component>
+</project>

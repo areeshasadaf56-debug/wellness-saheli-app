@@ -1,0 +1,1611 @@
+
+---
+events:
+  -
+    kind: "message-v1"
+    backtrace:
+      - "C:/Program Files/Microsoft Visual Studio/18/Insiders/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-4.3/Modules/CMakeDetermineSystem.cmake:212 (message)"
+      - "CMakeLists.txt:3 (project)"
+    message: |
+      The system is: Windows - 10.0.19045 - AMD64
+  -
+    kind: "find-v1"
+    backtrace:
+      - "C:/Program Files/Microsoft Visual Studio/18/Insiders/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-4.3/Modules/CMakeDetermineCompilerId.cmake:468 (find_file)"
+      - "C:/Program Files/Microsoft Visual Studio/18/Insiders/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-4.3/Modules/CMakeDetermineCompilerId.cmake:506 (CMAKE_DETERMINE_COMPILER_ID_WRITE)"
+      - "C:/Program Files/Microsoft Visual Studio/18/Insiders/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-4.3/Modules/CMakeDetermineCompilerId.cmake:8 (CMAKE_DETERMINE_COMPILER_ID_BUILD)"
+      - "C:/Program Files/Microsoft Visual Studio/18/Insiders/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-4.3/Modules/CMakeDetermineCompilerId.cmake:64 (__determine_compiler_id_test)"
+      - "C:/Program Files/Microsoft Visual Studio/18/Insiders/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-4.3/Modules/CMakeDetermineCXXCompiler.cmake:125 (CMAKE_DETERMINE_COMPILER_ID)"
+      - "CMakeLists.txt:3 (project)"
+    mode: "file"
+    variable: "src_in"
+    description: "Path to a file."
+    settings:
+      SearchFramework: "NEVER"
+      SearchAppBundle: "NEVER"
+      CMAKE_FIND_USE_CMAKE_PATH: true
+      CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+      CMAKE_FIND_USE_INSTALL_PREFIX: true
+    names:
+      - "CMakeCXXCompilerId.cpp.in"
+    candidate_directories:
+      - "C:/Program Files/Microsoft Visual Studio/18/Insiders/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-4.3/Modules/"
+    found: "C:/Program Files/Microsoft Visual Studio/18/Insiders/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-4.3/Modules/CMakeCXXCompilerId.cpp.in"
+    search_context:
+      ENV{PATH}:
+        - "C:\\Python314\\Scripts\\"
+        - "C:\\Python314\\"
+        - "C:\\Windows\\system32"
+        - "C:\\Windows"
+        - "C:\\Windows\\System32\\Wbem"
+        - "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\"
+        - "C:\\Windows\\System32\\OpenSSH\\"
+        - "C:\\Program Files\\nodejs\\"
+        - "C:\\ProgramData\\chocolatey\\bin"
+        - "C:\\Program Files (x86)\\Windows Kits\\10\\Windows Performance Toolkit\\"
+        - "C:\\Program Files\\Git\\cmd"
+        - "C:\\Users\\Areesha\\AppData\\Local\\Microsoft\\WindowsApps"
+        - "C:\\Users\\Areesha\\AppData\\Local\\Programs\\Microsoft VS Code\\bin"
+        - "C:\\Users\\Areesha\\src\\flutter\\bin"
+        - "C:\\Users\\Areesha\\AppData\\Roaming\\npm"
+        - "C:\\Users\\Areesha\\AppData\\Local\\Python\\bin"
+        - "C:\\Users\\Areesha\\AppData\\Local\\PowerToys\\DSCModules\\"
+        - "C:\\Program Files\\Android\\Android Studio\\jbr\\bin"
+        - "C:\\Users\\Areesha\\AppData\\Local\\Kiro-Cli\\"
+        - "C:\\Users\\Areesha\\src\\flutter\\bin\\mingit\\cmd"
+  -
+    kind: "message-v1"
+    backtrace:
+      - "C:/Program Files/Microsoft Visual Studio/18/Insiders/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-4.3/Modules/CMakeDetermineCompilerId.cmake:17 (message)"
+      - "C:/Program Files/Microsoft Visual Studio/18/Insiders/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-4.3/Modules/CMakeDetermineCompilerId.cmake:64 (__determine_compiler_id_test)"
+      - "C:/Program Files/Microsoft Visual Studio/18/Insiders/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-4.3/Modules/CMakeDetermineCXXCompiler.cmake:125 (CMAKE_DETERMINE_COMPILER_ID)"
+      - "CMakeLists.txt:3 (project)"
+    message: |
+      Compiling the CXX compiler identification source file "CMakeCXXCompilerId.cpp" succeeded.
+      Compiler:  
+      Build flags: 
+      Id flags:  
+      
+      The output was:
+      0
+      MSBuild version 18.7.1+024f5b037 for .NET Framework
+      Build started 9/25/2026 1:40:08 AM.
+      
+      Project "C:\\Users\\Areesha\\reproductive-health app\\wellness_saheli\\build\\windows\\x64\\CMakeFiles\\4.3.1-msvc1\\CompilerIdCXX\\CompilerIdCXX.vcxproj" on node 1 (default targets).
+      PrepareForBuild:
+        Creating directory "Debug\\".
+        Structured output is enabled. The formatting of compiler diagnostics will reflect the error hierarchy. See https://aka.ms/cpp/structured-output for more details.
+        Creating directory "Debug\\CompilerIdCXX.tlog\\".
+      InitializeBuildStatus:
+        Creating "Debug\\CompilerIdCXX.tlog\\unsuccessfulbuild" because "AlwaysCreate" was specified.
+        Touching "Debug\\CompilerIdCXX.tlog\\unsuccessfulbuild".
+      ClCompile:
+        C:\\Program Files\\Microsoft Visual Studio\\18\\Insiders\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\CL.exe /c /nologo /W0 /WX- /diagnostics:column /Od /D _MBCS /Gm- /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"Debug\\\\" /Fd"Debug\\vc145.pdb" /external:W0 /Gd /TP /FC /errorReport:queue CMakeCXXCompilerId.cpp
+        CMakeCXXCompilerId.cpp
+      Link:
+        C:\\Program Files\\Microsoft Visual Studio\\18\\Insiders\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\link.exe /ERRORREPORT:QUEUE /OUT:".\\CompilerIdCXX.exe" /INCREMENTAL:NO /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /PDB:".\\CompilerIdCXX.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:".\\CompilerIdCXX.lib" /MACHINE:X64 Debug\\CMakeCXXCompilerId.obj
+        CompilerIdCXX.vcxproj -> C:\\Users\\Areesha\\reproductive-health app\\wellness_saheli\\build\\windows\\x64\\CMakeFiles\\4.3.1-msvc1\\CompilerIdCXX\\CompilerIdCXX.exe
+      PostBuildEvent:
+        for %%i in (cl.exe) do @echo CMAKE_CXX_COMPILER=%%~$PATH:i
+        :VCEnd
+        CMAKE_CXX_COMPILER=C:\\Program Files\\Microsoft Visual Studio\\18\\Insiders\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe
+      FinalizeBuildStatus:
+        Deleting file "Debug\\CompilerIdCXX.tlog\\unsuccessfulbuild".
+        Touching "Debug\\CompilerIdCXX.tlog\\CompilerIdCXX.lastbuildstate".
+      Done Building Project "C:\\Users\\Areesha\\reproductive-health app\\wellness_saheli\\build\\windows\\x64\\CMakeFiles\\4.3.1-msvc1\\CompilerIdCXX\\CompilerIdCXX.vcxproj" (default targets).
+      
+      Build succeeded.
+          0 Warning(s)
+          0 Error(s)
+      
+      Time Elapsed 00:00:08.38
+      
+      
+      Compilation of the CXX compiler identification source "CMakeCXXCompilerId.cpp" produced "CompilerIdCXX.exe"
+      
+      Compilation of the CXX compiler identification source "CMakeCXXCompilerId.cpp" produced "CompilerIdCXX.vcxproj"
+      
+      The CXX compiler identification is MSVC, found in:
+        C:/Users/Areesha/reproductive-health app/wellness_saheli/build/windows/x64/CMakeFiles/4.3.1-msvc1/CompilerIdCXX/CompilerIdCXX.exe
+      
+  -
+    kind: "find-v1"
+    backtrace:
+      - "C:/Program Files/Microsoft Visual Studio/18/Insiders/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-4.3/Modules/CMakeFindBinUtils.cmake:37 (find_program)"
+      - "C:/Program Files/Microsoft Visual Studio/18/Insiders/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-4.3/Modules/CMakeFindBinUtils.cmake:65 (__resolve_tool_path)"
+      - "C:/Program Files/Microsoft Visual Studio/18/Insiders/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-4.3/Modules/CMakeFindBinUtils.cmake:103 (__resolve_linker_path)"
+      - "C:/Program Files/Microsoft Visual Studio/18/Insiders/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-4.3/Modules/CMakeDetermineCXXCompiler.cmake:206 (include)"
+      - "CMakeLists.txt:3 (project)"
+    mode: "program"
+    variable: "_CMAKE_TOOL_WITH_PATH"
+    description: "Path to a program."
+    settings:
+      SearchFramework: "NEVER"
+      SearchAppBundle: "NEVER"
+      CMAKE_FIND_USE_CMAKE_PATH: false
+      CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: false
+      CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+      CMAKE_FIND_USE_INSTALL_PREFIX: true
+    names:
+      - "link"
+    candidate_directories:
+      - "C:/Program Files/Microsoft Visual Studio/18/Insiders/VC/Tools/MSVC/14.51.36231/bin/Hostx64/x64/"
+      - "C:/Python314/Scripts/"
+      - "C:/Python314/"
+      - "C:/Windows/System32/"
+      - "C:/Windows/"
+      - "C:/Windows/System32/wbem/"
+      - "C:/Windows/System32/WindowsPowerShell/v1.0/"
+      - "C:/Windows/System32/OpenSSH/"
+      - "C:/Program Files/nodejs/"
+      - "C:/ProgramData/chocolatey/bin/"
+      - "C:/Program Files (x86)/Windows Kits/10/Windows Performance Toolkit/"
+      - "C:/Program Files/Git/cmd/"
+      - "C:/Users/Areesha/AppData/Local/Microsoft/WindowsApps/"
+      - "C:/Users/Areesha/AppData/Local/Programs/Microsoft VS Code/bin/"
+      - "C:/Users/Areesha/src/flutter/bin/"
+      - "C:/Users/Areesha/AppData/Roaming/npm/"
+      - "C:/Users/Areesha/AppData/Local/Python/bin/"
+      - "C:/Users/Areesha/AppData/Local/PowerToys/DSCModules/"
+      - "C:/Program Files/Android/Android Studio/jbr/bin/"
+      - "C:/Users/Areesha/AppData/Local/Kiro-Cli/"
+      - "C:/Users/Areesha/src/flutter/bin/mingit/cmd/"
+    searched_directories:
+      - "C:/Program Files/Microsoft Visual Studio/18/Insiders/VC/Tools/MSVC/14.51.36231/bin/Hostx64/x64/link.com"
+    found: "C:/Program Files/Microsoft Visual Studio/18/Insiders/VC/Tools/MSVC/14.51.36231/bin/Hostx64/x64/link.exe"
+    search_context:
+      ENV{PATH}:
+        - "C:\\Python314\\Scripts\\"
+        - "C:\\Python314\\"
+        - "C:\\Windows\\system32"
+        - "C:\\Windows"
+        - "C:\\Windows\\System32\\Wbem"
+        - "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\"
+        - "C:\\Windows\\System32\\OpenSSH\\"
+        - "C:\\Program Files\\nodejs\\"
+        - "C:\\ProgramData\\chocolatey\\bin"
+        - "C:\\Program Files (x86)\\Windows Kits\\10\\Windows Performance Toolkit\\"
+        - "C:\\Program Files\\Git\\cmd"
+        - "C:\\Users\\Areesha\\AppData\\Local\\Microsoft\\WindowsApps"
+        - "C:\\Users\\Areesha\\AppData\\Local\\Programs\\Microsoft VS Code\\bin"
+        - "C:\\Users\\Areesha\\src\\flutter\\bin"
+        - "C:\\Users\\Areesha\\AppData\\Roaming\\npm"
+        - "C:\\Users\\Areesha\\AppData\\Local\\Python\\bin"
+        - "C:\\Users\\Areesha\\AppData\\Local\\PowerToys\\DSCModules\\"
+        - "C:\\Program Files\\Android\\Android Studio\\jbr\\bin"
+        - "C:\\Users\\Areesha\\AppData\\Local\\Kiro-Cli\\"
+        - "C:\\Users\\Areesha\\src\\flutter\\bin\\mingit\\cmd"
+  -
+    kind: "find-v1"
+    backtrace:
+      - "C:/Program Files/Microsoft Visual Studio/18/Insiders/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-4.3/Modules/CMakeFindBinUtils.cmake:37 (find_program)"
+      - "C:/Program Files/Microsoft Visual Studio/18/Insiders/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-4.3/Modules/CMakeFindBinUtils.cmake:65 (__resolve_tool_path)"
+      - "C:/Program Files/Microsoft Visual Studio/18/Insiders/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-4.3/Modules/CMakeFindBinUtils.cmake:104 (__resolve_linker_path)"
+      - "C:/Program Files/Microsoft Visual Studio/18/Insiders/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-4.3/Modules/CMakeDetermineCXXCompiler.cmake:206 (include)"
+      - "CMakeLists.txt:3 (project)"
+    mode: "program"
+    variable: "_CMAKE_TOOL_WITH_PATH"
+    description: "Path to a program."
+    settings:
+      SearchFramework: "NEVER"
+      SearchAppBundle: "NEVER"
+      CMAKE_FIND_USE_CMAKE_PATH: false
+      CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: false
+      CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+      CMAKE_FIND_USE_INSTALL_PREFIX: true
+    names:
+      - "lld-link"
+    candidate_directories:
+      - "C:/Program Files/Microsoft Visual Studio/18/Insiders/VC/Tools/MSVC/14.51.36231/bin/Hostx64/x64/"
+      - "C:/Python314/Scripts/"
+      - "C:/Python314/"
+      - "C:/Windows/System32/"
+      - "C:/Windows/"
+      - "C:/Windows/System32/wbem/"
+      - "C:/Windows/System32/WindowsPowerShell/v1.0/"
+      - "C:/Windows/System32/OpenSSH/"
+      - "C:/Program Files/nodejs/"
+      - "C:/ProgramData/chocolatey/bin/"
+      - "C:/Program Files (x86)/Windows Kits/10/Windows Performance Toolkit/"
+      - "C:/Program Files/Git/cmd/"
+      - "C:/Users/Areesha/AppData/Local/Microsoft/WindowsApps/"
+      - "C:/Users/Areesha/AppData/Local/Programs/Microsoft VS Code/bin/"
+      - "C:/Users/Areesha/src/flutter/bin/"
+      - "C:/Users/Areesha/AppData/Roaming/npm/"
+      - "C:/Users/Areesha/AppData/Local/Python/bin/"
+      - "C:/Users/Areesha/AppData/Local/PowerToys/DSCModules/"
+      - "C:/Program Files/Android/Android Studio/jbr/bin/"
+      - "C:/Users/Areesha/AppData/Local/Kiro-Cli/"
+      - "C:/Users/Areesha/src/flutter/bin/mingit/cmd/"
+    searched_directories:
+      - "C:/Program Files/Microsoft Visual Studio/18/Insiders/VC/Tools/MSVC/14.51.36231/bin/Hostx64/x64/lld-link.com"
+      - "C:/Program Files/Microsoft Visual Studio/18/Insiders/VC/Tools/MSVC/14.51.36231/bin/Hostx64/x64/lld-link.exe"
+      - "C:/Program Files/Microsoft Visual Studio/18/Insiders/VC/Tools/MSVC/14.51.36231/bin/Hostx64/x64/lld-link"
+      - "C:/Python314/Scripts/lld-link.com"
+      - "C:/Python314/Scripts/lld-link.exe"
+      - "C:/Python314/Scripts/lld-link"
+      - "C:/Python314/lld-link.com"
+      - "C:/Python314/lld-link.exe"
+      - "C:/Python314/lld-link"
+      - "C:/Windows/System32/lld-link.com"
+      - "C:/Windows/System32/lld-link.exe"
+      - "C:/Windows/System32/lld-link"
+      - "C:/Windows/lld-link.com"
+      - "C:/Windows/lld-link.exe"
+      - "C:/Windows/lld-link"
+      - "C:/Windows/System32/wbem/lld-link.com"
+      - "C:/Windows/System32/wbem/lld-link.exe"
+      - "C:/Windows/System32/wbem/lld-link"
+      - "C:/Windows/System32/WindowsPowerShell/v1.0/lld-link.com"
+      - "C:/Windows/System32/WindowsPowerShell/v1.0/lld-link.exe"
+      - "C:/Windows/System32/WindowsPowerShell/v1.0/lld-link"
+      - "C:/Windows/System32/OpenSSH/lld-link.com"
+      - "C:/Windows/System32/OpenSSH/lld-link.exe"
+      - "C:/Windows/System32/OpenSSH/lld-link"
+      - "C:/Program Files/nodejs/lld-link.com"
+      - "C:/Program Files/nodejs/lld-link.exe"
+      - "C:/Program Files/nodejs/lld-link"
+      - "C:/ProgramData/chocolatey/bin/lld-link.com"
+      - "C:/ProgramData/chocolatey/bin/lld-link.exe"
+      - "C:/ProgramData/chocolatey/bin/lld-link"
+      - "C:/Program Files (x86)/Windows Kits/10/Windows Performance Toolkit/lld-link.com"
+      - "C:/Program Files (x86)/Windows Kits/10/Windows Performance Toolkit/lld-link.exe"
+      - "C:/Program Files (x86)/Windows Kits/10/Windows Performance Toolkit/lld-link"
+      - "C:/Program Files/Git/cmd/lld-link.com"
+      - "C:/Program Files/Git/cmd/lld-link.exe"
+      - "C:/Program Files/Git/cmd/lld-link"
+      - "C:/Users/Areesha/AppData/Local/Microsoft/WindowsApps/lld-link.com"
+      - "C:/Users/Areesha/AppData/Local/Microsoft/WindowsApps/lld-link.exe"
+      - "C:/Users/Areesha/AppData/Local/Microsoft/WindowsApps/lld-link"
+      - "C:/Users/Areesha/AppData/Local/Programs/Microsoft VS Code/bin/lld-link.com"
+      - "C:/Users/Areesha/AppData/Local/Programs/Microsoft VS Code/bin/lld-link.exe"
+      - "C:/Users/Areesha/AppData/Local/Programs/Microsoft VS Code/bin/lld-link"
+      - "C:/Users/Areesha/src/flutter/bin/lld-link.com"
+      - "C:/Users/Areesha/src/flutter/bin/lld-link.exe"
+      - "C:/Users/Areesha/src/flutter/bin/lld-link"
+      - "C:/Users/Areesha/AppData/Roaming/npm/lld-link.com"
+      - "C:/Users/Areesha/AppData/Roaming/npm/lld-link.exe"
+      - "C:/Users/Areesha/AppData/Roaming/npm/lld-link"
+      - "C:/Users/Areesha/AppData/Local/Python/bin/lld-link.com"
+      - "C:/Users/Areesha/AppData/Local/Python/bin/lld-link.exe"
+      - "C:/Users/Areesha/AppData/Local/Python/bin/lld-link"
+      - "C:/Users/Areesha/AppData/Local/PowerToys/DSCModules/lld-link.com"
+      - "C:/Users/Areesha/AppData/Local/PowerToys/DSCModules/lld-link.exe"
+      - "C:/Users/Areesha/AppData/Local/PowerToys/DSCModules/lld-link"
+      - "C:/Program Files/Android/Android Studio/jbr/bin/lld-link.com"
+      - "C:/Program Files/Android/Android Studio/jbr/bin/lld-link.exe"
+      - "C:/Program Files/Android/Android Studio/jbr/bin/lld-link"
+      - "C:/Users/Areesha/AppData/Local/Kiro-Cli/lld-link.com"
+      - "C:/Users/Areesha/AppData/Local/Kiro-Cli/lld-link.exe"
+      - "C:/Users/Areesha/AppData/Local/Kiro-Cli/lld-link"
+      - "C:/Users/Areesha/src/flutter/bin/mingit/cmd/lld-link.com"
+      - "C:/Users/Areesha/src/flutter/bin/mingit/cmd/lld-link.exe"
+      - "C:/Users/Areesha/src/flutter/bin/mingit/cmd/lld-link"
+    found: false
+    search_context:
+      ENV{PATH}:
+        - "C:\\Python314\\Scripts\\"
+        - "C:\\Python314\\"
+        - "C:\\Windows\\system32"
+        - "C:\\Windows"
+        - "C:\\Windows\\System32\\Wbem"
+        - "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\"
+        - "C:\\Windows\\System32\\OpenSSH\\"
+        - "C:\\Program Files\\nodejs\\"
+        - "C:\\ProgramData\\chocolatey\\bin"
+        - "C:\\Program Files (x86)\\Windows Kits\\10\\Windows Performance Toolkit\\"
+        - "C:\\Program Files\\Git\\cmd"
+        - "C:\\Users\\Areesha\\AppData\\Local\\Microsoft\\WindowsApps"
+        - "C:\\Users\\Areesha\\AppData\\Local\\Programs\\Microsoft VS Code\\bin"
+        - "C:\\Users\\Areesha\\src\\flutter\\bin"
+        - "C:\\Users\\Areesha\\AppData\\Roaming\\npm"
+        - "C:\\Users\\Areesha\\AppData\\Local\\Python\\bin"
+        - "C:\\Users\\Areesha\\AppData\\Local\\PowerToys\\DSCModules\\"
+        - "C:\\Program Files\\Android\\Android Studio\\jbr\\bin"
+        - "C:\\Users\\Areesha\\AppData\\Local\\Kiro-Cli\\"
+        - "C:\\Users\\Areesha\\src\\flutter\\bin\\mingit\\cmd"
+  -
+    kind: "find-v1"
+    backtrace:
+      - "C:/Program Files/Microsoft Visual Studio/18/Insiders/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-4.3/Modules/CMakeFindBinUtils.cmake:243 (find_program)"
+      - "C:/Program Files/Microsoft Visual Studio/18/Insiders/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-4.3/Modules/CMakeDetermineCXXCompiler.cmake:206 (include)"
+      - "CMakeLists.txt:3 (project)"
+    mode: "program"
+    variable: "CMAKE_LINKER"
+    description: "Path to a program."
+    settings:
+      SearchFramework: "NEVER"
+      SearchAppBundle: "NEVER"
+      CMAKE_FIND_USE_CMAKE_PATH: false
+      CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: false
+      CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+      CMAKE_FIND_USE_INSTALL_PREFIX: true
+    names:
+      - "link"
+    candidate_directories:
+      - "C:/Program Files/Microsoft Visual Studio/18/Insiders/VC/Tools/MSVC/14.51.36231/bin/Hostx64/x64/"
+      - "C:/Python314/Scripts/"
+      - "C:/Python314/"
+      - "C:/Windows/System32/"
+      - "C:/Windows/"
+      - "C:/Windows/System32/wbem/"
+      - "C:/Windows/System32/WindowsPowerShell/v1.0/"
+      - "C:/Windows/System32/OpenSSH/"
+      - "C:/Program Files/nodejs/"
+      - "C:/ProgramData/chocolatey/bin/"
+      - "C:/Program Files (x86)/Windows Kits/10/Windows Performance Toolkit/"
+      - "C:/Program Files/Git/cmd/"
+      - "C:/Users/Areesha/AppData/Local/Microsoft/WindowsApps/"
+      - "C:/Users/Areesha/AppData/Local/Programs/Microsoft VS Code/bin/"
+      - "C:/Users/Areesha/src/flutter/bin/"
+      - "C:/Users/Areesha/AppData/Roaming/npm/"
+      - "C:/Users/Areesha/AppData/Local/Python/bin/"
+      - "C:/Users/Areesha/AppData/Local/PowerToys/DSCModules/"
+      - "C:/Program Files/Android/Android Studio/jbr/bin/"
+      - "C:/Users/Areesha/AppData/Local/Kiro-Cli/"
+      - "C:/Users/Areesha/src/flutter/bin/mingit/cmd/"
+    searched_directories:
+      - "C:/Program Files/Microsoft Visual Studio/18/Insiders/VC/Tools/MSVC/14.51.36231/bin/Hostx64/x64/link.com"
+    found: "C:/Program Files/Microsoft Visual Studio/18/Insiders/VC/Tools/MSVC/14.51.36231/bin/Hostx64/x64/link.exe"
+    search_context:
+      ENV{PATH}:
+        - "C:\\Python314\\Scripts\\"
+        - "C:\\Python314\\"
+        - "C:\\Windows\\system32"
+        - "C:\\Windows"
+        - "C:\\Windows\\System32\\Wbem"
+        - "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\"
+        - "C:\\Windows\\System32\\OpenSSH\\"
+        - "C:\\Program Files\\nodejs\\"
+        - "C:\\ProgramData\\chocolatey\\bin"
+        - "C:\\Program Files (x86)\\Windows Kits\\10\\Windows Performance Toolkit\\"
+        - "C:\\Program Files\\Git\\cmd"
+        - "C:\\Users\\Areesha\\AppData\\Local\\Microsoft\\WindowsApps"
+        - "C:\\Users\\Areesha\\AppData\\Local\\Programs\\Microsoft VS Code\\bin"
+        - "C:\\Users\\Areesha\\src\\flutter\\bin"
+        - "C:\\Users\\Areesha\\AppData\\Roaming\\npm"
+        - "C:\\Users\\Areesha\\AppData\\Local\\Python\\bin"
+        - "C:\\Users\\Areesha\\AppData\\Local\\PowerToys\\DSCModules\\"
+        - "C:\\Program Files\\Android\\Android Studio\\jbr\\bin"
+        - "C:\\Users\\Areesha\\AppData\\Local\\Kiro-Cli\\"
+        - "C:\\Users\\Areesha\\src\\flutter\\bin\\mingit\\cmd"
+  -
+    kind: "find-v1"
+    backtrace:
+      - "C:/Program Files/Microsoft Visual Studio/18/Insiders/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-4.3/Modules/CMakeFindBinUtils.cmake:243 (find_program)"
+      - "C:/Program Files/Microsoft Visual Studio/18/Insiders/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-4.3/Modules/CMakeDetermineCXXCompiler.cmake:206 (include)"
+      - "CMakeLists.txt:3 (project)"
+    mode: "program"
+    variable: "CMAKE_MT"
+    description: "Path to a program."
+    settings:
+      SearchFramework: "NEVER"
+      SearchAppBundle: "NEVER"
+      CMAKE_FIND_USE_CMAKE_PATH: false
+      CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: false
+      CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+      CMAKE_FIND_USE_INSTALL_PREFIX: true
+    names:
+      - "mt"
+    candidate_directories:
+      - "C:/Program Files/Microsoft Visual Studio/18/Insiders/VC/Tools/MSVC/14.51.36231/bin/Hostx64/x64/"
+      - "C:/Python314/Scripts/"
+      - "C:/Python314/"
+      - "C:/Windows/System32/"
+      - "C:/Windows/"
+      - "C:/Windows/System32/wbem/"
+      - "C:/Windows/System32/WindowsPowerShell/v1.0/"
+      - "C:/Windows/System32/OpenSSH/"
+      - "C:/Program Files/nodejs/"
+      - "C:/ProgramData/chocolatey/bin/"
+      - "C:/Program Files (x86)/Windows Kits/10/Windows Performance Toolkit/"
+      - "C:/Program Files/Git/cmd/"
+      - "C:/Users/Areesha/AppData/Local/Microsoft/WindowsApps/"
+      - "C:/Users/Areesha/AppData/Local/Programs/Microsoft VS Code/bin/"
+      - "C:/Users/Areesha/src/flutter/bin/"
+      - "C:/Users/Areesha/AppData/Roaming/npm/"
+      - "C:/Users/Areesha/AppData/Local/Python/bin/"
+      - "C:/Users/Areesha/AppData/Local/PowerToys/DSCModules/"
+      - "C:/Program Files/Android/Android Studio/jbr/bin/"
+      - "C:/Users/Areesha/AppData/Local/Kiro-Cli/"
+      - "C:/Users/Areesha/src/flutter/bin/mingit/cmd/"
+    searched_directories:
+      - "C:/Program Files/Microsoft Visual Studio/18/Insiders/VC/Tools/MSVC/14.51.36231/bin/Hostx64/x64/mt.com"
+      - "C:/Program Files/Microsoft Visual Studio/18/Insiders/VC/Tools/MSVC/14.51.36231/bin/Hostx64/x64/mt.exe"
+      - "C:/Program Files/Microsoft Visual Studio/18/Insiders/VC/Tools/MSVC/14.51.36231/bin/Hostx64/x64/mt"
+      - "C:/Python314/Scripts/mt.com"
+      - "C:/Python314/Scripts/mt.exe"
+      - "C:/Python314/Scripts/mt"
+      - "C:/Python314/mt.com"
+      - "C:/Python314/mt.exe"
+      - "C:/Python314/mt"
+      - "C:/Windows/System32/mt.com"
+      - "C:/Windows/System32/mt.exe"
+      - "C:/Windows/System32/mt"
+      - "C:/Windows/mt.com"
+      - "C:/Windows/mt.exe"
+      - "C:/Windows/mt"
+      - "C:/Windows/System32/wbem/mt.com"
+      - "C:/Windows/System32/wbem/mt.exe"
+      - "C:/Windows/System32/wbem/mt"
+      - "C:/Windows/System32/WindowsPowerShell/v1.0/mt.com"
+      - "C:/Windows/System32/WindowsPowerShell/v1.0/mt.exe"
+      - "C:/Windows/System32/WindowsPowerShell/v1.0/mt"
+      - "C:/Windows/System32/OpenSSH/mt.com"
+      - "C:/Windows/System32/OpenSSH/mt.exe"
+      - "C:/Windows/System32/OpenSSH/mt"
+      - "C:/Program Files/nodejs/mt.com"
+      - "C:/Program Files/nodejs/mt.exe"
+      - "C:/Program Files/nodejs/mt"
+      - "C:/ProgramData/chocolatey/bin/mt.com"
+      - "C:/ProgramData/chocolatey/bin/mt.exe"
+      - "C:/ProgramData/chocolatey/bin/mt"
+      - "C:/Program Files (x86)/Windows Kits/10/Windows Performance Toolkit/mt.com"
+      - "C:/Program Files (x86)/Windows Kits/10/Windows Performance Toolkit/mt.exe"
+      - "C:/Program Files (x86)/Windows Kits/10/Windows Performance Toolkit/mt"
+      - "C:/Program Files/Git/cmd/mt.com"
+      - "C:/Program Files/Git/cmd/mt.exe"
+      - "C:/Program Files/Git/cmd/mt"
+      - "C:/Users/Areesha/AppData/Local/Microsoft/WindowsApps/mt.com"
+      - "C:/Users/Areesha/AppData/Local/Microsoft/WindowsApps/mt.exe"
+      - "C:/Users/Areesha/AppData/Local/Microsoft/WindowsApps/mt"
+      - "C:/Users/Areesha/AppData/Local/Programs/Microsoft VS Code/bin/mt.com"
+      - "C:/Users/Areesha/AppData/Local/Programs/Microsoft VS Code/bin/mt.exe"
+      - "C:/Users/Areesha/AppData/Local/Programs/Microsoft VS Code/bin/mt"
+      - "C:/Users/Areesha/src/flutter/bin/mt.com"
+      - "C:/Users/Areesha/src/flutter/bin/mt.exe"
+      - "C:/Users/Areesha/src/flutter/bin/mt"
+      - "C:/Users/Areesha/AppData/Roaming/npm/mt.com"
+      - "C:/Users/Areesha/AppData/Roaming/npm/mt.exe"
+      - "C:/Users/Areesha/AppData/Roaming/npm/mt"
+      - "C:/Users/Areesha/AppData/Local/Python/bin/mt.com"
+      - "C:/Users/Areesha/AppData/Local/Python/bin/mt.exe"
+      - "C:/Users/Areesha/AppData/Local/Python/bin/mt"
+      - "C:/Users/Areesha/AppData/Local/PowerToys/DSCModules/mt.com"
+      - "C:/Users/Areesha/AppData/Local/PowerToys/DSCModules/mt.exe"
+      - "C:/Users/Areesha/AppData/Local/PowerToys/DSCModules/mt"
+      - "C:/Program Files/Android/Android Studio/jbr/bin/mt.com"
+      - "C:/Program Files/Android/Android Studio/jbr/bin/mt.exe"
+      - "C:/Program Files/Android/Android Studio/jbr/bin/mt"
+      - "C:/Users/Areesha/AppData/Local/Kiro-Cli/mt.com"
+      - "C:/Users/Areesha/AppData/Local/Kiro-Cli/mt.exe"
+      - "C:/Users/Areesha/AppData/Local/Kiro-Cli/mt"
+      - "C:/Users/Areesha/src/flutter/bin/mingit/cmd/mt.com"
+      - "C:/Users/Areesha/src/flutter/bin/mingit/cmd/mt.exe"
+      - "C:/Users/Areesha/src/flutter/bin/mingit/cmd/mt"
+    found: false
+    search_context:
+      ENV{PATH}:
+        - "C:\\Python314\\Scripts\\"
+        - "C:\\Python314\\"
+        - "C:\\Windows\\system32"
+        - "C:\\Windows"
+        - "C:\\Windows\\System32\\Wbem"
+        - "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\"
+        - "C:\\Windows\\System32\\OpenSSH\\"
+        - "C:\\Program Files\\nodejs\\"
+        - "C:\\ProgramData\\chocolatey\\bin"
+        - "C:\\Program Files (x86)\\Windows Kits\\10\\Windows Performance Toolkit\\"
+        - "C:\\Program Files\\Git\\cmd"
+        - "C:\\Users\\Areesha\\AppData\\Local\\Microsoft\\WindowsApps"
+        - "C:\\Users\\Areesha\\AppData\\Local\\Programs\\Microsoft VS Code\\bin"
+        - "C:\\Users\\Areesha\\src\\flutter\\bin"
+        - "C:\\Users\\Areesha\\AppData\\Roaming\\npm"
+        - "C:\\Users\\Areesha\\AppData\\Local\\Python\\bin"
+        - "C:\\Users\\Areesha\\AppData\\Local\\PowerToys\\DSCModules\\"
+        - "C:\\Program Files\\Android\\Android Studio\\jbr\\bin"
+        - "C:\\Users\\Areesha\\AppData\\Local\\Kiro-Cli\\"
+        - "C:\\Users\\Areesha\\src\\flutter\\bin\\mingit\\cmd"
+  -
+    kind: "find-v1"
+    backtrace:
+      - "C:/Program Files/Microsoft Visual Studio/18/Insiders/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-4.3/Modules/CMakeFindBinUtils.cmake:243 (find_program)"
+      - "C:/Program Files/Microsoft Visual Studio/18/Insiders/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-4.3/Modules/CMakeDetermineCXXCompiler.cmake:206 (include)"
+      - "CMakeLists.txt:3 (project)"
+    mode: "program"
+    variable: "CMAKE_AR"
+    description: "Path to a program."
+    settings:
+      SearchFramework: "NEVER"
+      SearchAppBundle: "NEVER"
+      CMAKE_FIND_USE_CMAKE_PATH: false
+      CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: false
+      CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+      CMAKE_FIND_USE_INSTALL_PREFIX: true
+    names:
+      - "lib"
+    candidate_directories:
+      - "C:/Program Files/Microsoft Visual Studio/18/Insiders/VC/Tools/MSVC/14.51.36231/bin/Hostx64/x64/"
+      - "C:/Python314/Scripts/"
+      - "C:/Python314/"
+      - "C:/Windows/System32/"
+      - "C:/Windows/"
+      - "C:/Windows/System32/wbem/"
+      - "C:/Windows/System32/WindowsPowerShell/v1.0/"
+      - "C:/Windows/System32/OpenSSH/"
+      - "C:/Program Files/nodejs/"
+      - "C:/ProgramData/chocolatey/bin/"
+      - "C:/Program Files (x86)/Windows Kits/10/Windows Performance Toolkit/"
+      - "C:/Program Files/Git/cmd/"
+      - "C:/Users/Areesha/AppData/Local/Microsoft/WindowsApps/"
+      - "C:/Users/Areesha/AppData/Local/Programs/Microsoft VS Code/bin/"
+      - "C:/Users/Areesha/src/flutter/bin/"
+      - "C:/Users/Areesha/AppData/Roaming/npm/"
+      - "C:/Users/Areesha/AppData/Local/Python/bin/"
+      - "C:/Users/Areesha/AppData/Local/PowerToys/DSCModules/"
+      - "C:/Program Files/Android/Android Studio/jbr/bin/"
+      - "C:/Users/Areesha/AppData/Local/Kiro-Cli/"
+      - "C:/Users/Areesha/src/flutter/bin/mingit/cmd/"
+    searched_directories:
+      - "C:/Program Files/Microsoft Visual Studio/18/Insiders/VC/Tools/MSVC/14.51.36231/bin/Hostx64/x64/lib.com"
+    found: "C:/Program Files/Microsoft Visual Studio/18/Insiders/VC/Tools/MSVC/14.51.36231/bin/Hostx64/x64/lib.exe"
+    search_context:
+      ENV{PATH}:
+        - "C:\\Python314\\Scripts\\"
+        - "C:\\Python314\\"
+        - "C:\\Windows\\system32"
+        - "C:\\Windows"
+        - "C:\\Windows\\System32\\Wbem"
+        - "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\"
+        - "C:\\Windows\\System32\\OpenSSH\\"
+        - "C:\\Program Files\\nodejs\\"
+        - "C:\\ProgramData\\chocolatey\\bin"
+        - "C:\\Program Files (x86)\\Windows Kits\\10\\Windows Performance Toolkit\\"
+        - "C:\\Program Files\\Git\\cmd"
+        - "C:\\Users\\Areesha\\AppData\\Local\\Microsoft\\WindowsApps"
+        - "C:\\Users\\Areesha\\AppData\\Local\\Programs\\Microsoft VS Code\\bin"
+        - "C:\\Users\\Areesha\\src\\flutter\\bin"
+        - "C:\\Users\\Areesha\\AppData\\Roaming\\npm"
+        - "C:\\Users\\Areesha\\AppData\\Local\\Python\\bin"
+        - "C:\\Users\\Areesha\\AppData\\Local\\PowerToys\\DSCModules\\"
+        - "C:\\Program Files\\Android\\Android Studio\\jbr\\bin"
+        - "C:\\Users\\Areesha\\AppData\\Local\\Kiro-Cli\\"
+        - "C:\\Users\\Areesha\\src\\flutter\\bin\\mingit\\cmd"
+  -
+    kind: "find-v1"
+    backtrace:
+      - "C:/Program Files/Microsoft Visual Studio/18/Insiders/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-4.3/Modules/CMakeDetermineRCCompiler.cmake:40 (find_program)"
+      - "C:/Program Files/Microsoft Visual Studio/18/Insiders/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-4.3/Modules/Platform/Windows-MSVC.cmake:596 (enable_language)"
+      - "C:/Program Files/Microsoft Visual Studio/18/Insiders/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-4.3/Modules/Platform/Windows-MSVC.cmake:569 (__windows_compiler_msvc_enable_rc)"
+      - "C:/Program Files/Microsoft Visual Studio/18/Insiders/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-4.3/Modules/Platform/Windows-MSVC-CXX.cmake:6 (__windows_compiler_msvc)"
+      - "C:/Program Files/Microsoft Visual Studio/18/Insiders/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-4.3/Modules/CMakeCXXInformation.cmake:48 (include)"
+      - "CMakeLists.txt:3 (project)"
+    mode: "program"
+    variable: "CMAKE_RC_COMPILER"
+    description: "RC compiler"
+    settings:
+      SearchFramework: "NEVER"
+      SearchAppBundle: "NEVER"
+      CMAKE_FIND_USE_CMAKE_PATH: true
+      CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+      CMAKE_FIND_USE_INSTALL_PREFIX: true
+    names:
+      - "rc"
+    candidate_directories:
+      - "C:/Python314/Scripts/"
+      - "C:/Python314/"
+      - "C:/Windows/System32/"
+      - "C:/Windows/"
+      - "C:/Windows/System32/wbem/"
+      - "C:/Windows/System32/WindowsPowerShell/v1.0/"
+      - "C:/Windows/System32/OpenSSH/"
+      - "C:/Program Files/nodejs/"
+      - "C:/ProgramData/chocolatey/bin/"
+      - "C:/Program Files (x86)/Windows Kits/10/Windows Performance Toolkit/"
+      - "C:/Program Files/Git/cmd/"
+      - "C:/Users/Areesha/AppData/Local/Microsoft/WindowsApps/"
+      - "C:/Users/Areesha/AppData/Local/Programs/Microsoft VS Code/bin/"
+      - "C:/Users/Areesha/src/flutter/bin/"
+      - "C:/Users/Areesha/AppData/Roaming/npm/"
+      - "C:/Users/Areesha/AppData/Local/Python/bin/"
+      - "C:/Users/Areesha/AppData/Local/PowerToys/DSCModules/"
+      - "C:/Program Files/Android/Android Studio/jbr/bin/"
+      - "C:/Users/Areesha/AppData/Local/Kiro-Cli/"
+      - "C:/Users/Areesha/src/flutter/bin/mingit/cmd/"
+      - "C:/Program Files/bin/"
+      - "C:/Program Files/sbin/"
+      - "C:/Program Files/"
+      - "C:/Program Files (x86)/bin/"
+      - "C:/Program Files (x86)/sbin/"
+      - "C:/Program Files (x86)/"
+      - "C:/Program Files/Microsoft Visual Studio/18/Insiders/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/bin/"
+      - "C:/Program Files/Microsoft Visual Studio/18/Insiders/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/sbin/"
+      - "C:/Program Files/Microsoft Visual Studio/18/Insiders/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/"
+      - "C:/Program Files/wellness_saheli/bin/"
+      - "C:/Program Files/wellness_saheli/sbin/"
+      - "C:/Program Files/wellness_saheli/"
+    searched_directories:
+      - "C:/Python314/Scripts/rc.com"
+      - "C:/Python314/Scripts/rc.exe"
+      - "C:/Python314/Scripts/rc"
+      - "C:/Python314/rc.com"
+      - "C:/Python314/rc.exe"
+      - "C:/Python314/rc"
+      - "C:/Windows/System32/rc.com"
+      - "C:/Windows/System32/rc.exe"
+      - "C:/Windows/System32/rc"
+      - "C:/Windows/rc.com"
+      - "C:/Windows/rc.exe"
+      - "C:/Windows/rc"
+      - "C:/Windows/System32/wbem/rc.com"
+      - "C:/Windows/System32/wbem/rc.exe"
+      - "C:/Windows/System32/wbem/rc"
+      - "C:/Windows/System32/WindowsPowerShell/v1.0/rc.com"
+      - "C:/Windows/System32/WindowsPowerShell/v1.0/rc.exe"
+      - "C:/Windows/System32/WindowsPowerShell/v1.0/rc"
+      - "C:/Windows/System32/OpenSSH/rc.com"
+      - "C:/Windows/System32/OpenSSH/rc.exe"
+      - "C:/Windows/System32/OpenSSH/rc"
+      - "C:/Program Files/nodejs/rc.com"
+      - "C:/Program Files/nodejs/rc.exe"
+      - "C:/Program Files/nodejs/rc"
+      - "C:/ProgramData/chocolatey/bin/rc.com"
+      - "C:/ProgramData/chocolatey/bin/rc.exe"
+      - "C:/ProgramData/chocolatey/bin/rc"
+      - "C:/Program Files (x86)/Windows Kits/10/Windows Performance Toolkit/rc.com"
+      - "C:/Program Files (x86)/Windows Kits/10/Windows Performance Toolkit/rc.exe"
+      - "C:/Program Files (x86)/Windows Kits/10/Windows Performance Toolkit/rc"
+      - "C:/Program Files/Git/cmd/rc.com"
+      - "C:/Program Files/Git/cmd/rc.exe"
+      - "C:/Program Files/Git/cmd/rc"
+      - "C:/Users/Areesha/AppData/Local/Microsoft/WindowsApps/rc.com"
+      - "C:/Users/Areesha/AppData/Local/Microsoft/WindowsApps/rc.exe"
+      - "C:/Users/Areesha/AppData/Local/Microsoft/WindowsApps/rc"
+      - "C:/Users/Areesha/AppData/Local/Programs/Microsoft VS Code/bin/rc.com"
+      - "C:/Users/Areesha/AppData/Local/Programs/Microsoft VS Code/bin/rc.exe"
+      - "C:/Users/Areesha/AppData/Local/Programs/Microsoft VS Code/bin/rc"
+      - "C:/Users/Areesha/src/flutter/bin/rc.com"
+      - "C:/Users/Areesha/src/flutter/bin/rc.exe"
+      - "C:/Users/Areesha/src/flutter/bin/rc"
+      - "C:/Users/Areesha/AppData/Roaming/npm/rc.com"
+      - "C:/Users/Areesha/AppData/Roaming/npm/rc.exe"
+      - "C:/Users/Areesha/AppData/Roaming/npm/rc"
+      - "C:/Users/Areesha/AppData/Local/Python/bin/rc.com"
+      - "C:/Users/Areesha/AppData/Local/Python/bin/rc.exe"
+      - "C:/Users/Areesha/AppData/Local/Python/bin/rc"
+      - "C:/Users/Areesha/AppData/Local/PowerToys/DSCModules/rc.com"
+      - "C:/Users/Areesha/AppData/Local/PowerToys/DSCModules/rc.exe"
+      - "C:/Users/Areesha/AppData/Local/PowerToys/DSCModules/rc"
+      - "C:/Program Files/Android/Android Studio/jbr/bin/rc.com"
+      - "C:/Program Files/Android/Android Studio/jbr/bin/rc.exe"
+      - "C:/Program Files/Android/Android Studio/jbr/bin/rc"
+      - "C:/Users/Areesha/AppData/Local/Kiro-Cli/rc.com"
+      - "C:/Users/Areesha/AppData/Local/Kiro-Cli/rc.exe"
+      - "C:/Users/Areesha/AppData/Local/Kiro-Cli/rc"
+      - "C:/Users/Areesha/src/flutter/bin/mingit/cmd/rc.com"
+      - "C:/Users/Areesha/src/flutter/bin/mingit/cmd/rc.exe"
+      - "C:/Users/Areesha/src/flutter/bin/mingit/cmd/rc"
+      - "C:/Program Files/bin/rc.com"
+      - "C:/Program Files/bin/rc.exe"
+      - "C:/Program Files/bin/rc"
+      - "C:/Program Files/sbin/rc.com"
+      - "C:/Program Files/sbin/rc.exe"
+      - "C:/Program Files/sbin/rc"
+      - "C:/Program Files/rc.com"
+      - "C:/Program Files/rc.exe"
+      - "C:/Program Files/rc"
+      - "C:/Program Files (x86)/bin/rc.com"
+      - "C:/Program Files (x86)/bin/rc.exe"
+      - "C:/Program Files (x86)/bin/rc"
+      - "C:/Program Files (x86)/sbin/rc.com"
+      - "C:/Program Files (x86)/sbin/rc.exe"
+      - "C:/Program Files (x86)/sbin/rc"
+      - "C:/Program Files (x86)/rc.com"
+      - "C:/Program Files (x86)/rc.exe"
+      - "C:/Program Files (x86)/rc"
+      - "C:/Program Files/Microsoft Visual Studio/18/Insiders/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/bin/rc.com"
+      - "C:/Program Files/Microsoft Visual Studio/18/Insiders/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/bin/rc.exe"
+      - "C:/Program Files/Microsoft Visual Studio/18/Insiders/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/bin/rc"
+      - "C:/Program Files/Microsoft Visual Studio/18/Insiders/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/sbin/rc.com"
+      - "C:/Program Files/Microsoft Visual Studio/18/Insiders/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/sbin/rc.exe"
+      - "C:/Program Files/Microsoft Visual Studio/18/Insiders/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/sbin/rc"
+      - "C:/Program Files/Microsoft Visual Studio/18/Insiders/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/rc.com"
+      - "C:/Program Files/Microsoft Visual Studio/18/Insiders/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/rc.exe"
+      - "C:/Program Files/Microsoft Visual Studio/18/Insiders/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/rc"
+      - "C:/Program Files/wellness_saheli/bin/rc.com"
+      - "C:/Program Files/wellness_saheli/bin/rc.exe"
+      - "C:/Program Files/wellness_saheli/bin/rc"
+      - "C:/Program Files/wellness_saheli/sbin/rc.com"
+      - "C:/Program Files/wellness_saheli/sbin/rc.exe"
+      - "C:/Program Files/wellness_saheli/sbin/rc"
+      - "C:/Program Files/wellness_saheli/rc.com"
+      - "C:/Program Files/wellness_saheli/rc.exe"
+      - "C:/Program Files/wellness_saheli/rc"
+    found: false
+    search_context:
+      ENV{PATH}:
+        - "C:\\Python314\\Scripts\\"
+        - "C:\\Python314\\"
+        - "C:\\Windows\\system32"
+        - "C:\\Windows"
+        - "C:\\Windows\\System32\\Wbem"
+        - "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\"
+        - "C:\\Windows\\System32\\OpenSSH\\"
+        - "C:\\Program Files\\nodejs\\"
+        - "C:\\ProgramData\\chocolatey\\bin"
+        - "C:\\Program Files (x86)\\Windows Kits\\10\\Windows Performance Toolkit\\"
+        - "C:\\Program Files\\Git\\cmd"
+        - "C:\\Users\\Areesha\\AppData\\Local\\Microsoft\\WindowsApps"
+        - "C:\\Users\\Areesha\\AppData\\Local\\Programs\\Microsoft VS Code\\bin"
+        - "C:\\Users\\Areesha\\src\\flutter\\bin"
+        - "C:\\Users\\Areesha\\AppData\\Roaming\\npm"
+        - "C:\\Users\\Areesha\\AppData\\Local\\Python\\bin"
+        - "C:\\Users\\Areesha\\AppData\\Local\\PowerToys\\DSCModules\\"
+        - "C:\\Program Files\\Android\\Android Studio\\jbr\\bin"
+        - "C:\\Users\\Areesha\\AppData\\Local\\Kiro-Cli\\"
+        - "C:\\Users\\Areesha\\src\\flutter\\bin\\mingit\\cmd"
+      CMAKE_INSTALL_PREFIX: "C:/Program Files/wellness_saheli"
+      CMAKE_SYSTEM_PREFIX_PATH:
+        - "C:/Program Files"
+        - "C:/Program Files (x86)"
+        - "C:/Program Files/Microsoft Visual Studio/18/Insiders/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake"
+        - "C:/Program Files/wellness_saheli"
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "C:/Program Files/Microsoft Visual Studio/18/Insiders/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-4.3/Modules/CMakeDetermineCompilerABI.cmake:83 (try_compile)"
+      - "C:/Program Files/Microsoft Visual Studio/18/Insiders/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-4.3/Modules/CMakeTestCXXCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:3 (project)"
+    checks:
+      - "Detecting CXX compiler ABI info"
+    directories:
+      source: "C:/Users/Areesha/reproductive-health app/wellness_saheli/build/windows/x64/CMakeFiles/CMakeScratch/TryCompile-7yhz2q"
+      binary: "C:/Users/Areesha/reproductive-health app/wellness_saheli/build/windows/x64/CMakeFiles/CMakeScratch/TryCompile-7yhz2q"
+    cmakeVariables:
+      CMAKE_CXX_FLAGS: "/DWIN32 /D_WINDOWS /W3 /GR /EHsc"
+      CMAKE_CXX_FLAGS_DEBUG: "/MDd /Zi /Ob0 /Od /RTC1"
+      CMAKE_CXX_SCAN_FOR_MODULES: "OFF"
+      CMAKE_CXX_STDLIB_MODULES_JSON: ""
+      CMAKE_EXE_LINKER_FLAGS: "/machine:x64"
+    buildResult:
+      variable: "CMAKE_CXX_ABI_COMPILED"
+      cached: true
+      stdout: |
+        Change Dir: 'C:/Users/Areesha/reproductive-health app/wellness_saheli/build/windows/x64/CMakeFiles/CMakeScratch/TryCompile-7yhz2q'
+        
+        Run Build Command(s): "C:/Program Files/Microsoft Visual Studio/18/Insiders/MSBuild/Current/Bin/amd64/MSBuild.exe" cmTC_2b00d.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=18.0 /v:n
+        MSBuild version 18.7.1+024f5b037 for .NET Framework
+        Build started 9/25/2026 1:40:18 AM.
+        
+        Project "C:\\Users\\Areesha\\reproductive-health app\\wellness_saheli\\build\\windows\\x64\\CMakeFiles\\CMakeScratch\\TryCompile-7yhz2q\\cmTC_2b00d.vcxproj" on node 1 (default targets).
+        PrepareForBuild:
+          Structured output is enabled. The formatting of compiler diagnostics will reflect the error hierarchy. See https://aka.ms/cpp/structured-output for more details.
+          Creating directory "C:\\Users\\Areesha\\reproductive-health app\\wellness_saheli\\build\\windows\\x64\\CMakeFiles\\CMakeScratch\\TryCompile-7yhz2q\\Debug\\".
+          Creating directory "cmTC_2b00d.dir\\Debug\\cmTC_2b00d.tlog\\".
+        InitializeBuildStatus:
+          Creating "cmTC_2b00d.dir\\Debug\\cmTC_2b00d.tlog\\unsuccessfulbuild" because "AlwaysCreate" was specified.
+          Touching "cmTC_2b00d.dir\\Debug\\cmTC_2b00d.tlog\\unsuccessfulbuild".
+        ClCompile:
+          C:\\Program Files\\Microsoft Visual Studio\\18\\Insiders\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\CL.exe /c /Zi /W3 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D _MBCS /D "CMAKE_INTDIR=\\"Debug\\"" /EHsc /RTC1 /MDd /GR /Fo"cmTC_2b00d.dir\\Debug\\\\" /Fd"cmTC_2b00d.dir\\Debug\\vc145.pdb" /external:W3 /TP /errorReport:queue "C:\\Program Files\\Microsoft Visual Studio\\18\\Insiders\\Common7\\IDE\\CommonExtensions\\Microsoft\\CMake\\CMake\\share\\cmake-4.3\\Modules\\CMakeCXXCompilerABI.cpp"
+          Microsoft (R) C/C++ Optimizing Compiler Version 19.51.36243 for x64
+          Copyright (C) Microsoft Corporation.  All rights reserved.
+          cl /c /Zi /W3 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D _MBCS /D "CMAKE_INTDIR=\\"Debug\\"" /EHsc /RTC1 /MDd /GR /Fo"cmTC_2b00d.dir\\Debug\\\\" /Fd"cmTC_2b00d.dir\\Debug\\vc145.pdb" /external:W3 /TP /errorReport:queue "C:\\Program Files\\Microsoft Visual Studio\\18\\Insiders\\Common7\\IDE\\CommonExtensions\\Microsoft\\CMake\\CMake\\share\\cmake-4.3\\Modules\\CMakeCXXCompilerABI.cpp"
+          CMakeCXXCompilerABI.cpp
+        Link:
+          C:\\Program Files\\Microsoft Visual Studio\\18\\Insiders\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\link.exe /OUT:"C:\\Users\\Areesha\\reproductive-health app\\wellness_saheli\\build\\windows\\x64\\CMakeFiles\\CMakeScratch\\TryCompile-7yhz2q\\Debug\\cmTC_2b00d.exe" /INCREMENTAL /ILK:"cmTC_2b00d.dir\\Debug\\cmTC_2b00d.ilk" /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:/Users/Areesha/reproductive-health app/wellness_saheli/build/windows/x64/CMakeFiles/CMakeScratch/TryCompile-7yhz2q/Debug/cmTC_2b00d.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /IMPLIB:"C:/Users/Areesha/reproductive-health app/wellness_saheli/build/windows/x64/CMakeFiles/CMakeScratch/TryCompile-7yhz2q/Debug/cmTC_2b00d.lib" /MACHINE:X64  /machine:x64 cmTC_2b00d.dir\\Debug\\CMakeCXXCompilerABI.obj
+          cmTC_2b00d.vcxproj -> C:\\Users\\Areesha\\reproductive-health app\\wellness_saheli\\build\\windows\\x64\\CMakeFiles\\CMakeScratch\\TryCompile-7yhz2q\\Debug\\cmTC_2b00d.exe
+        FinalizeBuildStatus:
+          Deleting file "cmTC_2b00d.dir\\Debug\\cmTC_2b00d.tlog\\unsuccessfulbuild".
+          Touching "cmTC_2b00d.dir\\Debug\\cmTC_2b00d.tlog\\cmTC_2b00d.lastbuildstate".
+        Done Building Project "C:\\Users\\Areesha\\reproductive-health app\\wellness_saheli\\build\\windows\\x64\\CMakeFiles\\CMakeScratch\\TryCompile-7yhz2q\\cmTC_2b00d.vcxproj" (default targets).
+        
+        Build succeeded.
+            0 Warning(s)
+            0 Error(s)
+        
+        Time Elapsed 00:00:02.44
+        
+      exitCode: 0
+  -
+    kind: "message-v1"
+    backtrace:
+      - "C:/Program Files/Microsoft Visual Studio/18/Insiders/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-4.3/Modules/CMakeDetermineCompilerABI.cmake:253 (message)"
+      - "C:/Program Files/Microsoft Visual Studio/18/Insiders/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-4.3/Modules/CMakeTestCXXCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:3 (project)"
+    message: |
+      Parsed CXX implicit link information:
+        link line regex: [^( *|.*[/\\])(ld[0-9]*(|\\.[a-rt-z][a-z]*|\\.s[a-np-z][a-z]*|\\.so[a-z]+)|link\\.exe|lld-link(\\.exe)?|CMAKE_LINK_STARTFILE-NOTFOUND|([^/\\]+-)?ld|collect2)[^/\\]*( |$)]
+        linker tool regex: [^[ 	]*(->|"|[0-9]+>[ 	-]*Build:[ 	0-9]+ ms[ 	]*)?[ 	]*(([^"]*[/\\])?(ld[0-9]*(|\\.[a-rt-z][a-z]*|\\.s[a-np-z][a-z]*|\\.so[a-z]+)|link\\.exe|lld-link(\\.exe)?))("|,| |$)]
+        linker tool for 'CXX': C:/Program Files/Microsoft Visual Studio/18/Insiders/VC/Tools/MSVC/14.51.36231/bin/HostX64/x64/link.exe
+        implicit libs: []
+        implicit objs: []
+        implicit dirs: []
+        implicit fwks: []
+      
+      
+  -
+    kind: "message-v1"
+    backtrace:
+      - "C:/Program Files/Microsoft Visual Studio/18/Insiders/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-4.3/Modules/Internal/CMakeDetermineLinkerId.cmake:38 (message)"
+      - "C:/Program Files/Microsoft Visual Studio/18/Insiders/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-4.3/Modules/CMakeDetermineCompilerABI.cmake:299 (cmake_determine_linker_id)"
+      - "C:/Program Files/Microsoft Visual Studio/18/Insiders/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-4.3/Modules/CMakeTestCXXCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:3 (project)"
+    message: |
+      Running the CXX compiler's linker: "C:/Program Files/Microsoft Visual Studio/18/Insiders/VC/Tools/MSVC/14.51.36231/bin/HostX64/x64/link.exe" "-v"
+      Microsoft (R) Incremental Linker Version 14.51.36243.0
+      Copyright (C) Microsoft Corporation.  All rights reserved.
+  -
+    kind: "find-v1"
+    backtrace:
+      - "C:/Program Files/Microsoft Visual Studio/18/Insiders/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-4.3/Modules/CMakeDetermineCompilerId.cmake:468 (find_file)"
+      - "C:/Program Files/Microsoft Visual Studio/18/Insiders/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-4.3/Modules/CMakeDetermineCompilerId.cmake:506 (CMAKE_DETERMINE_COMPILER_ID_WRITE)"
+      - "C:/Program Files/Microsoft Visual Studio/18/Insiders/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-4.3/Modules/CMakeDetermineCompilerId.cmake:8 (CMAKE_DETERMINE_COMPILER_ID_BUILD)"
+      - "C:/Program Files/Microsoft Visual Studio/18/Insiders/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-4.3/Modules/CMakeDetermineCompilerId.cmake:64 (__determine_compiler_id_test)"
+      - "C:/Program Files/Microsoft Visual Studio/18/Insiders/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-4.3/Modules/CMakeDetermineCCompiler.cmake:122 (CMAKE_DETERMINE_COMPILER_ID)"
+      - "flutter/ephemeral/.plugin_symlinks/jni/src/CMakeLists.txt:8 (project)"
+    mode: "file"
+    variable: "src_in"
+    description: "Path to a file."
+    settings:
+      SearchFramework: "NEVER"
+      SearchAppBundle: "NEVER"
+      CMAKE_FIND_USE_CMAKE_PATH: true
+      CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+      CMAKE_FIND_USE_INSTALL_PREFIX: true
+    names:
+      - "CMakeCCompilerId.c.in"
+    candidate_directories:
+      - "C:/Program Files/Microsoft Visual Studio/18/Insiders/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-4.3/Modules/"
+    found: "C:/Program Files/Microsoft Visual Studio/18/Insiders/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-4.3/Modules/CMakeCCompilerId.c.in"
+    search_context:
+      ENV{PATH}:
+        - "C:\\Python314\\Scripts\\"
+        - "C:\\Python314\\"
+        - "C:\\Windows\\system32"
+        - "C:\\Windows"
+        - "C:\\Windows\\System32\\Wbem"
+        - "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\"
+        - "C:\\Windows\\System32\\OpenSSH\\"
+        - "C:\\Program Files\\nodejs\\"
+        - "C:\\ProgramData\\chocolatey\\bin"
+        - "C:\\Program Files (x86)\\Windows Kits\\10\\Windows Performance Toolkit\\"
+        - "C:\\Program Files\\Git\\cmd"
+        - "C:\\Users\\Areesha\\AppData\\Local\\Microsoft\\WindowsApps"
+        - "C:\\Users\\Areesha\\AppData\\Local\\Programs\\Microsoft VS Code\\bin"
+        - "C:\\Users\\Areesha\\src\\flutter\\bin"
+        - "C:\\Users\\Areesha\\AppData\\Roaming\\npm"
+        - "C:\\Users\\Areesha\\AppData\\Local\\Python\\bin"
+        - "C:\\Users\\Areesha\\AppData\\Local\\PowerToys\\DSCModules\\"
+        - "C:\\Program Files\\Android\\Android Studio\\jbr\\bin"
+        - "C:\\Users\\Areesha\\AppData\\Local\\Kiro-Cli\\"
+        - "C:\\Users\\Areesha\\src\\flutter\\bin\\mingit\\cmd"
+      CMAKE_INSTALL_PREFIX: "C:/Program Files/wellness_saheli"
+      CMAKE_SYSTEM_PREFIX_PATH:
+        - "C:/Program Files"
+        - "C:/Program Files (x86)"
+        - "C:/Program Files/Microsoft Visual Studio/18/Insiders/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake"
+        - "C:/Program Files/wellness_saheli"
+  -
+    kind: "message-v1"
+    backtrace:
+      - "C:/Program Files/Microsoft Visual Studio/18/Insiders/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-4.3/Modules/CMakeDetermineCompilerId.cmake:17 (message)"
+      - "C:/Program Files/Microsoft Visual Studio/18/Insiders/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-4.3/Modules/CMakeDetermineCompilerId.cmake:64 (__determine_compiler_id_test)"
+      - "C:/Program Files/Microsoft Visual Studio/18/Insiders/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-4.3/Modules/CMakeDetermineCCompiler.cmake:122 (CMAKE_DETERMINE_COMPILER_ID)"
+      - "flutter/ephemeral/.plugin_symlinks/jni/src/CMakeLists.txt:8 (project)"
+    message: |
+      Compiling the C compiler identification source file "CMakeCCompilerId.c" succeeded.
+      Compiler:  
+      Build flags: 
+      Id flags:  
+      
+      The output was:
+      0
+      MSBuild version 18.7.1+024f5b037 for .NET Framework
+      Build started 9/25/2026 1:40:26 AM.
+      
+      Project "C:\\Users\\Areesha\\reproductive-health app\\wellness_saheli\\build\\windows\\x64\\CMakeFiles\\4.3.1-msvc1\\CompilerIdC\\CompilerIdC.vcxproj" on node 1 (default targets).
+      PrepareForBuild:
+        Creating directory "Debug\\".
+        Structured output is enabled. The formatting of compiler diagnostics will reflect the error hierarchy. See https://aka.ms/cpp/structured-output for more details.
+        Creating directory "Debug\\CompilerIdC.tlog\\".
+      InitializeBuildStatus:
+        Creating "Debug\\CompilerIdC.tlog\\unsuccessfulbuild" because "AlwaysCreate" was specified.
+        Touching "Debug\\CompilerIdC.tlog\\unsuccessfulbuild".
+      ClCompile:
+        C:\\Program Files\\Microsoft Visual Studio\\18\\Insiders\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\CL.exe /c /nologo /W0 /WX- /diagnostics:column /Od /D _MBCS /Gm- /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"Debug\\\\" /Fd"Debug\\vc145.pdb" /external:W0 /Gd /TC /FC /errorReport:queue CMakeCCompilerId.c
+        CMakeCCompilerId.c
+      Link:
+        C:\\Program Files\\Microsoft Visual Studio\\18\\Insiders\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\link.exe /ERRORREPORT:QUEUE /OUT:".\\CompilerIdC.exe" /INCREMENTAL:NO /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /PDB:".\\CompilerIdC.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:".\\CompilerIdC.lib" /MACHINE:X64 Debug\\CMakeCCompilerId.obj
+        CompilerIdC.vcxproj -> C:\\Users\\Areesha\\reproductive-health app\\wellness_saheli\\build\\windows\\x64\\CMakeFiles\\4.3.1-msvc1\\CompilerIdC\\CompilerIdC.exe
+      PostBuildEvent:
+        for %%i in (cl.exe) do @echo CMAKE_C_COMPILER=%%~$PATH:i
+        :VCEnd
+        CMAKE_C_COMPILER=C:\\Program Files\\Microsoft Visual Studio\\18\\Insiders\\VC\\Tools\\MSVC\\14.51.36231\\bin\\Hostx64\\x64\\cl.exe
+      FinalizeBuildStatus:
+        Deleting file "Debug\\CompilerIdC.tlog\\unsuccessfulbuild".
+        Touching "Debug\\CompilerIdC.tlog\\CompilerIdC.lastbuildstate".
+      Done Building Project "C:\\Users\\Areesha\\reproductive-health app\\wellness_saheli\\build\\windows\\x64\\CMakeFiles\\4.3.1-msvc1\\CompilerIdC\\CompilerIdC.vcxproj" (default targets).
+      
+      Build succeeded.
+          0 Warning(s)
+          0 Error(s)
+      
+      Time Elapsed 00:00:05.99
+      
+      
+      Compilation of the C compiler identification source "CMakeCCompilerId.c" produced "CompilerIdC.exe"
+      
+      Compilation of the C compiler identification source "CMakeCCompilerId.c" produced "CompilerIdC.vcxproj"
+      
+      The C compiler identification is MSVC, found in:
+        C:/Users/Areesha/reproductive-health app/wellness_saheli/build/windows/x64/CMakeFiles/4.3.1-msvc1/CompilerIdC/CompilerIdC.exe
+      
+  -
+    kind: "find-v1"
+    backtrace:
+      - "C:/Program Files/Microsoft Visual Studio/18/Insiders/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-4.3/Modules/CMakeFindBinUtils.cmake:37 (find_program)"
+      - "C:/Program Files/Microsoft Visual Studio/18/Insiders/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-4.3/Modules/CMakeFindBinUtils.cmake:65 (__resolve_tool_path)"
+      - "C:/Program Files/Microsoft Visual Studio/18/Insiders/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-4.3/Modules/CMakeFindBinUtils.cmake:104 (__resolve_linker_path)"
+      - "C:/Program Files/Microsoft Visual Studio/18/Insiders/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-4.3/Modules/CMakeDetermineCCompiler.cmake:200 (include)"
+      - "flutter/ephemeral/.plugin_symlinks/jni/src/CMakeLists.txt:8 (project)"
+    mode: "program"
+    variable: "_CMAKE_TOOL_WITH_PATH"
+    description: "Path to a program."
+    settings:
+      SearchFramework: "NEVER"
+      SearchAppBundle: "NEVER"
+      CMAKE_FIND_USE_CMAKE_PATH: false
+      CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: false
+      CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+      CMAKE_FIND_USE_INSTALL_PREFIX: true
+    names:
+      - "lld-link"
+    candidate_directories:
+      - "C:/Program Files/Microsoft Visual Studio/18/Insiders/VC/Tools/MSVC/14.51.36231/bin/Hostx64/x64/"
+      - "C:/Python314/Scripts/"
+      - "C:/Python314/"
+      - "C:/Windows/System32/"
+      - "C:/Windows/"
+      - "C:/Windows/System32/wbem/"
+      - "C:/Windows/System32/WindowsPowerShell/v1.0/"
+      - "C:/Windows/System32/OpenSSH/"
+      - "C:/Program Files/nodejs/"
+      - "C:/ProgramData/chocolatey/bin/"
+      - "C:/Program Files (x86)/Windows Kits/10/Windows Performance Toolkit/"
+      - "C:/Program Files/Git/cmd/"
+      - "C:/Users/Areesha/AppData/Local/Microsoft/WindowsApps/"
+      - "C:/Users/Areesha/AppData/Local/Programs/Microsoft VS Code/bin/"
+      - "C:/Users/Areesha/src/flutter/bin/"
+      - "C:/Users/Areesha/AppData/Roaming/npm/"
+      - "C:/Users/Areesha/AppData/Local/Python/bin/"
+      - "C:/Users/Areesha/AppData/Local/PowerToys/DSCModules/"
+      - "C:/Program Files/Android/Android Studio/jbr/bin/"
+      - "C:/Users/Areesha/AppData/Local/Kiro-Cli/"
+      - "C:/Users/Areesha/src/flutter/bin/mingit/cmd/"
+      - "C:/Program Files/bin/"
+      - "C:/Program Files/sbin/"
+      - "C:/Program Files/"
+      - "C:/Program Files (x86)/bin/"
+      - "C:/Program Files (x86)/sbin/"
+      - "C:/Program Files (x86)/"
+      - "C:/Program Files/Microsoft Visual Studio/18/Insiders/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/bin/"
+      - "C:/Program Files/Microsoft Visual Studio/18/Insiders/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/sbin/"
+      - "C:/Program Files/Microsoft Visual Studio/18/Insiders/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/"
+      - "C:/Program Files/wellness_saheli/bin/"
+      - "C:/Program Files/wellness_saheli/sbin/"
+      - "C:/Program Files/wellness_saheli/"
+    searched_directories:
+      - "C:/Program Files/Microsoft Visual Studio/18/Insiders/VC/Tools/MSVC/14.51.36231/bin/Hostx64/x64/lld-link.com"
+      - "C:/Program Files/Microsoft Visual Studio/18/Insiders/VC/Tools/MSVC/14.51.36231/bin/Hostx64/x64/lld-link.exe"
+      - "C:/Program Files/Microsoft Visual Studio/18/Insiders/VC/Tools/MSVC/14.51.36231/bin/Hostx64/x64/lld-link"
+      - "C:/Python314/Scripts/lld-link.com"
+      - "C:/Python314/Scripts/lld-link.exe"
+      - "C:/Python314/Scripts/lld-link"
+      - "C:/Python314/lld-link.com"
+      - "C:/Python314/lld-link.exe"
+      - "C:/Python314/lld-link"
+      - "C:/Windows/System32/lld-link.com"
+      - "C:/Windows/System32/lld-link.exe"
+      - "C:/Windows/System32/lld-link"
+      - "C:/Windows/lld-link.com"
+      - "C:/Windows/lld-link.exe"
+      - "C:/Windows/lld-link"
+      - "C:/Windows/System32/wbem/lld-link.com"
+      - "C:/Windows/System32/wbem/lld-link.exe"
+      - "C:/Windows/System32/wbem/lld-link"
+      - "C:/Windows/System32/WindowsPowerShell/v1.0/lld-link.com"
+      - "C:/Windows/System32/WindowsPowerShell/v1.0/lld-link.exe"
+      - "C:/Windows/System32/WindowsPowerShell/v1.0/lld-link"
+      - "C:/Windows/System32/OpenSSH/lld-link.com"
+      - "C:/Windows/System32/OpenSSH/lld-link.exe"
+      - "C:/Windows/System32/OpenSSH/lld-link"
+      - "C:/Program Files/nodejs/lld-link.com"
+      - "C:/Program Files/nodejs/lld-link.exe"
+      - "C:/Program Files/nodejs/lld-link"
+      - "C:/ProgramData/chocolatey/bin/lld-link.com"
+      - "C:/ProgramData/chocolatey/bin/lld-link.exe"
+      - "C:/ProgramData/chocolatey/bin/lld-link"
+      - "C:/Program Files (x86)/Windows Kits/10/Windows Performance Toolkit/lld-link.com"
+      - "C:/Program Files (x86)/Windows Kits/10/Windows Performance Toolkit/lld-link.exe"
+      - "C:/Program Files (x86)/Windows Kits/10/Windows Performance Toolkit/lld-link"
+      - "C:/Program Files/Git/cmd/lld-link.com"
+      - "C:/Program Files/Git/cmd/lld-link.exe"
+      - "C:/Program Files/Git/cmd/lld-link"
+      - "C:/Users/Areesha/AppData/Local/Microsoft/WindowsApps/lld-link.com"
+      - "C:/Users/Areesha/AppData/Local/Microsoft/WindowsApps/lld-link.exe"
+      - "C:/Users/Areesha/AppData/Local/Microsoft/WindowsApps/lld-link"
+      - "C:/Users/Areesha/AppData/Local/Programs/Microsoft VS Code/bin/lld-link.com"
+      - "C:/Users/Areesha/AppData/Local/Programs/Microsoft VS Code/bin/lld-link.exe"
+      - "C:/Users/Areesha/AppData/Local/Programs/Microsoft VS Code/bin/lld-link"
+      - "C:/Users/Areesha/src/flutter/bin/lld-link.com"
+      - "C:/Users/Areesha/src/flutter/bin/lld-link.exe"
+      - "C:/Users/Areesha/src/flutter/bin/lld-link"
+      - "C:/Users/Areesha/AppData/Roaming/npm/lld-link.com"
+      - "C:/Users/Areesha/AppData/Roaming/npm/lld-link.exe"
+      - "C:/Users/Areesha/AppData/Roaming/npm/lld-link"
+      - "C:/Users/Areesha/AppData/Local/Python/bin/lld-link.com"
+      - "C:/Users/Areesha/AppData/Local/Python/bin/lld-link.exe"
+      - "C:/Users/Areesha/AppData/Local/Python/bin/lld-link"
+      - "C:/Users/Areesha/AppData/Local/PowerToys/DSCModules/lld-link.com"
+      - "C:/Users/Areesha/AppData/Local/PowerToys/DSCModules/lld-link.exe"
+      - "C:/Users/Areesha/AppData/Local/PowerToys/DSCModules/lld-link"
+      - "C:/Program Files/Android/Android Studio/jbr/bin/lld-link.com"
+      - "C:/Program Files/Android/Android Studio/jbr/bin/lld-link.exe"
+      - "C:/Program Files/Android/Android Studio/jbr/bin/lld-link"
+      - "C:/Users/Areesha/AppData/Local/Kiro-Cli/lld-link.com"
+      - "C:/Users/Areesha/AppData/Local/Kiro-Cli/lld-link.exe"
+      - "C:/Users/Areesha/AppData/Local/Kiro-Cli/lld-link"
+      - "C:/Users/Areesha/src/flutter/bin/mingit/cmd/lld-link.com"
+      - "C:/Users/Areesha/src/flutter/bin/mingit/cmd/lld-link.exe"
+      - "C:/Users/Areesha/src/flutter/bin/mingit/cmd/lld-link"
+      - "C:/Program Files/bin/lld-link.com"
+      - "C:/Program Files/bin/lld-link.exe"
+      - "C:/Program Files/bin/lld-link"
+      - "C:/Program Files/sbin/lld-link.com"
+      - "C:/Program Files/sbin/lld-link.exe"
+      - "C:/Program Files/sbin/lld-link"
+      - "C:/Program Files/lld-link.com"
+      - "C:/Program Files/lld-link.exe"
+      - "C:/Program Files/lld-link"
+      - "C:/Program Files (x86)/bin/lld-link.com"
+      - "C:/Program Files (x86)/bin/lld-link.exe"
+      - "C:/Program Files (x86)/bin/lld-link"
+      - "C:/Program Files (x86)/sbin/lld-link.com"
+      - "C:/Program Files (x86)/sbin/lld-link.exe"
+      - "C:/Program Files (x86)/sbin/lld-link"
+      - "C:/Program Files (x86)/lld-link.com"
+      - "C:/Program Files (x86)/lld-link.exe"
+      - "C:/Program Files (x86)/lld-link"
+      - "C:/Program Files/Microsoft Visual Studio/18/Insiders/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/bin/lld-link.com"
+      - "C:/Program Files/Microsoft Visual Studio/18/Insiders/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/bin/lld-link.exe"
+      - "C:/Program Files/Microsoft Visual Studio/18/Insiders/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/bin/lld-link"
+      - "C:/Program Files/Microsoft Visual Studio/18/Insiders/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/sbin/lld-link.com"
+      - "C:/Program Files/Microsoft Visual Studio/18/Insiders/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/sbin/lld-link.exe"
+      - "C:/Program Files/Microsoft Visual Studio/18/Insiders/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/sbin/lld-link"
+      - "C:/Program Files/Microsoft Visual Studio/18/Insiders/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/lld-link.com"
+      - "C:/Program Files/Microsoft Visual Studio/18/Insiders/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/lld-link.exe"
+      - "C:/Program Files/Microsoft Visual Studio/18/Insiders/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/lld-link"
+      - "C:/Program Files/wellness_saheli/bin/lld-link.com"
+      - "C:/Program Files/wellness_saheli/bin/lld-link.exe"
+      - "C:/Program Files/wellness_saheli/bin/lld-link"
+      - "C:/Program Files/wellness_saheli/sbin/lld-link.com"
+      - "C:/Program Files/wellness_saheli/sbin/lld-link.exe"
+      - "C:/Program Files/wellness_saheli/sbin/lld-link"
+      - "C:/Program Files/wellness_saheli/lld-link.com"
+      - "C:/Program Files/wellness_saheli/lld-link.exe"
+      - "C:/Program Files/wellness_saheli/lld-link"
+    found: false
+    search_context:
+      ENV{PATH}:
+        - "C:\\Python314\\Scripts\\"
+        - "C:\\Python314\\"
+        - "C:\\Windows\\system32"
+        - "C:\\Windows"
+        - "C:\\Windows\\System32\\Wbem"
+        - "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\"
+        - "C:\\Windows\\System32\\OpenSSH\\"
+        - "C:\\Program Files\\nodejs\\"
+        - "C:\\ProgramData\\chocolatey\\bin"
+        - "C:\\Program Files (x86)\\Windows Kits\\10\\Windows Performance Toolkit\\"
+        - "C:\\Program Files\\Git\\cmd"
+        - "C:\\Users\\Areesha\\AppData\\Local\\Microsoft\\WindowsApps"
+        - "C:\\Users\\Areesha\\AppData\\Local\\Programs\\Microsoft VS Code\\bin"
+        - "C:\\Users\\Areesha\\src\\flutter\\bin"
+        - "C:\\Users\\Areesha\\AppData\\Roaming\\npm"
+        - "C:\\Users\\Areesha\\AppData\\Local\\Python\\bin"
+        - "C:\\Users\\Areesha\\AppData\\Local\\PowerToys\\DSCModules\\"
+        - "C:\\Program Files\\Android\\Android Studio\\jbr\\bin"
+        - "C:\\Users\\Areesha\\AppData\\Local\\Kiro-Cli\\"
+        - "C:\\Users\\Areesha\\src\\flutter\\bin\\mingit\\cmd"
+      CMAKE_INSTALL_PREFIX: "C:/Program Files/wellness_saheli"
+      CMAKE_SYSTEM_PREFIX_PATH:
+        - "C:/Program Files"
+        - "C:/Program Files (x86)"
+        - "C:/Program Files/Microsoft Visual Studio/18/Insiders/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake"
+        - "C:/Program Files/wellness_saheli"
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "C:/Program Files/Microsoft Visual Studio/18/Insiders/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-4.3/Modules/CMakeDetermineCompilerABI.cmake:83 (try_compile)"
+      - "C:/Program Files/Microsoft Visual Studio/18/Insiders/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-4.3/Modules/CMakeTestCCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "flutter/ephemeral/.plugin_symlinks/jni/src/CMakeLists.txt:8 (project)"
+    checks:
+      - "Detecting C compiler ABI info"
+    directories:
+      source: "C:/Users/Areesha/reproductive-health app/wellness_saheli/build/windows/x64/CMakeFiles/CMakeScratch/TryCompile-3fnz4n"
+      binary: "C:/Users/Areesha/reproductive-health app/wellness_saheli/build/windows/x64/CMakeFiles/CMakeScratch/TryCompile-3fnz4n"
+    cmakeVariables:
+      CMAKE_CXX_STDLIB_MODULES_JSON: ""
+      CMAKE_C_FLAGS: "/DWIN32 /D_WINDOWS /W3"
+      CMAKE_C_FLAGS_DEBUG: "/MDd /Zi /Ob0 /Od /RTC1"
+      CMAKE_EXE_LINKER_FLAGS: "/machine:x64"
+    buildResult:
+      variable: "CMAKE_C_ABI_COMPILED"
+      cached: true
+      stdout: |
+        Change Dir: 'C:/Users/Areesha/reproductive-health app/wellness_saheli/build/windows/x64/CMakeFiles/CMakeScratch/TryCompile-3fnz4n'
+        
+        Run Build Command(s): "C:/Program Files/Microsoft Visual Studio/18/Insiders/MSBuild/Current/Bin/amd64/MSBuild.exe" cmTC_39838.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=18.0 /v:n
+        MSBuild version 18.7.1+024f5b037 for .NET Framework
+        Build started 9/25/2026 1:40:34 AM.
+        
+        Project "C:\\Users\\Areesha\\reproductive-health app\\wellness_saheli\\build\\windows\\x64\\CMakeFiles\\CMakeScratch\\TryCompile-3fnz4n\\cmTC_39838.vcxproj" on node 1 (default targets).
+        PrepareForBuild:
+          Structured output is enabled. The formatting of compiler diagnostics will reflect the error hierarchy. See https://aka.ms/cpp/structured-output for more details.
+          Creating directory "C:\\Users\\Areesha\\reproductive-health app\\wellness_saheli\\build\\windows\\x64\\CMakeFiles\\CMakeScratch\\TryCompile-3fnz4n\\Debug\\".
+          Creating directory "cmTC_39838.dir\\Debug\\cmTC_39838.tlog\\".
+        InitializeBuildStatus:
+          Creating "cmTC_39838.dir\\Debug\\cmTC_39838.tlog\\unsuccessfulbuild" because "AlwaysCreate" was specified.
+          Touching "cmTC_39838.dir\\Debug\\cmTC_39838.tlog\\unsuccessfulbuild".
+        ClCompile:
+          C:\\Program Files\\Microsoft Visual Studio\\18\\Insiders\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\CL.exe /c /Zi /W3 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D _MBCS /D "CMAKE_INTDIR=\\"Debug\\"" /RTC1 /MDd /Fo"cmTC_39838.dir\\Debug\\\\" /Fd"cmTC_39838.dir\\Debug\\vc145.pdb" /external:W3 /TC /errorReport:queue "C:\\Program Files\\Microsoft Visual Studio\\18\\Insiders\\Common7\\IDE\\CommonExtensions\\Microsoft\\CMake\\CMake\\share\\cmake-4.3\\Modules\\CMakeCCompilerABI.c"
+          Microsoft (R) C/C++ Optimizing Compiler Version 19.51.36243 for x64
+          Copyright (C) Microsoft Corporation.  All rights reserved.
+          cl /c /Zi /W3 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D _MBCS /D "CMAKE_INTDIR=\\"Debug\\"" /RTC1 /MDd /Fo"cmTC_39838.dir\\Debug\\\\" /Fd"cmTC_39838.dir\\Debug\\vc145.pdb" /external:W3 /TC /errorReport:queue "C:\\Program Files\\Microsoft Visual Studio\\18\\Insiders\\Common7\\IDE\\CommonExtensions\\Microsoft\\CMake\\CMake\\share\\cmake-4.3\\Modules\\CMakeCCompilerABI.c"
+          CMakeCCompilerABI.c
+        Link:
+          C:\\Program Files\\Microsoft Visual Studio\\18\\Insiders\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\link.exe /OUT:"C:\\Users\\Areesha\\reproductive-health app\\wellness_saheli\\build\\windows\\x64\\CMakeFiles\\CMakeScratch\\TryCompile-3fnz4n\\Debug\\cmTC_39838.exe" /INCREMENTAL /ILK:"cmTC_39838.dir\\Debug\\cmTC_39838.ilk" /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:/Users/Areesha/reproductive-health app/wellness_saheli/build/windows/x64/CMakeFiles/CMakeScratch/TryCompile-3fnz4n/Debug/cmTC_39838.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /IMPLIB:"C:/Users/Areesha/reproductive-health app/wellness_saheli/build/windows/x64/CMakeFiles/CMakeScratch/TryCompile-3fnz4n/Debug/cmTC_39838.lib" /MACHINE:X64  /machine:x64 cmTC_39838.dir\\Debug\\CMakeCCompilerABI.obj
+          cmTC_39838.vcxproj -> C:\\Users\\Areesha\\reproductive-health app\\wellness_saheli\\build\\windows\\x64\\CMakeFiles\\CMakeScratch\\TryCompile-3fnz4n\\Debug\\cmTC_39838.exe
+        FinalizeBuildStatus:
+          Deleting file "cmTC_39838.dir\\Debug\\cmTC_39838.tlog\\unsuccessfulbuild".
+          Touching "cmTC_39838.dir\\Debug\\cmTC_39838.tlog\\cmTC_39838.lastbuildstate".
+        Done Building Project "C:\\Users\\Areesha\\reproductive-health app\\wellness_saheli\\build\\windows\\x64\\CMakeFiles\\CMakeScratch\\TryCompile-3fnz4n\\cmTC_39838.vcxproj" (default targets).
+        
+        Build succeeded.
+            0 Warning(s)
+            0 Error(s)
+        
+        Time Elapsed 00:00:02.84
+        
+      exitCode: 0
+  -
+    kind: "message-v1"
+    backtrace:
+      - "C:/Program Files/Microsoft Visual Studio/18/Insiders/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-4.3/Modules/CMakeDetermineCompilerABI.cmake:253 (message)"
+      - "C:/Program Files/Microsoft Visual Studio/18/Insiders/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-4.3/Modules/CMakeTestCCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "flutter/ephemeral/.plugin_symlinks/jni/src/CMakeLists.txt:8 (project)"
+    message: |
+      Parsed C implicit link information:
+        link line regex: [^( *|.*[/\\])(ld[0-9]*(|\\.[a-rt-z][a-z]*|\\.s[a-np-z][a-z]*|\\.so[a-z]+)|link\\.exe|lld-link(\\.exe)?|CMAKE_LINK_STARTFILE-NOTFOUND|([^/\\]+-)?ld|collect2)[^/\\]*( |$)]
+        linker tool regex: [^[ 	]*(->|"|[0-9]+>[ 	-]*Build:[ 	0-9]+ ms[ 	]*)?[ 	]*(([^"]*[/\\])?(ld[0-9]*(|\\.[a-rt-z][a-z]*|\\.s[a-np-z][a-z]*|\\.so[a-z]+)|link\\.exe|lld-link(\\.exe)?))("|,| |$)]
+        linker tool for 'C': C:/Program Files/Microsoft Visual Studio/18/Insiders/VC/Tools/MSVC/14.51.36231/bin/HostX64/x64/link.exe
+        implicit libs: []
+        implicit objs: []
+        implicit dirs: []
+        implicit fwks: []
+      
+      
+  -
+    kind: "message-v1"
+    backtrace:
+      - "C:/Program Files/Microsoft Visual Studio/18/Insiders/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-4.3/Modules/Internal/CMakeDetermineLinkerId.cmake:38 (message)"
+      - "C:/Program Files/Microsoft Visual Studio/18/Insiders/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-4.3/Modules/CMakeDetermineCompilerABI.cmake:299 (cmake_determine_linker_id)"
+      - "C:/Program Files/Microsoft Visual Studio/18/Insiders/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-4.3/Modules/CMakeTestCCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "flutter/ephemeral/.plugin_symlinks/jni/src/CMakeLists.txt:8 (project)"
+    message: |
+      Running the C compiler's linker: "C:/Program Files/Microsoft Visual Studio/18/Insiders/VC/Tools/MSVC/14.51.36231/bin/HostX64/x64/link.exe" "-v"
+      Microsoft (R) Incremental Linker Version 14.51.36243.0
+      Copyright (C) Microsoft Corporation.  All rights reserved.
+  -
+    kind: "find-v1"
+    backtrace:
+      - "C:/Program Files/Microsoft Visual Studio/18/Insiders/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-4.3/Modules/FindJNI.cmake:538 (find_library)"
+      - "flutter/ephemeral/.plugin_symlinks/jni/src/CMakeLists.txt:20 (find_package)"
+    mode: "library"
+    variable: "JAVA_JVM_LIBRARY"
+    description: "Java Virtual Machine library"
+    settings:
+      SearchFramework: "NEVER"
+      SearchAppBundle: "NEVER"
+      CMAKE_FIND_USE_CMAKE_PATH: true
+      CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+      CMAKE_FIND_USE_INSTALL_PREFIX: true
+    names:
+      - "jvm"
+    candidate_directories:
+      - "C:/Python314/Scripts/"
+      - "C:/Python314/"
+      - "C:/Windows/System32/"
+      - "C:/Windows/"
+      - "C:/Windows/System32/wbem/"
+      - "C:/Windows/System32/WindowsPowerShell/v1.0/"
+      - "C:/Windows/System32/OpenSSH/"
+      - "C:/Program Files/nodejs/"
+      - "C:/ProgramData/chocolatey/bin/"
+      - "C:/Program Files (x86)/Windows Kits/10/Windows Performance Toolkit/"
+      - "C:/Program Files/Git/cmd/"
+      - "C:/Users/Areesha/AppData/Local/Microsoft/WindowsApps/"
+      - "C:/Users/Areesha/AppData/Local/Programs/Microsoft VS Code/bin/"
+      - "C:/Users/Areesha/src/flutter/bin/"
+      - "C:/Users/Areesha/AppData/Roaming/npm/"
+      - "C:/Users/Areesha/AppData/Local/Python/bin/"
+      - "C:/Users/Areesha/AppData/Local/PowerToys/DSCModules/"
+      - "C:/Program Files/Android/Android Studio/jbr/bin/"
+      - "C:/Users/Areesha/AppData/Local/Kiro-Cli/"
+      - "C:/Users/Areesha/src/flutter/bin/mingit/cmd/"
+      - "C:/Program Files/lib/"
+      - "C:/Program Files/"
+      - "C:/Program Files (x86)/lib/"
+      - "C:/Program Files (x86)/"
+      - "C:/Program Files/Microsoft Visual Studio/18/Insiders/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/lib/"
+      - "C:/Program Files/Microsoft Visual Studio/18/Insiders/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/"
+      - "C:/Program Files/wellness_saheli/lib/"
+      - "C:/Program Files/wellness_saheli/"
+      - "C:/Program Files/wellness_saheli/bin/"
+      - "C:/Program Files/Microsoft Visual Studio/18/Insiders/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/bin/"
+      - "/bin/"
+      - "C:/Program Files/Android/Android Studio/jbr/lib/"
+      - "C:/Program Files/Android/Android Studio/jbr/lib/client/"
+      - "C:/Program Files/Android/Android Studio/jbr/lib/minimal/"
+      - "C:/Program Files/Android/Android Studio/jbr/lib/server/"
+      - "C:/Program Files/Android/Android Studio/jbr/lib/zero/"
+      - "C:/Program Files/Android/Android Studio/jbr/lib/j9vm/"
+      - "C:/Program Files/Android/Android Studio/jbr/lib/default/"
+      - "C:/Program Files/Android/Android Studio/jbr/"
+      - "C:/Program Files/Android/Android Studio/jbr/client/"
+      - "C:/Program Files/Android/Android Studio/jbr/minimal/"
+      - "C:/Program Files/Android/Android Studio/jbr/server/"
+      - "C:/Program Files/Android/Android Studio/jbr/zero/"
+      - "C:/Program Files/Android/Android Studio/jbr/j9vm/"
+      - "C:/Program Files/Android/Android Studio/jbr/default/"
+    searched_directories:
+      - "C:/Python314/Scripts/"
+      - "C:/Python314/"
+      - "C:/Windows/System32/"
+      - "C:/Windows/"
+      - "C:/Windows/System32/wbem/"
+      - "C:/Windows/System32/WindowsPowerShell/v1.0/"
+      - "C:/Windows/System32/OpenSSH/"
+      - "C:/Program Files/nodejs/"
+      - "C:/ProgramData/chocolatey/bin/"
+      - "C:/Program Files (x86)/Windows Kits/10/Windows Performance Toolkit/"
+      - "C:/Program Files/Git/cmd/"
+      - "C:/Users/Areesha/AppData/Local/Microsoft/WindowsApps/"
+      - "C:/Users/Areesha/AppData/Local/Programs/Microsoft VS Code/bin/"
+      - "C:/Users/Areesha/src/flutter/bin/"
+      - "C:/Users/Areesha/AppData/Roaming/npm/"
+      - "C:/Users/Areesha/AppData/Local/Python/bin/"
+      - "C:/Users/Areesha/AppData/Local/PowerToys/DSCModules/"
+      - "C:/Program Files/Android/Android Studio/jbr/bin/"
+      - "C:/Users/Areesha/AppData/Local/Kiro-Cli/"
+      - "C:/Users/Areesha/src/flutter/bin/mingit/cmd/"
+      - "C:/Program Files/lib/"
+      - "C:/Program Files/"
+      - "C:/Program Files (x86)/lib/"
+      - "C:/Program Files (x86)/"
+      - "C:/Program Files/Microsoft Visual Studio/18/Insiders/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/lib/"
+      - "C:/Program Files/Microsoft Visual Studio/18/Insiders/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/"
+      - "C:/Program Files/wellness_saheli/lib/"
+      - "C:/Program Files/wellness_saheli/"
+      - "C:/Program Files/wellness_saheli/bin/"
+      - "C:/Program Files/Microsoft Visual Studio/18/Insiders/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/bin/"
+      - "/bin/"
+    found: "C:/Program Files/Android/Android Studio/jbr/lib/jvm.lib"
+    search_context:
+      ENV{PATH}:
+        - "C:\\Python314\\Scripts\\"
+        - "C:\\Python314\\"
+        - "C:\\Windows\\system32"
+        - "C:\\Windows"
+        - "C:\\Windows\\System32\\Wbem"
+        - "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\"
+        - "C:\\Windows\\System32\\OpenSSH\\"
+        - "C:\\Program Files\\nodejs\\"
+        - "C:\\ProgramData\\chocolatey\\bin"
+        - "C:\\Program Files (x86)\\Windows Kits\\10\\Windows Performance Toolkit\\"
+        - "C:\\Program Files\\Git\\cmd"
+        - "C:\\Users\\Areesha\\AppData\\Local\\Microsoft\\WindowsApps"
+        - "C:\\Users\\Areesha\\AppData\\Local\\Programs\\Microsoft VS Code\\bin"
+        - "C:\\Users\\Areesha\\src\\flutter\\bin"
+        - "C:\\Users\\Areesha\\AppData\\Roaming\\npm"
+        - "C:\\Users\\Areesha\\AppData\\Local\\Python\\bin"
+        - "C:\\Users\\Areesha\\AppData\\Local\\PowerToys\\DSCModules\\"
+        - "C:\\Program Files\\Android\\Android Studio\\jbr\\bin"
+        - "C:\\Users\\Areesha\\AppData\\Local\\Kiro-Cli\\"
+        - "C:\\Users\\Areesha\\src\\flutter\\bin\\mingit\\cmd"
+      CMAKE_INSTALL_PREFIX: "C:/Program Files/wellness_saheli"
+      CMAKE_SYSTEM_PREFIX_PATH:
+        - "C:/Program Files"
+        - "C:/Program Files (x86)"
+        - "C:/Program Files/Microsoft Visual Studio/18/Insiders/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake"
+        - "C:/Program Files/wellness_saheli"
+      CMAKE_SYSTEM_LIBRARY_PATH:
+        - "C:/Program Files/wellness_saheli/bin"
+        - "C:/Program Files/Microsoft Visual Studio/18/Insiders/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/bin"
+        - "/bin"
+  -
+    kind: "find-v1"
+    backtrace:
+      - "C:/Program Files/Microsoft Visual Studio/18/Insiders/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-4.3/Modules/FindJNI.cmake:566 (find_path)"
+      - "flutter/ephemeral/.plugin_symlinks/jni/src/CMakeLists.txt:20 (find_package)"
+    mode: "path"
+    variable: "JAVA_INCLUDE_PATH"
+    description: "JNI include directory"
+    settings:
+      SearchFramework: "NEVER"
+      SearchAppBundle: "NEVER"
+      CMAKE_FIND_USE_CMAKE_PATH: true
+      CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+      CMAKE_FIND_USE_INSTALL_PREFIX: true
+    names:
+      - "jni.h"
+    candidate_directories:
+      - "C:/Python314/Scripts/"
+      - "C:/Python314/"
+      - "C:/Windows/System32/"
+      - "C:/Windows/"
+      - "C:/Windows/System32/wbem/"
+      - "C:/Windows/System32/WindowsPowerShell/v1.0/"
+      - "C:/Windows/System32/OpenSSH/"
+      - "C:/Program Files/nodejs/"
+      - "C:/ProgramData/chocolatey/bin/"
+      - "C:/Program Files (x86)/Windows Kits/10/Windows Performance Toolkit/"
+      - "C:/Program Files/Git/cmd/"
+      - "C:/Users/Areesha/AppData/Local/Microsoft/WindowsApps/"
+      - "C:/Users/Areesha/AppData/Local/Programs/Microsoft VS Code/bin/"
+      - "C:/Users/Areesha/src/flutter/bin/"
+      - "C:/Users/Areesha/AppData/Roaming/npm/"
+      - "C:/Users/Areesha/AppData/Local/Python/bin/"
+      - "C:/Users/Areesha/AppData/Local/PowerToys/DSCModules/"
+      - "C:/Program Files/Android/Android Studio/jbr/bin/"
+      - "C:/Users/Areesha/AppData/Local/Kiro-Cli/"
+      - "C:/Users/Areesha/src/flutter/bin/mingit/cmd/"
+      - "C:/Program Files/include/"
+      - "C:/Program Files/"
+      - "C:/Program Files (x86)/include/"
+      - "C:/Program Files (x86)/"
+      - "C:/Program Files/Microsoft Visual Studio/18/Insiders/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/include/"
+      - "C:/Program Files/Microsoft Visual Studio/18/Insiders/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/"
+      - "C:/Program Files/wellness_saheli/include/"
+      - "C:/Program Files/wellness_saheli/"
+      - "C:/Program Files/Android/Android Studio/jbr/include/"
+    searched_directories:
+      - "C:/Python314/Scripts/jni.h"
+      - "C:/Python314/jni.h"
+      - "C:/Windows/System32/jni.h"
+      - "C:/Windows/jni.h"
+      - "C:/Windows/System32/wbem/jni.h"
+      - "C:/Windows/System32/WindowsPowerShell/v1.0/jni.h"
+      - "C:/Windows/System32/OpenSSH/jni.h"
+      - "C:/Program Files/nodejs/jni.h"
+      - "C:/ProgramData/chocolatey/bin/jni.h"
+      - "C:/Program Files (x86)/Windows Kits/10/Windows Performance Toolkit/jni.h"
+      - "C:/Program Files/Git/cmd/jni.h"
+      - "C:/Users/Areesha/AppData/Local/Microsoft/WindowsApps/jni.h"
+      - "C:/Users/Areesha/AppData/Local/Programs/Microsoft VS Code/bin/jni.h"
+      - "C:/Users/Areesha/src/flutter/bin/jni.h"
+      - "C:/Users/Areesha/AppData/Roaming/npm/jni.h"
+      - "C:/Users/Areesha/AppData/Local/Python/bin/jni.h"
+      - "C:/Users/Areesha/AppData/Local/PowerToys/DSCModules/jni.h"
+      - "C:/Program Files/Android/Android Studio/jbr/bin/jni.h"
+      - "C:/Users/Areesha/AppData/Local/Kiro-Cli/jni.h"
+      - "C:/Users/Areesha/src/flutter/bin/mingit/cmd/jni.h"
+      - "C:/Program Files/include/jni.h"
+      - "C:/Program Files/jni.h"
+      - "C:/Program Files (x86)/include/jni.h"
+      - "C:/Program Files (x86)/jni.h"
+      - "C:/Program Files/Microsoft Visual Studio/18/Insiders/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/include/jni.h"
+      - "C:/Program Files/Microsoft Visual Studio/18/Insiders/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/jni.h"
+      - "C:/Program Files/wellness_saheli/include/jni.h"
+      - "C:/Program Files/wellness_saheli/jni.h"
+      - "C:/Program Files/Android/Android Studio/jbr/include/jni.h"
+    found: false
+    search_context:
+      ENV{PATH}:
+        - "C:\\Python314\\Scripts\\"
+        - "C:\\Python314\\"
+        - "C:\\Windows\\system32"
+        - "C:\\Windows"
+        - "C:\\Windows\\System32\\Wbem"
+        - "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\"
+        - "C:\\Windows\\System32\\OpenSSH\\"
+        - "C:\\Program Files\\nodejs\\"
+        - "C:\\ProgramData\\chocolatey\\bin"
+        - "C:\\Program Files (x86)\\Windows Kits\\10\\Windows Performance Toolkit\\"
+        - "C:\\Program Files\\Git\\cmd"
+        - "C:\\Users\\Areesha\\AppData\\Local\\Microsoft\\WindowsApps"
+        - "C:\\Users\\Areesha\\AppData\\Local\\Programs\\Microsoft VS Code\\bin"
+        - "C:\\Users\\Areesha\\src\\flutter\\bin"
+        - "C:\\Users\\Areesha\\AppData\\Roaming\\npm"
+        - "C:\\Users\\Areesha\\AppData\\Local\\Python\\bin"
+        - "C:\\Users\\Areesha\\AppData\\Local\\PowerToys\\DSCModules\\"
+        - "C:\\Program Files\\Android\\Android Studio\\jbr\\bin"
+        - "C:\\Users\\Areesha\\AppData\\Local\\Kiro-Cli\\"
+        - "C:\\Users\\Areesha\\src\\flutter\\bin\\mingit\\cmd"
+      CMAKE_INSTALL_PREFIX: "C:/Program Files/wellness_saheli"
+      CMAKE_SYSTEM_PREFIX_PATH:
+        - "C:/Program Files"
+        - "C:/Program Files (x86)"
+        - "C:/Program Files/Microsoft Visual Studio/18/Insiders/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake"
+        - "C:/Program Files/wellness_saheli"
+  -
+    kind: "find-v1"
+    backtrace:
+      - "C:/Program Files/Microsoft Visual Studio/18/Insiders/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-4.3/Modules/FindJNI.cmake:606 (find_path)"
+      - "flutter/ephemeral/.plugin_symlinks/jni/src/CMakeLists.txt:20 (find_package)"
+    mode: "path"
+    variable: "JAVA_INCLUDE_PATH2"
+    description: "jni_md.h jniport.h include directory"
+    settings:
+      SearchFramework: "NEVER"
+      SearchAppBundle: "NEVER"
+      CMAKE_FIND_USE_CMAKE_PATH: true
+      CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+      CMAKE_FIND_USE_INSTALL_PREFIX: true
+    names:
+      - "jni_md.h"
+      - "jniport.h"
+    candidate_directories:
+      - "C:/Python314/Scripts/"
+      - "C:/Python314/"
+      - "C:/Windows/System32/"
+      - "C:/Windows/"
+      - "C:/Windows/System32/wbem/"
+      - "C:/Windows/System32/WindowsPowerShell/v1.0/"
+      - "C:/Windows/System32/OpenSSH/"
+      - "C:/Program Files/nodejs/"
+      - "C:/ProgramData/chocolatey/bin/"
+      - "C:/Program Files (x86)/Windows Kits/10/Windows Performance Toolkit/"
+      - "C:/Program Files/Git/cmd/"
+      - "C:/Users/Areesha/AppData/Local/Microsoft/WindowsApps/"
+      - "C:/Users/Areesha/AppData/Local/Programs/Microsoft VS Code/bin/"
+      - "C:/Users/Areesha/src/flutter/bin/"
+      - "C:/Users/Areesha/AppData/Roaming/npm/"
+      - "C:/Users/Areesha/AppData/Local/Python/bin/"
+      - "C:/Users/Areesha/AppData/Local/PowerToys/DSCModules/"
+      - "C:/Program Files/Android/Android Studio/jbr/bin/"
+      - "C:/Users/Areesha/AppData/Local/Kiro-Cli/"
+      - "C:/Users/Areesha/src/flutter/bin/mingit/cmd/"
+      - "C:/Program Files/include/"
+      - "C:/Program Files/"
+      - "C:/Program Files (x86)/include/"
+      - "C:/Program Files (x86)/"
+      - "C:/Program Files/Microsoft Visual Studio/18/Insiders/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/include/"
+      - "C:/Program Files/Microsoft Visual Studio/18/Insiders/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/"
+      - "C:/Program Files/wellness_saheli/include/"
+      - "C:/Program Files/wellness_saheli/"
+      - "C:/Users/Areesha/reproductive-health app/wellness_saheli/windows/flutter/ephemeral/.plugin_symlinks/jni/src/JAVA_INCLUDE_PATH-NOTFOUND/"
+      - "C:/Users/Areesha/reproductive-health app/wellness_saheli/windows/flutter/ephemeral/.plugin_symlinks/jni/src/JAVA_INCLUDE_PATH-NOTFOUND/darwin/"
+      - "C:/Users/Areesha/reproductive-health app/wellness_saheli/windows/flutter/ephemeral/.plugin_symlinks/jni/src/JAVA_INCLUDE_PATH-NOTFOUND/win32/"
+      - "C:/Users/Areesha/reproductive-health app/wellness_saheli/windows/flutter/ephemeral/.plugin_symlinks/jni/src/JAVA_INCLUDE_PATH-NOTFOUND/linux/"
+      - "C:/Users/Areesha/reproductive-health app/wellness_saheli/windows/flutter/ephemeral/.plugin_symlinks/jni/src/JAVA_INCLUDE_PATH-NOTFOUND/freebsd/"
+      - "C:/Users/Areesha/reproductive-health app/wellness_saheli/windows/flutter/ephemeral/.plugin_symlinks/jni/src/JAVA_INCLUDE_PATH-NOTFOUND/openbsd/"
+      - "C:/Users/Areesha/reproductive-health app/wellness_saheli/windows/flutter/ephemeral/.plugin_symlinks/jni/src/JAVA_INCLUDE_PATH-NOTFOUND/solaris/"
+      - "C:/Users/Areesha/reproductive-health app/wellness_saheli/windows/flutter/ephemeral/.plugin_symlinks/jni/src/JAVA_INCLUDE_PATH-NOTFOUND/hp-ux/"
+      - "C:/Users/Areesha/reproductive-health app/wellness_saheli/windows/flutter/ephemeral/.plugin_symlinks/jni/src/JAVA_INCLUDE_PATH-NOTFOUND/alpha/"
+      - "C:/Users/Areesha/reproductive-health app/wellness_saheli/windows/flutter/ephemeral/.plugin_symlinks/jni/src/JAVA_INCLUDE_PATH-NOTFOUND/aix/"
+    searched_directories:
+      - "C:/Python314/Scripts/jni_md.h"
+      - "C:/Python314/jni_md.h"
+      - "C:/Windows/System32/jni_md.h"
+      - "C:/Windows/jni_md.h"
+      - "C:/Windows/System32/wbem/jni_md.h"
+      - "C:/Windows/System32/WindowsPowerShell/v1.0/jni_md.h"
+      - "C:/Windows/System32/OpenSSH/jni_md.h"
+      - "C:/Program Files/nodejs/jni_md.h"
+      - "C:/ProgramData/chocolatey/bin/jni_md.h"
+      - "C:/Program Files (x86)/Windows Kits/10/Windows Performance Toolkit/jni_md.h"
+      - "C:/Program Files/Git/cmd/jni_md.h"
+      - "C:/Users/Areesha/AppData/Local/Microsoft/WindowsApps/jni_md.h"
+      - "C:/Users/Areesha/AppData/Local/Programs/Microsoft VS Code/bin/jni_md.h"
+      - "C:/Users/Areesha/src/flutter/bin/jni_md.h"
+      - "C:/Users/Areesha/AppData/Roaming/npm/jni_md.h"
+      - "C:/Users/Areesha/AppData/Local/Python/bin/jni_md.h"
+      - "C:/Users/Areesha/AppData/Local/PowerToys/DSCModules/jni_md.h"
+      - "C:/Program Files/Android/Android Studio/jbr/bin/jni_md.h"
+      - "C:/Users/Areesha/AppData/Local/Kiro-Cli/jni_md.h"
+      - "C:/Users/Areesha/src/flutter/bin/mingit/cmd/jni_md.h"
+      - "C:/Program Files/include/jni_md.h"
+      - "C:/Program Files/jni_md.h"
+      - "C:/Program Files (x86)/include/jni_md.h"
+      - "C:/Program Files (x86)/jni_md.h"
+      - "C:/Program Files/Microsoft Visual Studio/18/Insiders/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/include/jni_md.h"
+      - "C:/Program Files/Microsoft Visual Studio/18/Insiders/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/jni_md.h"
+      - "C:/Program Files/wellness_saheli/include/jni_md.h"
+      - "C:/Program Files/wellness_saheli/jni_md.h"
+      - "C:/Users/Areesha/reproductive-health app/wellness_saheli/windows/flutter/ephemeral/.plugin_symlinks/jni/src/JAVA_INCLUDE_PATH-NOTFOUND/jni_md.h"
+      - "C:/Users/Areesha/reproductive-health app/wellness_saheli/windows/flutter/ephemeral/.plugin_symlinks/jni/src/JAVA_INCLUDE_PATH-NOTFOUND/darwin/jni_md.h"
+      - "C:/Users/Areesha/reproductive-health app/wellness_saheli/windows/flutter/ephemeral/.plugin_symlinks/jni/src/JAVA_INCLUDE_PATH-NOTFOUND/win32/jni_md.h"
+      - "C:/Users/Areesha/reproductive-health app/wellness_saheli/windows/flutter/ephemeral/.plugin_symlinks/jni/src/JAVA_INCLUDE_PATH-NOTFOUND/linux/jni_md.h"
+      - "C:/Users/Areesha/reproductive-health app/wellness_saheli/windows/flutter/ephemeral/.plugin_symlinks/jni/src/JAVA_INCLUDE_PATH-NOTFOUND/freebsd/jni_md.h"
+      - "C:/Users/Areesha/reproductive-health app/wellness_saheli/windows/flutter/ephemeral/.plugin_symlinks/jni/src/JAVA_INCLUDE_PATH-NOTFOUND/openbsd/jni_md.h"
+      - "C:/Users/Areesha/reproductive-health app/wellness_saheli/windows/flutter/ephemeral/.plugin_symlinks/jni/src/JAVA_INCLUDE_PATH-NOTFOUND/solaris/jni_md.h"
+      - "C:/Users/Areesha/reproductive-health app/wellness_saheli/windows/flutter/ephemeral/.plugin_symlinks/jni/src/JAVA_INCLUDE_PATH-NOTFOUND/hp-ux/jni_md.h"
+      - "C:/Users/Areesha/reproductive-health app/wellness_saheli/windows/flutter/ephemeral/.plugin_symlinks/jni/src/JAVA_INCLUDE_PATH-NOTFOUND/alpha/jni_md.h"
+      - "C:/Users/Areesha/reproductive-health app/wellness_saheli/windows/flutter/ephemeral/.plugin_symlinks/jni/src/JAVA_INCLUDE_PATH-NOTFOUND/aix/jni_md.h"
+      - "C:/Python314/Scripts/jniport.h"
+      - "C:/Python314/jniport.h"
+      - "C:/Windows/System32/jniport.h"
+      - "C:/Windows/jniport.h"
+      - "C:/Windows/System32/wbem/jniport.h"
+      - "C:/Windows/System32/WindowsPowerShell/v1.0/jniport.h"
+      - "C:/Windows/System32/OpenSSH/jniport.h"
+      - "C:/Program Files/nodejs/jniport.h"
+      - "C:/ProgramData/chocolatey/bin/jniport.h"
+      - "C:/Program Files (x86)/Windows Kits/10/Windows Performance Toolkit/jniport.h"
+      - "C:/Program Files/Git/cmd/jniport.h"
+      - "C:/Users/Areesha/AppData/Local/Microsoft/WindowsApps/jniport.h"
+      - "C:/Users/Areesha/AppData/Local/Programs/Microsoft VS Code/bin/jniport.h"
+      - "C:/Users/Areesha/src/flutter/bin/jniport.h"
+      - "C:/Users/Areesha/AppData/Roaming/npm/jniport.h"
+      - "C:/Users/Areesha/AppData/Local/Python/bin/jniport.h"
+      - "C:/Users/Areesha/AppData/Local/PowerToys/DSCModules/jniport.h"
+      - "C:/Program Files/Android/Android Studio/jbr/bin/jniport.h"
+      - "C:/Users/Areesha/AppData/Local/Kiro-Cli/jniport.h"
+      - "C:/Users/Areesha/src/flutter/bin/mingit/cmd/jniport.h"
+      - "C:/Program Files/include/jniport.h"
+      - "C:/Program Files/jniport.h"
+      - "C:/Program Files (x86)/include/jniport.h"
+      - "C:/Program Files (x86)/jniport.h"
+      - "C:/Program Files/Microsoft Visual Studio/18/Insiders/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/include/jniport.h"
+      - "C:/Program Files/Microsoft Visual Studio/18/Insiders/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/jniport.h"
+      - "C:/Program Files/wellness_saheli/include/jniport.h"
+      - "C:/Program Files/wellness_saheli/jniport.h"
+      - "C:/Users/Areesha/reproductive-health app/wellness_saheli/windows/flutter/ephemeral/.plugin_symlinks/jni/src/JAVA_INCLUDE_PATH-NOTFOUND/jniport.h"
+      - "C:/Users/Areesha/reproductive-health app/wellness_saheli/windows/flutter/ephemeral/.plugin_symlinks/jni/src/JAVA_INCLUDE_PATH-NOTFOUND/darwin/jniport.h"
+      - "C:/Users/Areesha/reproductive-health app/wellness_saheli/windows/flutter/ephemeral/.plugin_symlinks/jni/src/JAVA_INCLUDE_PATH-NOTFOUND/win32/jniport.h"
+      - "C:/Users/Areesha/reproductive-health app/wellness_saheli/windows/flutter/ephemeral/.plugin_symlinks/jni/src/JAVA_INCLUDE_PATH-NOTFOUND/linux/jniport.h"
+      - "C:/Users/Areesha/reproductive-health app/wellness_saheli/windows/flutter/ephemeral/.plugin_symlinks/jni/src/JAVA_INCLUDE_PATH-NOTFOUND/freebsd/jniport.h"
+      - "C:/Users/Areesha/reproductive-health app/wellness_saheli/windows/flutter/ephemeral/.plugin_symlinks/jni/src/JAVA_INCLUDE_PATH-NOTFOUND/openbsd/jniport.h"
+      - "C:/Users/Areesha/reproductive-health app/wellness_saheli/windows/flutter/ephemeral/.plugin_symlinks/jni/src/JAVA_INCLUDE_PATH-NOTFOUND/solaris/jniport.h"
+      - "C:/Users/Areesha/reproductive-health app/wellness_saheli/windows/flutter/ephemeral/.plugin_symlinks/jni/src/JAVA_INCLUDE_PATH-NOTFOUND/hp-ux/jniport.h"
+      - "C:/Users/Areesha/reproductive-health app/wellness_saheli/windows/flutter/ephemeral/.plugin_symlinks/jni/src/JAVA_INCLUDE_PATH-NOTFOUND/alpha/jniport.h"
+      - "C:/Users/Areesha/reproductive-health app/wellness_saheli/windows/flutter/ephemeral/.plugin_symlinks/jni/src/JAVA_INCLUDE_PATH-NOTFOUND/aix/jniport.h"
+    found: false
+    search_context:
+      ENV{PATH}:
+        - "C:\\Python314\\Scripts\\"
+        - "C:\\Python314\\"
+        - "C:\\Windows\\system32"
+        - "C:\\Windows"
+        - "C:\\Windows\\System32\\Wbem"
+        - "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\"
+        - "C:\\Windows\\System32\\OpenSSH\\"
+        - "C:\\Program Files\\nodejs\\"
+        - "C:\\ProgramData\\chocolatey\\bin"
+        - "C:\\Program Files (x86)\\Windows Kits\\10\\Windows Performance Toolkit\\"
+        - "C:\\Program Files\\Git\\cmd"
+        - "C:\\Users\\Areesha\\AppData\\Local\\Microsoft\\WindowsApps"
+        - "C:\\Users\\Areesha\\AppData\\Local\\Programs\\Microsoft VS Code\\bin"
+        - "C:\\Users\\Areesha\\src\\flutter\\bin"
+        - "C:\\Users\\Areesha\\AppData\\Roaming\\npm"
+        - "C:\\Users\\Areesha\\AppData\\Local\\Python\\bin"
+        - "C:\\Users\\Areesha\\AppData\\Local\\PowerToys\\DSCModules\\"
+        - "C:\\Program Files\\Android\\Android Studio\\jbr\\bin"
+        - "C:\\Users\\Areesha\\AppData\\Local\\Kiro-Cli\\"
+        - "C:\\Users\\Areesha\\src\\flutter\\bin\\mingit\\cmd"
+      CMAKE_INSTALL_PREFIX: "C:/Program Files/wellness_saheli"
+      CMAKE_SYSTEM_PREFIX_PATH:
+        - "C:/Program Files"
+        - "C:/Program Files (x86)"
+        - "C:/Program Files/Microsoft Visual Studio/18/Insiders/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake"
+        - "C:/Program Files/wellness_saheli"
+...
